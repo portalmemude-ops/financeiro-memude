@@ -10,6 +10,7 @@ import UserProfile from '@/layouts/components/UserProfile.vue'
 import CompanySelector from '@/layouts/components/CompanySelector.vue'
 import NavbarNotifications from '@/layouts/components/NavbarNotifications.vue'
 import CashBalanceBadge from '@/layouts/components/CashBalanceBadge.vue'
+import QuickAddMenu from '@/layouts/components/QuickAddMenu.vue'
 </script>
 
 <template>
@@ -31,6 +32,9 @@ import CashBalanceBadge from '@/layouts/components/CashBalanceBadge.vue'
 
         <!-- 👉 Saldo em caixa — sempre visível -->
         <CashBalanceBadge class="ms-4 d-none d-sm-flex" />
+
+        <!-- 👉 Botão global de adicionar (atalhos rápidos) -->
+        <QuickAddMenu class="ms-3" />
 
         <VSpacer />
 

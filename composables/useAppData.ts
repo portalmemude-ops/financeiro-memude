@@ -24,7 +24,7 @@ export interface AppData {
 
 const TABLES = [
   'companies', 'company_members', 'user_profiles',
-  'chart_accounts', 'cost_centers', 'suppliers', 'employees',
+  'chart_accounts', 'cost_centers', 'suppliers', 'employees', 'clients',
   'developments', 'sales', 'commissions', 'commission_installments', 'commission_splits',
   'payables', 'receivables', 'transactions',
 ] as const
@@ -43,6 +43,10 @@ export async function loadAppData(): Promise<AppData | null> {
     data[t] = (results[i].data as Record<string, unknown>[]) ?? []
   })
 
+  // Diagnóstico temporário do carregamento (ver console do navegador).
+  console.info('[loadAppData] user', user.value?.id, 'counts',
+    Object.fromEntries(TABLES.map((t, i) => [t, results[i].data?.length ?? 0])))
+
   const companies = camelizeRows(data.companies) as unknown as Company[]
 
   const members = data.company_members as unknown as { user_id: string; company_id: string; role: Role }[]
@@ -57,6 +61,16 @@ export async function loadAppData(): Promise<AppData | null> {
       .filter(m => m.user_id === user.value!.id)
       .map(m => ({ companyId: m.company_id, role: m.role })),
   }
+  console.info('[loadAppData] roles', currentUser.roles, 'membersRaw', members?.length)
+
+  // Fallback robusto: se os vínculos não vieram na leitura direta da tabela,
+  // busca-os pela RPC my_memberships() (sempre exposta; RLS aplica).
+  if (currentUser.roles.length === 0) {
+    const { data: cm, error: cmErr } = await (supabase.rpc as any)('my_memberships')
+    if (cm?.length)
+      currentUser.roles = (cm as { company_id: string; role: Role }[]).map(m => ({ companyId: m.company_id, role: m.role }))
+    console.info('[loadAppData] roles via RPC', currentUser.roles, 'err', cmErr?.message)
+  }
 
   // Fixups: colunas ausentes no banco que o app espera com default.
   const withActive = (rows: Record<string, unknown>[]) => rows.map(r => ({ isActive: true, ...r }))
@@ -69,6 +83,7 @@ export async function loadAppData(): Promise<AppData | null> {
       costCenters: withActive(camelizeRows(data.cost_centers)),
       suppliers: camelizeRows(data.suppliers),
       employees: camelizeRows(data.employees),
+      clients: camelizeRows(data.clients),
       developments: camelizeRows(data.developments),
       sales: camelizeRows(data.sales),
       commissions: camelizeRows(data.commissions),

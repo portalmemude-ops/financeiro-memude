@@ -4,6 +4,7 @@ import { useAuditStore } from './audit'
 import type {
   AppNotification,
   ChartAccount,
+  Client,
   Commission,
   CommissionInstallment,
   CommissionSplit,
@@ -33,6 +34,7 @@ export const useFinanceStore = defineStore('finance', {
     chartAccounts: [] as ChartAccount[],
     costCenters: [] as CostCenter[],
     suppliers: [] as Supplier[],
+    clients: [] as Client[],
     employees: [] as Employee[],
     payables: [] as Payable[],
     receivables: [] as Receivable[],
@@ -73,6 +75,9 @@ export const useFinanceStore = defineStore('finance', {
     },
     companySuppliers(state): Supplier[] {
       return state.suppliers.filter(x => x.companyId === this.cid)
+    },
+    companyClients(state): Client[] {
+      return state.clients.filter(x => x.companyId === this.cid)
     },
     companyEmployees(state): Employee[] {
       return state.employees.filter(x => x.companyId === this.cid)
@@ -172,6 +177,7 @@ export const useFinanceStore = defineStore('finance', {
       this.chartAccounts = (data.chartAccounts ?? []) as ChartAccount[]
       this.costCenters = (data.costCenters ?? []) as CostCenter[]
       this.suppliers = (data.suppliers ?? []) as Supplier[]
+      this.clients = (data.clients ?? []) as Client[]
       this.employees = (data.employees ?? []) as Employee[]
       this.developments = (data.developments ?? []) as Development[]
       this.sales = (data.sales ?? []) as Sale[]

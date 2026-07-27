@@ -97,6 +97,21 @@ export interface BankInfo {
   pix?: string
 }
 
+export interface Client {
+  id: string
+  companyId: string
+  name: string
+  document?: string
+  email?: string
+  phone?: string
+  address?: string
+  city?: string
+  state?: string
+  notes?: string
+  isActive: boolean
+  createdAt: string
+}
+
 export interface Supplier {
   id: string
   companyId: string
