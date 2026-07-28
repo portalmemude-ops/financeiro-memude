@@ -503,7 +503,7 @@ begin
       gen_random_uuid()
     );
 
-    select public.settle_receivable(
+    select * from public.settle_receivable(
       target_id := r.id,
       settle_amount := receipt_amount,
       settle_at := coalesce(
