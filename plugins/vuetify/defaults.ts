@@ -24,6 +24,12 @@ export default {
   VChip: {
     elevation: 0,
   },
+  VDataTable: {
+    // Vuetify 3.7 define `mobile: false` por padrão, o que impede a detecção
+    // automática do breakpoint. `null` devolve o controle ao useDisplay.
+    mobile: null,
+    mobileBreakpoint: 'md',
+  },
   VMenu: {
     offset: '2px',
   },

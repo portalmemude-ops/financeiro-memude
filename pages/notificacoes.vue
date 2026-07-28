@@ -108,6 +108,7 @@ function toggleChannel(rule: NotificationRule, channel: NotificationChannel) {
               :key="n.id"
             >
               <VListItem
+                class="notification-list-item"
                 :class="{ 'bg-surface-light': n.status !== 'read' }"
                 @click="onClickNotification(n)"
               >
@@ -132,21 +133,17 @@ function toggleChannel(rule: NotificationRule, channel: NotificationChannel) {
                 <VListItemSubtitle class="mt-1">
                   {{ n.message }}
                 </VListItemSubtitle>
-
-                <template #append>
-                  <div class="text-end">
-                    <VChip
-                      size="x-small"
-                      label
-                      class="mb-1"
-                    >
-                      {{ channelLabels[n.channel] }}
-                    </VChip>
-                    <div class="text-caption text-disabled">
-                      {{ formatDateTime(n.createdAt) }}
-                    </div>
-                  </div>
-                </template>
+                <div class="notification-list-item__meta d-flex align-center flex-wrap gap-2 mt-2">
+                  <VChip
+                    size="x-small"
+                    label
+                  >
+                    {{ channelLabels[n.channel] }}
+                  </VChip>
+                  <span class="text-caption text-disabled">
+                    {{ formatDateTime(n.createdAt) }}
+                  </span>
+                </div>
               </VListItem>
               <VDivider v-if="i < finance.companyNotifications.length - 1" />
             </template>
@@ -218,3 +215,28 @@ function toggleChannel(rule: NotificationRule, channel: NotificationChannel) {
     </VCard>
   </div>
 </template>
+
+<style lang="scss" scoped>
+.notification-list-item :deep(.v-list-item__content) {
+  min-inline-size: 0;
+}
+
+.notification-list-item :deep(.v-list-item-title),
+.notification-list-item :deep(.v-list-item-subtitle) {
+  -webkit-line-clamp: unset;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+@media (max-width: 599.98px) {
+  .notification-list-item {
+    align-items: flex-start;
+    padding-block: 0.875rem;
+  }
+
+  .notification-list-item :deep(.v-list-item__prepend) {
+    align-self: flex-start;
+    margin-inline-end: 0.75rem;
+  }
+}
+</style>

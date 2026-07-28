@@ -1,19 +1,27 @@
 <script setup lang="ts">
+import { useDisplay } from 'vuetify'
 import { useAppStore } from '@/stores/app'
 
 const appStore = useAppStore()
+const { xs } = useDisplay()
+const companyIcon = computed(() => appStore.isRealEstate ? 'ri-building-line' : 'ri-megaphone-line')
 </script>
 
 <template>
   <VBtn
     variant="tonal"
     color="default"
-    class="text-none"
-    :prepend-icon="appStore.isRealEstate ? 'ri-building-line' : 'ri-megaphone-line'"
-    append-icon="ri-arrow-down-s-line"
+    class="company-selector text-none"
+    :icon="xs"
+    :prepend-icon="xs ? undefined : companyIcon"
+    :append-icon="xs ? undefined : 'ri-arrow-down-s-line'"
+    :aria-label="xs ? `Selecionar empresa. Atual: ${appStore.currentCompany.tradeName}` : undefined"
   >
-    <span class="d-none d-sm-inline">{{ appStore.currentCompany.tradeName }}</span>
-    <span class="d-sm-none">Empresa</span>
+    <VIcon
+      v-if="xs"
+      :icon="companyIcon"
+    />
+    <span v-else>{{ appStore.currentCompany.tradeName }}</span>
 
     <VMenu
       activator="parent"
@@ -21,7 +29,7 @@ const appStore = useAppStore()
       offset="8"
     >
       <VList
-        width="280"
+        class="company-selector__menu"
         density="comfortable"
       >
         <VListSubheader>Empresas</VListSubheader>
@@ -57,3 +65,21 @@ const appStore = useAppStore()
     </VMenu>
   </VBtn>
 </template>
+
+<style lang="scss" scoped>
+.company-selector {
+  max-inline-size: min(18rem, 35vw);
+}
+
+.company-selector__menu {
+  inline-size: min(17.5rem, calc(100vw - 1.5rem));
+}
+
+@media (max-width: 599.98px) {
+  .company-selector {
+    block-size: 2.75rem !important;
+    inline-size: 2.75rem !important;
+    max-inline-size: 2.75rem;
+  }
+}
+</style>

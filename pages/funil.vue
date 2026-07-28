@@ -235,7 +235,11 @@ function save() {
       </VCard>
 
       <!-- Kanban -->
-      <div class="kanban d-flex gap-4 pb-3">
+      <div
+        class="kanban d-flex gap-4 pb-3"
+        tabindex="0"
+        aria-label="Quadro do funil. Deslize horizontalmente para ver todas as etapas."
+      >
         <div
           v-for="col in columns"
           :key="col.value"
@@ -418,6 +422,10 @@ function save() {
 <style lang="scss" scoped>
 .kanban {
   overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scroll-padding-inline: 0.25rem;
+  scroll-snap-type: inline proximity;
+  scrollbar-width: thin;
 }
 
 .kanban-col {
@@ -427,6 +435,7 @@ function save() {
   border-radius: 8px;
   background-color: rgba(var(--v-theme-on-surface), 0.04);
   transition: background-color 0.2s ease;
+  scroll-snap-align: start;
 
   &--over {
     background-color: rgba(var(--v-theme-primary), 0.12);
@@ -439,6 +448,13 @@ function save() {
 
   &--dragging {
     opacity: 0.5;
+  }
+}
+
+@media (max-width: 599.98px) {
+  .kanban-col {
+    inline-size: min(264px, calc(100vw - 3rem));
+    min-inline-size: min(264px, calc(100vw - 3rem));
   }
 }
 </style>

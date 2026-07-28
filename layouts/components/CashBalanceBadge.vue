@@ -12,7 +12,7 @@ const positive = computed(() => m.cashBalance.value >= 0)
     color="primary"
     variant="tonal"
     flat
-    class="cash-balance-badge d-flex align-center px-3 py-1"
+    class="cash-balance-badge align-center px-3 py-1"
   >
     <VIcon
       icon="ri-wallet-3-line"
@@ -35,6 +35,7 @@ const positive = computed(() => m.cashBalance.value >= 0)
 
 <style lang="scss" scoped>
 .cash-balance-badge {
+  display: flex;
   border-radius: 8px;
 }
 </style>
