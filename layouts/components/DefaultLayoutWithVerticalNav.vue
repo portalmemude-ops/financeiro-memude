@@ -17,7 +17,7 @@ import QuickAddMenu from '@/layouts/components/QuickAddMenu.vue'
   <VerticalNavLayout>
     <!-- 👉 navbar -->
     <template #navbar="{ toggleVerticalOverlayNavActive }">
-      <div class="d-flex h-100 align-center">
+      <div class="mobile-navbar d-flex h-100 align-center">
         <!-- 👉 Vertical nav toggle in overlay mode -->
         <IconBtn
           class="ms-n3 d-lg-none"
@@ -34,13 +34,13 @@ import QuickAddMenu from '@/layouts/components/QuickAddMenu.vue'
         <CashBalanceBadge class="ms-4 d-none d-sm-flex" />
 
         <!-- 👉 Botão global de adicionar (atalhos rápidos) -->
-        <QuickAddMenu class="ms-3" />
+        <QuickAddMenu class="mobile-navbar__quick-add ms-3" />
 
         <VSpacer />
 
         <NavbarNotifications class="me-1" />
 
-        <NavbarThemeSwitcher class="me-2" />
+        <NavbarThemeSwitcher class="mobile-navbar__theme me-2" />
 
         <UserProfile />
       </div>
@@ -106,6 +106,25 @@ import QuickAddMenu from '@/layouts/components/QuickAddMenu.vue'
     font-weight: 500;
     line-height: 1.75rem;
     text-transform: uppercase;
+  }
+}
+
+@media (max-width: 599.98px) {
+  .mobile-navbar {
+    gap: 0.125rem;
+    inline-size: 100%;
+  }
+
+  .mobile-navbar :deep(.v-btn--icon) {
+    margin-inline: 0 !important;
+  }
+
+  .mobile-navbar__quick-add {
+    margin-inline-start: 0 !important;
+  }
+
+  .mobile-navbar__theme {
+    margin-inline-end: 0 !important;
   }
 }
 </style>

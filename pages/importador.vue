@@ -337,6 +337,7 @@ const canAdvance = computed(() => {
       <VStepper
         v-model="step"
         :items="items"
+        class="smart-import-stepper"
         flat
       >
         <!-- Passo 1 -->
@@ -497,7 +498,7 @@ const canAdvance = computed(() => {
 
       <VDivider />
 
-      <VCardText class="d-flex justify-space-between">
+      <VCardText class="import-actions d-flex justify-space-between gap-2">
         <VBtn
           variant="tonal"
           color="secondary"
@@ -527,3 +528,59 @@ const canAdvance = computed(() => {
     </VCard>
   </div>
 </template>
+
+<style lang="scss" scoped>
+@media (max-width: 599.98px) {
+  .smart-import-stepper :deep(.v-stepper-header) {
+    justify-content: flex-start;
+    max-inline-size: 100%;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: thin;
+  }
+
+  .smart-import-stepper :deep(.v-stepper-item) {
+    flex: 0 0 6rem;
+    padding: 0.75rem 0.5rem;
+  }
+
+  .smart-import-stepper :deep(.v-stepper-item__title) {
+    font-size: 0.75rem;
+    line-height: 1rem;
+    white-space: normal;
+  }
+
+  .smart-import-stepper :deep(.v-stepper-window) {
+    margin: 0;
+  }
+
+  .smart-import-stepper :deep(.v-card-text) {
+    padding-inline: 0.75rem;
+  }
+
+  .import-actions {
+    flex-direction: column-reverse;
+  }
+
+  .import-actions :deep(.v-btn) {
+    inline-size: 100%;
+  }
+}
+
+@media (max-width: 399.98px) {
+  .smart-import-stepper :deep(.v-stepper-header) {
+    justify-content: space-evenly;
+    overflow-x: hidden;
+  }
+
+  .smart-import-stepper :deep(.v-stepper-item) {
+    flex: 0 0 3rem;
+    min-inline-size: 3rem;
+  }
+
+  .smart-import-stepper :deep(.v-stepper-item__title),
+  .smart-import-stepper :deep(.v-stepper-header .v-divider) {
+    display: none;
+  }
+}
+</style>

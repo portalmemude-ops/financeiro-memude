@@ -119,17 +119,18 @@ function doToggle() {
             <VListItem
               v-for="account in group.accounts"
               :key="account.id"
-              :style="{ paddingInlineStart: `${16 + levelOf(account.code) * 20}px` }"
+              class="chart-account-item"
+              :style="{ '--account-level': levelOf(account.code) }"
             >
               <template #default>
-                <div class="d-flex align-center gap-2">
-                  <span
-                    class="text-disabled font-weight-medium"
-                    style="min-inline-size: 56px;"
-                  >
+                <div class="chart-account-item__content d-flex align-center gap-2">
+                  <span class="chart-account-item__code text-disabled font-weight-medium">
                     {{ account.code }}
                   </span>
-                  <span :class="{ 'text-disabled': !account.isActive }">
+                  <span
+                    class="chart-account-item__name"
+                    :class="{ 'text-disabled': !account.isActive }"
+                  >
                     {{ account.name }}
                   </span>
                   <VChip
@@ -271,3 +272,50 @@ function doToggle() {
     />
   </div>
 </template>
+
+<style lang="scss" scoped>
+.chart-account-item {
+  padding-inline-start: calc(1rem + var(--account-level) * 1.25rem) !important;
+}
+
+.chart-account-item__content {
+  min-inline-size: 0;
+}
+
+.chart-account-item__code {
+  min-inline-size: 3.5rem;
+}
+
+.chart-account-item__name {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 599.98px) {
+  .chart-account-item {
+    align-items: flex-start;
+    padding-block: 0.5rem !important;
+    padding-inline-start: calc(0.5rem + var(--account-level) * 0.75rem) !important;
+    padding-inline-end: 0.25rem !important;
+  }
+
+  .chart-account-item__content {
+    align-items: flex-start !important;
+    flex-wrap: wrap;
+    gap: 0.375rem 0.5rem !important;
+  }
+
+  .chart-account-item__code {
+    min-inline-size: 3rem;
+  }
+
+  .chart-account-item__name {
+    flex: 1 1 calc(100% - 3.5rem);
+  }
+
+  .chart-account-item :deep(.v-list-item__append) {
+    align-self: flex-start;
+    margin-inline-start: 0.25rem;
+  }
+}
+</style>

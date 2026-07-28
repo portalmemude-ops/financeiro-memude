@@ -90,10 +90,10 @@ const chartSeries = computed(() => [
     <VCard
       color="primary"
       variant="tonal"
-      class="mb-6"
+      class="dashboard-balance-card mb-6"
     >
-      <VCardText class="d-flex flex-wrap align-center justify-space-between gap-4">
-        <div class="d-flex align-center gap-4">
+      <VCardText class="dashboard-balance-card__content d-flex flex-wrap align-center justify-space-between gap-4">
+        <div class="dashboard-balance-card__primary d-flex align-center gap-4">
           <VAvatar
             size="56"
             variant="tonal"
@@ -104,19 +104,19 @@ const chartSeries = computed(() => [
               size="30"
             />
           </VAvatar>
-          <div>
+          <div class="dashboard-balance-card__copy">
             <div class="text-body-1 text-medium-emphasis">
               Saldo em caixa
             </div>
             <div
-              class="text-h3 font-weight-bold"
+              class="dashboard-balance-card__value text-h3 font-weight-bold"
               :class="saldoCaixa >= 0 ? 'text-primary' : 'text-error'"
             >
               {{ formatBRL(saldoCaixa) }}
             </div>
           </div>
         </div>
-        <div class="d-flex gap-6">
+        <div class="dashboard-balance-card__totals d-flex gap-6">
           <div>
             <div class="text-caption text-medium-emphasis">
               Entradas (total)
@@ -393,6 +393,60 @@ const chartSeries = computed(() => [
     </VRow>
   </div>
 </template>
+
+<style lang="scss" scoped>
+.dashboard-balance-card__primary,
+.dashboard-balance-card__copy {
+  min-inline-size: 0;
+}
+
+.dashboard-balance-card__value {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 599.98px) {
+  .dashboard-balance-card__content {
+    align-items: stretch !important;
+    padding: 1rem !important;
+  }
+
+  .dashboard-balance-card__primary,
+  .dashboard-balance-card__totals {
+    inline-size: 100%;
+  }
+
+  .dashboard-balance-card__primary {
+    gap: 0.75rem !important;
+  }
+
+  .dashboard-balance-card__primary :deep(.v-avatar) {
+    block-size: 2.75rem !important;
+    flex: 0 0 2.75rem;
+    inline-size: 2.75rem !important;
+  }
+
+  .dashboard-balance-card__value {
+    font-size: clamp(1.45rem, 8vw, 2rem) !important;
+    line-height: 1.2 !important;
+  }
+
+  .dashboard-balance-card__totals {
+    display: grid !important;
+    gap: 0.75rem !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .dashboard-balance-card__totals :deep(.v-divider) {
+    display: none;
+  }
+
+  .dashboard-balance-card__totals .text-h6 {
+    font-size: 1rem !important;
+    line-height: 1.4 !important;
+    overflow-wrap: anywhere;
+  }
+}
+</style>
 
 <style lang="scss" scoped>
 .card-list {

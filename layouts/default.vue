@@ -34,6 +34,27 @@ import DefaultLayoutWithVerticalNav from './components/DefaultLayoutWithVertical
 // descem para a linha de baixo. A classe repetida eleva a especificidade para
 // vencer a regra `display: grid` do Vuetify independente da ordem de carga.
 @media (max-width: 599.98px) {
+  html,
+  body,
+  .layout-wrapper,
+  .layout-content-wrapper {
+    max-inline-size: 100%;
+  }
+
+  .layout-navbar .navbar-content-container,
+  .layout-page-content,
+  .layout-footer .footer-content-container {
+    padding-inline: 0.75rem !important;
+  }
+
+  .layout-navbar {
+    padding-inline: 0 !important;
+  }
+
+  .layout-page-content {
+    padding-block: 1rem !important;
+  }
+
   .v-card-item.v-card-item {
     display: flex;
     flex-wrap: wrap;
@@ -48,6 +69,119 @@ import DefaultLayoutWithVerticalNav from './components/DefaultLayoutWithVertical
 
   .v-card-item .v-card-item__append {
     padding-inline-start: 0;
+  }
+
+  // Alvos tÃ¡teis: 44px Ã© o mÃ­nimo seguro para uso com o polegar.
+  .layout-wrapper .v-btn {
+    min-block-size: 2.75rem;
+  }
+
+  .layout-wrapper .v-btn.v-btn--icon {
+    block-size: 2.75rem !important;
+    inline-size: 2.75rem !important;
+  }
+
+  .layout-wrapper .v-tab {
+    min-block-size: 2.75rem;
+  }
+
+  // Filtros deixam de preservar larguras desktop definidas inline.
+  .layout-page-content .v-card-text.d-flex.flex-wrap > .v-input,
+  .layout-page-content .v-card-text.d-flex.flex-wrap > .v-field,
+  .layout-page-content .v-card-text.d-flex.flex-wrap > .v-btn-toggle {
+    flex: 1 1 100%;
+    max-inline-size: 100% !important;
+  }
+
+  .v-btn-toggle.v-btn-toggle {
+    display: flex;
+    max-inline-size: 100%;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+  }
+
+  // Modais permanecem dentro da viewport e o conteÃºdo central rola.
+  .v-dialog > .v-overlay__content {
+    margin: 0.75rem !important;
+    max-block-size: calc(100dvh - 1.5rem) !important;
+    max-inline-size: calc(100vw - 1.5rem) !important;
+  }
+
+  .v-dialog > .v-overlay__content > .v-card {
+    max-block-size: calc(100dvh - 1.5rem);
+    overflow-y: auto;
+  }
+
+  .v-dialog .v-card-text.d-flex.justify-end,
+  .v-dialog .v-card-actions {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  // Tabelas nativas continuam acessÃ­veis por gesto horizontal, sem mover a
+  // pÃ¡gina inteira. Tabelas de dados usam o modo de linhas mobile do Vuetify.
+  .v-table__wrapper {
+    max-inline-size: 100%;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: thin;
+  }
+
+  .v-data-table .v-data-table__tr--mobile {
+    border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+    border-radius: 0.75rem;
+    display: block;
+    margin: 0.75rem;
+    overflow: hidden;
+  }
+
+  .v-data-table .v-data-table__tr--mobile > td {
+    align-items: flex-start;
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: minmax(5.5rem, 38%) minmax(0, 1fr);
+    min-block-size: 2.75rem;
+    padding-block: 0.625rem;
+    white-space: normal;
+  }
+
+  .v-data-table .v-data-table__td-title {
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+
+  .v-data-table .v-data-table-footer {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+    padding: 0.75rem;
+  }
+
+  .v-data-table .v-data-table-footer__items-per-page,
+  .v-data-table .v-data-table-footer__info {
+    margin-inline: 0;
+  }
+
+  .v-slide-group {
+    max-inline-size: 100%;
+  }
+
+  .v-slide-group__container {
+    overscroll-behavior-inline: contain;
+  }
+
+  .v-alert,
+  .v-card-text,
+  .v-list-item-title,
+  .v-list-item-subtitle {
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (max-width: 399.98px) {
+  .v-dialog .v-card-text.d-flex.justify-end > .v-btn,
+  .v-dialog .v-card-actions > .v-btn {
+    flex: 1 1 100%;
+    margin-inline: 0 !important;
   }
 }
 
