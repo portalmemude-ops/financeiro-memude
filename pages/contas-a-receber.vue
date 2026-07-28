@@ -239,6 +239,29 @@ async function doCancel() {
   }
 }
 
+const deleteDialog = ref(false)
+const deleteTarget = ref<Receivable | null>(null)
+function askDelete(r: Receivable) {
+  deleteTarget.value = r
+  deleteDialog.value = true
+}
+async function doDelete() {
+  if (!deleteTarget.value)
+    return
+  actionLoading.value = true
+  try {
+    await finance.deleteReceivable(deleteTarget.value.id)
+    showMessage('Conta excluída permanentemente.')
+  }
+  catch (error) {
+    showMessage(error instanceof Error ? error.message : 'Não foi possível excluir a conta.', 'error')
+  }
+  finally {
+    actionLoading.value = false
+    deleteTarget.value = null
+  }
+}
+
 function invoiceOf(receivableId: string) {
   return finance.companyInvoices.find(i => i.receivableId === receivableId)
 }
@@ -290,7 +313,7 @@ async function doReverse() {
     >
       <template #actions>
         <VBtn
-          v-if="!app.isReadOnly"
+          v-if="app.canManageFinance"
           prepend-icon="ri-add-line"
           @click="openNew"
         >
@@ -469,7 +492,7 @@ async function doReverse() {
         <template #item.actions="{ item }">
           <div class="d-flex justify-end">
             <VBtn
-              v-if="!app.isReadOnly && isReceivablePending(item)"
+              v-if="app.canManageFinance && isReceivablePending(item)"
               color="success"
               variant="tonal"
               size="small"
@@ -483,7 +506,7 @@ async function doReverse() {
               Receber
             </VBtn>
             <IconBtn
-              v-if="!app.isReadOnly && activeReceipts(item.id).length"
+              v-if="app.canManageFinance && activeReceipts(item.id).length"
               color="warning"
               aria-label="Estornar recebimento"
               @click="openReverse(item)"
@@ -493,26 +516,41 @@ async function doReverse() {
                 Estornar último recebimento
               </VTooltip>
             </IconBtn>
-            <IconBtn
-              v-if="!app.isReadOnly && item.status !== 'received'"
-              aria-label="Editar lançamento"
-              @click="openEdit(item)"
-            >
-              <VIcon icon="ri-pencil-line" />
-              <VTooltip activator="parent">
-                Editar
-              </VTooltip>
-            </IconBtn>
-            <IconBtn
-              v-if="!app.isReadOnly && isReceivablePending(item) && !item.receivedAmount"
-              aria-label="Cancelar lançamento"
-              @click="askCancel(item)"
-            >
-              <VIcon icon="ri-close-circle-line" />
-              <VTooltip activator="parent">
-                Cancelar
-              </VTooltip>
-            </IconBtn>
+            <VMenu v-if="app.canManageFinance && !item.receivedAmount && !['partial', 'received'].includes(item.status)">
+              <template #activator="{ props }">
+                <IconBtn
+                  v-bind="props"
+                  aria-label="Mais ações da conta"
+                >
+                  <VIcon icon="ri-more-2-fill" />
+                  <VTooltip activator="parent">
+                    Mais ações
+                  </VTooltip>
+                </IconBtn>
+              </template>
+              <VList density="compact">
+                <VListItem
+                  v-if="item.status !== 'cancelled'"
+                  prepend-icon="ri-pencil-line"
+                  title="Editar"
+                  @click="openEdit(item)"
+                />
+                <VListItem
+                  v-if="isReceivablePending(item)"
+                  prepend-icon="ri-close-circle-line"
+                  title="Cancelar"
+                  @click="askCancel(item)"
+                />
+                <VDivider v-if="item.status !== 'cancelled'" />
+                <VListItem
+                  v-if="!invoiceOf(item.id) && !item.saleId && !item.commissionInstallmentId"
+                  prepend-icon="ri-delete-bin-line"
+                  title="Excluir permanentemente"
+                  class="text-error"
+                  @click="askDelete(item)"
+                />
+              </VList>
+            </VMenu>
           </div>
         </template>
         <template #no-data>
@@ -530,10 +568,10 @@ async function doReverse() {
       persistent
     >
       <VCard>
-        <VCardItem>
+        <VCardItem class="account-dialog__header">
           <VCardTitle>{{ editing.id ? 'Editar conta a receber' : 'Nova conta a receber' }}</VCardTitle>
         </VCardItem>
-        <VCardText>
+        <VCardText class="account-dialog__body">
           <VForm
             ref="formRef"
             @submit.prevent="save"
@@ -542,15 +580,17 @@ async function doReverse() {
               <VCol
                 v-if="!editing.id"
                 cols="12"
+                class="account-dialog__choice"
               >
-                <VLabel class="mb-2">
+                <VLabel>
                   Situação inicial
                 </VLabel>
                 <VBtnToggle
                   v-model="initialSituation"
+                  class="account-dialog__choice-toggle"
                   mandatory
-                  divided
                   color="primary"
+                  variant="outlined"
                 >
                   <VBtn value="pending">
                     A receber
@@ -559,7 +599,7 @@ async function doReverse() {
                     Já recebido
                   </VBtn>
                 </VBtnToggle>
-                <div class="text-caption text-disabled mt-2">
+                <div class="text-caption text-disabled">
                   Contas “A receber” entram apenas na projeção. O caixa só muda quando um recebimento é confirmado.
                 </div>
               </VCol>
@@ -952,6 +992,15 @@ async function doReverse() {
       confirm-text="Cancelar conta"
       confirm-color="error"
       @confirm="doCancel"
+    />
+
+    <ConfirmDialog
+      v-model="deleteDialog"
+      title="Excluir conta permanentemente"
+      :message="`A conta '${deleteTarget?.description}' será removida definitivamente. Esta ação só é permitida quando não há recebimento, transação, NFS-e, venda, comissão ou outro vínculo. Deseja continuar?`"
+      confirm-text="Excluir permanentemente"
+      confirm-color="error"
+      @confirm="doDelete"
     />
 
     <VSnackbar

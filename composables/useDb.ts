@@ -190,24 +190,32 @@ export function useDb() {
       }) as Promise<ChartAccount>
     },
 
-    savePayable(input: Partial<Payable>) {
-      return saveRow('payables', input.id, {
-        description: input.description,
-        amount: input.amount,
-        due_date: input.dueDate,
-        competence_date: input.competenceDate,
-        category_id: input.categoryId,
-        cost_center_id: input.costCenterId,
-        supplier_id: input.supplierId,
-        employee_id: input.employeeId,
-        status: input.status ?? 'open',
-        recurrence: input.recurrence ?? 'once',
-        installment_number: input.installmentNumber,
-        total_installments: input.totalInstallments,
-        parent_payable_id: input.parentPayableId,
-        proof_url: input.proofUrl,
-        notes: input.notes,
-      }) as Promise<Payable>
+    async savePayable(input: Partial<Payable>) {
+      const { data, error } = await db.rpc('save_payable_entry', {
+        target_id: input.id ?? null,
+        payload: {
+          companyId: companyId(),
+          description: input.description,
+          amount: input.amount,
+          dueDate: input.dueDate,
+          competenceDate: input.competenceDate,
+          categoryId: input.categoryId,
+          costCenterId: input.costCenterId,
+          supplierId: input.supplierId,
+          employeeId: input.employeeId,
+          recurrence: input.recurrence ?? 'once',
+          installmentNumber: input.installmentNumber,
+          totalInstallments: input.totalInstallments,
+          parentPayableId: input.parentPayableId,
+          proofUrl: input.proofUrl,
+          notes: input.notes,
+        },
+      })
+
+      if (error)
+        throw new Error(error.message)
+
+      return camelize(data as Record<string, unknown>) as unknown as Payable
     },
 
     createPayable(input: Record<string, unknown>) {
@@ -365,6 +373,20 @@ export function useDb() {
         throw new Error(error.message)
 
       return camelize(data as Record<string, unknown>) as unknown as Receivable
+    },
+    async deletePayable(id: string) {
+      const { data, error } = await db.rpc('delete_payable_entry', { target_id: id })
+      if (error)
+        throw new Error(error.message)
+
+      return data as string
+    },
+    async deleteReceivable(id: string) {
+      const { data, error } = await db.rpc('delete_receivable_entry', { target_id: id })
+      if (error)
+        throw new Error(error.message)
+
+      return data as string
     },
 
     saveDevelopment(input: Partial<Development>) {

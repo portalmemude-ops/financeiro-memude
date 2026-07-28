@@ -375,14 +375,18 @@ export const useFinanceStore = defineStore('finance', {
     async savePayable(p: Partial<Payable>) {
       if (!this.canWrite())
         return
+      const isNew = !p.id
       const saved = await useDb().savePayable(p)
+      const displaySaved = this.withDerivedStatus([saved])[0]
       const index = this.payables.findIndex(item => item.id === saved.id)
       if (index >= 0)
-        this.payables[index] = saved
+        this.payables[index] = displaySaved
       else
-        this.payables.unshift(saved)
+        this.payables.unshift(displaySaved)
 
-      return saved
+      this.logAudit(isNew ? 'create' : 'update', 'payable', `${isNew ? 'Cadastro' : 'Edição'}: ${saved.description}`, saved.id)
+
+      return displaySaved
     },
 
     /** Cria N parcelas de uma conta a pagar. */
@@ -571,6 +575,21 @@ export const useFinanceStore = defineStore('finance', {
       }
     },
 
+    async deletePayable(id: string) {
+      if (!this.canWrite())
+        return
+      const index = this.payables.findIndex(item => item.id === id)
+      if (index < 0)
+        return
+      const target = this.payables[index]
+
+      await useDb().deletePayable(id)
+      this.payables.splice(index, 1)
+      this.logAudit('delete', 'payable', `Exclusão permanente: ${target.description}`, id)
+
+      return id
+    },
+
     async saveReceivable(
       r: Partial<Receivable>,
       options: { initialReceipt?: ReceiptInput; externalInvoice?: ExternalInvoiceInput } = {},
@@ -579,11 +598,12 @@ export const useFinanceStore = defineStore('finance', {
         return
       const isNew = !r.id
       const saved = await useDb().saveReceivable(r, options)
+      const displaySaved = this.withDerivedStatus([saved])[0]
       const index = this.receivables.findIndex(item => item.id === saved.id)
       if (index >= 0)
-        this.receivables[index] = saved
+        this.receivables[index] = displaySaved
       else
-        this.receivables.unshift(saved)
+        this.receivables.unshift(displaySaved)
       if (options.initialReceipt) {
         this.transactions = await useDb().loadTransactions()
         this.settlements = await useDb().loadSettlements()
@@ -600,7 +620,9 @@ export const useFinanceStore = defineStore('finance', {
           this.hydrate(refreshed.finance)
       }
 
-      return saved
+      this.logAudit(isNew ? 'create' : 'update', 'receivable', `${isNew ? 'Cadastro' : 'Edição'}: ${saved.description}`, saved.id)
+
+      return displaySaved
     },
 
     async receiveReceivable(
@@ -680,6 +702,21 @@ export const useFinanceStore = defineStore('finance', {
         Object.assign(r, await useDb().cancelReceivable(id))
         this.logAudit('cancel', 'receivable', `Cancelamento: ${r.description}`, r.id)
       }
+    },
+
+    async deleteReceivable(id: string) {
+      if (!this.canWrite())
+        return
+      const index = this.receivables.findIndex(item => item.id === id)
+      if (index < 0)
+        return
+      const target = this.receivables[index]
+
+      await useDb().deleteReceivable(id)
+      this.receivables.splice(index, 1)
+      this.logAudit('delete', 'receivable', `Exclusão permanente: ${target.description}`, id)
+
+      return id
     },
 
     // ---- comercial -----------------------------------------------------------
