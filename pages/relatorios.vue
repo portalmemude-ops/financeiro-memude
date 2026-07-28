@@ -86,15 +86,14 @@ const dre = computed(() => {
   const revenues = new Map<string, number>()
   const expenses = new Map<string, number>()
 
-  finance.companyReceivables.filter(r => r.status === 'received' && inRange(r.receivedAt)).forEach(r => {
-    const k = finance.accountName(r.categoryId)
-
-    revenues.set(k, (revenues.get(k) ?? 0) + (r.receivedAmount ?? r.amount))
-  })
-  finance.companyPayables.filter(p => p.status === 'paid' && inRange(p.paidAt)).forEach(p => {
-    const k = finance.accountName(p.categoryId)
-
-    expenses.set(k, (expenses.get(k) ?? 0) + (p.paidAmount ?? p.amount))
+  finance.companyTransactions.filter(t => inRange(t.date)).forEach(transaction => {
+    const k = finance.accountName(finance.transactionCategoryId(transaction))
+    const revenue = transactionIncome(transaction)
+    const expense = transactionExpense(transaction)
+    if (revenue)
+      revenues.set(k, (revenues.get(k) ?? 0) + revenue)
+    if (expense)
+      expenses.set(k, (expenses.get(k) ?? 0) + expense)
   })
 
   const revRows = [...revenues.entries()].map(([name, value]) => ({ name, value }))
@@ -133,12 +132,13 @@ function dreRows(): (string | number)[][] {
 const balancete = computed(() => {
   const movement = new Map<string, number>() // categoryId -> saldo (receita + / despesa -)
 
-  finance.companyReceivables
-    .filter(r => r.status === 'received' && inRange(r.receivedAt))
-    .forEach(r => movement.set(r.categoryId ?? '', (movement.get(r.categoryId ?? '') ?? 0) + (r.receivedAmount ?? r.amount)))
-  finance.companyPayables
-    .filter(p => p.status === 'paid' && inRange(p.paidAt))
-    .forEach(p => movement.set(p.categoryId ?? '', (movement.get(p.categoryId ?? '') ?? 0) - (p.paidAmount ?? p.amount)))
+  finance.companyTransactions
+    .filter(t => inRange(t.date))
+    .forEach(transaction => {
+      const key = finance.transactionCategoryId(transaction) ?? ''
+
+      movement.set(key, (movement.get(key) ?? 0) + transactionEffect(transaction))
+    })
 
   const rows = finance.companyChartAccounts
     .filter(a => movement.has(a.id))
@@ -164,11 +164,11 @@ const aging = computed(() => {
     { label: '90+ dias', min: 91, max: Number.POSITIVE_INFINITY, items: [] as { desc: string; amount: number; days: number }[] },
   ]
 
-  finance.companyReceivables.filter(r => r.status === 'overdue').forEach(r => {
+  finance.companyReceivables.filter(r => isReceivablePending(r) && daysUntil(r.dueDate) < 0).forEach(r => {
     const days = Math.abs(daysUntil(r.dueDate))
     const b = buckets.find(x => days >= x.min && days <= x.max)
 
-    b?.items.push({ desc: `${r.clientName ?? '—'} — ${r.description}`, amount: r.amount, days })
+    b?.items.push({ desc: `${r.clientName ?? '—'} — ${r.description}`, amount: receivableOutstanding(r), days })
   })
 
   return buckets.map(b => ({ ...b, total: b.items.reduce((s, i) => s + i.amount, 0) }))
@@ -202,8 +202,9 @@ function exportCommissions() {
 
 // ===== Centro de custo =====
 const costCenterRows = computed(() => finance.companyCostCenters.map(cc => {
-  const rev = finance.companyReceivables.filter(r => r.status === 'received' && r.costCenterId === cc.id && inRange(r.receivedAt)).reduce((s, r) => s + (r.receivedAmount ?? r.amount), 0)
-  const exp = finance.companyPayables.filter(p => p.status === 'paid' && p.costCenterId === cc.id && inRange(p.paidAt)).reduce((s, p) => s + (p.paidAmount ?? p.amount), 0)
+  const transactions = finance.companyTransactions.filter(t => finance.transactionCostCenterId(t) === cc.id && inRange(t.date))
+  const rev = transactions.reduce((sum, transaction) => sum + transactionIncome(transaction), 0)
+  const exp = transactions.reduce((sum, transaction) => sum + transactionExpense(transaction), 0)
 
   return { name: cc.name, rev, exp, result: rev - exp }
 }))
@@ -223,8 +224,9 @@ const comparison = computed(() => {
     d.setMonth(d.getMonth() - i)
 
     const key = d.toISOString().slice(0, 7)
-    const rev = finance.companyReceivables.filter(r => r.status === 'received' && r.receivedAt?.slice(0, 7) === key).reduce((s, r) => s + (r.receivedAmount ?? r.amount), 0)
-    const exp = finance.companyPayables.filter(p => p.status === 'paid' && p.paidAt?.slice(0, 7) === key).reduce((s, p) => s + (p.paidAmount ?? p.amount), 0)
+    const transactions = finance.companyTransactions.filter(t => t.date.slice(0, 7) === key)
+    const rev = transactions.reduce((sum, transaction) => sum + transactionIncome(transaction), 0)
+    const exp = transactions.reduce((sum, transaction) => sum + transactionExpense(transaction), 0)
 
     months.push({ label: d.toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' }), rev, exp })
   }

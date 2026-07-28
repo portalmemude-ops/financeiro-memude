@@ -4,12 +4,15 @@ import type {
   CostCenter,
   Development,
   Employee,
+  ExternalInvoiceInput,
   FunnelCard,
   Invoice,
   NotificationRule,
   Payable,
+  ReceiptInput,
   Receivable,
   Sale,
+  Settlement,
   Supplier,
   Transaction,
 } from '@/types/finance'
@@ -249,38 +252,38 @@ export function useDb() {
       return (data as Record<string, unknown>[]).map(camelize) as unknown as Payable[]
     },
 
-    saveReceivable(input: Partial<Receivable>) {
-      return saveRow('receivables', input.id, {
-        description: input.description,
-        amount: input.amount,
-        due_date: input.dueDate,
-        competence_date: input.competenceDate,
-        client_name: input.clientName,
-        client_document: input.clientDocument,
-        category_id: input.categoryId,
-        cost_center_id: input.costCenterId,
-        invoice_rule: input.invoiceRule ?? 'none',
-        recurrence: input.recurrence ?? 'once',
-        status: input.status ?? 'open',
-        proof_url: input.proofUrl,
-        notes: input.notes,
-        sale_id: input.saleId,
-        commission_installment_id: input.commissionInstallmentId,
-      }) as Promise<Receivable>
-    },
+    async saveReceivable(
+      input: Partial<Receivable>,
+      options: { initialReceipt?: ReceiptInput; externalInvoice?: ExternalInvoiceInput } = {},
+    ) {
+      const { data, error } = await db.rpc('save_receivable_entry', {
+        target_id: input.id ?? null,
+        payload: {
+          companyId: companyId(),
+          description: input.description,
+          amount: input.amount,
+          dueDate: input.dueDate,
+          competenceDate: input.competenceDate,
+          clientName: input.clientName,
+          clientDocument: input.clientDocument,
+          categoryId: input.categoryId,
+          costCenterId: input.costCenterId,
+          invoiceRule: input.invoiceRule ?? 'on_receive',
+          invoiceScheduledDate: input.invoiceScheduledDate,
+          invoiceRecurrenceDay: input.invoiceRecurrenceDay,
+          recurrence: input.recurrence ?? 'once',
+          notes: input.notes,
+          saleId: input.saleId,
+          commissionInstallmentId: input.commissionInstallmentId,
+        },
+        initial_receipt: options.initialReceipt ?? null,
+        external_invoice: options.externalInvoice ?? null,
+      })
 
-    createReceivable(input: Record<string, unknown>) {
-      return saveRow('receivables', undefined, {
-        description: input.description,
-        amount: input.amount,
-        due_date: input.dueDate,
-        client_name: input.clientName,
-        category_id: input.categoryId,
-        cost_center_id: input.costCenterId,
-        invoice_rule: input.invoiceRule ?? 'none',
-        recurrence: input.recurrence ?? 'once',
-        status: input.status ?? 'open',
-      }) as Promise<Receivable>
+      if (error)
+        throw new Error(error.message)
+
+      return camelize(data as Record<string, unknown>) as unknown as Receivable
     },
 
     async settlePayable(id: string, amount: number, proofUrl?: string) {
@@ -297,12 +300,16 @@ export function useDb() {
       return camelize(data as Record<string, unknown>) as unknown as Payable
     },
 
-    async settleReceivable(id: string, amount: number, proofUrl?: string) {
+    async settleReceivable(id: string, receipt: ReceiptInput) {
       const { data, error } = await db.rpc('settle_receivable', {
         target_id: id,
-        settle_amount: amount,
-        settle_at: new Date().toISOString(),
-        proof: proofUrl,
+        settle_amount: receipt.amount,
+        settle_at: receipt.receivedAt,
+        method: receipt.method,
+        account_name: receipt.account,
+        proof: receipt.proofUrl,
+        request_key: receipt.requestId,
+        settlement_note: receipt.notes,
       })
 
       if (error)
@@ -324,8 +331,41 @@ export function useDb() {
       return (data as Record<string, unknown>[]).map(row => camelize(row) as unknown as Transaction)
     },
 
+    async loadSettlements() {
+      const { data, error } = await db
+        .from('settlements')
+        .select('*')
+        .eq('company_id', companyId())
+        .order('settled_at', { ascending: false })
+
+      if (error)
+        throw new Error(error.message)
+
+      return (data as Record<string, unknown>[]).map(row => camelize(row) as unknown as Settlement)
+    },
+
+    async reverseReceivableSettlement(settlementId: string, reason: string, requestId: string) {
+      const { data, error } = await db.rpc('reverse_receivable_settlement', {
+        target_settlement: settlementId,
+        reversed_at: new Date().toISOString(),
+        reversal_reason: reason,
+        request_key: requestId,
+      })
+
+      if (error)
+        throw new Error(error.message)
+
+      return camelize(data as Record<string, unknown>) as unknown as Receivable
+    },
+
     cancelPayable: (id: string) => updateRow('payables', id, { status: 'cancelled' }) as Promise<Payable>,
-    cancelReceivable: (id: string) => updateRow('receivables', id, { status: 'cancelled' }) as Promise<Receivable>,
+    async cancelReceivable(id: string) {
+      const { data, error } = await db.rpc('cancel_receivable', { target_id: id })
+      if (error)
+        throw new Error(error.message)
+
+      return camelize(data as Record<string, unknown>) as unknown as Receivable
+    },
 
     saveDevelopment(input: Partial<Development>) {
       return saveRow('developments', input.id, {
@@ -441,6 +481,7 @@ export function useDb() {
     saveInvoice(input: Partial<Invoice>) {
       return saveRow('invoices', input.id, {
         receivable_id: input.receivableId,
+        source: input.source ?? 'system',
         status: input.status ?? 'pending',
         environment: input.environment ?? 'homologacao',
         provider: 'ginfes',

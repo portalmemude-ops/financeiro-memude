@@ -14,14 +14,14 @@ useHead({ title: 'Dashboard' })
 
 // 👉 Saldo em caixa (realizado acumulado) — informação principal
 const saldoCaixa = computed(() => m.cashBalance.value)
-const totalIncome = computed(() => finance.companyTransactions.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0))
-const totalExpense = computed(() => finance.companyTransactions.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0))
+const totalIncome = computed(() => finance.companyTransactions.reduce((sum, transaction) => sum + transactionIncome(transaction), 0))
+const totalExpense = computed(() => finance.companyTransactions.reduce((sum, transaction) => sum + transactionExpense(transaction), 0))
 
 // 👉 KPIs principais
 const kpis = computed(() => [
   { title: 'Saldo realizado (mês)', value: formatBRL(m.realized.value.balance), icon: 'ri-wallet-3-line', color: m.realized.value.balance >= 0 ? 'success' : 'error', subtitle: `Entradas ${formatBRLCompact(m.realized.value.income)} · Saídas ${formatBRLCompact(m.realized.value.expense)}` },
   { title: 'A pagar (7 dias)', value: formatBRL(m.sum(m.weekPayables.value)), icon: 'ri-arrow-up-circle-line', color: 'warning', subtitle: `${m.weekPayables.value.length} conta(s) vencendo` },
-  { title: 'A receber (7 dias)', value: formatBRL(m.sum(m.weekReceivables.value)), icon: 'ri-arrow-down-circle-line', color: 'info', subtitle: `${m.weekReceivables.value.length} conta(s) a receber` },
+  { title: 'A receber (7 dias)', value: formatBRL(m.sumReceivables(m.weekReceivables.value)), icon: 'ri-arrow-down-circle-line', color: 'info', subtitle: `${m.weekReceivables.value.length} conta(s) a receber` },
   { title: 'Resultado do mês (DRE)', value: formatBRL(m.dre.value.result), icon: 'ri-pie-chart-2-line', color: m.dre.value.result >= 0 ? 'primary' : 'error', subtitle: 'Receitas − Despesas realizadas' },
 ])
 
@@ -34,7 +34,7 @@ const alerts = computed(() => {
 
   const orr = m.overdueReceivables.value
   if (orr.length)
-    list.push({ title: `Inadimplência: ${orr.length} título(s)`, message: `${formatBRL(m.sum(orr))} a receber em atraso.`, color: 'error', icon: 'ri-error-warning-line' })
+    list.push({ title: `Inadimplência: ${orr.length} título(s)`, message: `${formatBRL(m.sumReceivables(orr))} a receber em atraso.`, color: 'error', icon: 'ri-error-warning-line' })
 
   const dueSoon = m.weekPayables.value.filter(p => daysUntil(p.dueDate) >= 0)
   if (dueSoon.length)

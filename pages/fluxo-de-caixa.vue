@@ -24,8 +24,8 @@ const upcoming = computed(() => {
   const within = (iso: string) => daysUntil(iso) >= 0 && daysUntil(iso) <= horizon.value
 
   const ins = finance.companyReceivables
-    .filter(r => r.status === 'open' && within(r.dueDate))
-    .map(r => ({ kind: 'income' as const, date: r.dueDate, description: r.description, party: r.clientName ?? '—', amount: r.amount }))
+    .filter(r => isReceivablePending(r) && within(r.dueDate))
+    .map(r => ({ kind: 'income' as const, date: r.dueDate, description: r.description, party: r.clientName ?? '—', amount: receivableOutstanding(r) }))
 
   const outs = finance.companyPayables
     .filter(p => ['open', 'overdue'].includes(p.status) && within(p.dueDate))

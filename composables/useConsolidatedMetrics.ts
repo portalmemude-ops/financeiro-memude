@@ -40,8 +40,8 @@ export function useConsolidatedMetrics() {
   const byCompany = computed<CompanyMetrics[]>(() =>
     app.availableCompanies.map(company => {
       const tx = finance.transactions.filter(t => t.companyId === company.id && inCurrentMonth(t.date))
-      const income = tx.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0)
-      const expense = tx.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0)
+      const income = tx.reduce((s, t) => s + transactionIncome(t), 0)
+      const expense = tx.reduce((s, t) => s + transactionExpense(t), 0)
 
       const openPayables = finance.payables
         .filter(p => p.companyId === company.id && (p.status === 'open' || (p.status !== 'paid' && p.status !== 'cancelled' && daysUntil(p.dueDate) < 0)))
@@ -57,7 +57,7 @@ export function useConsolidatedMetrics() {
         balance: income - expense,
         openPayables,
         overdueReceivables: overdue.length,
-        overdueAmount: overdue.reduce((s, r) => s + r.amount, 0),
+        overdueAmount: overdue.reduce((s, r) => s + receivableOutstanding(r), 0),
       }
     }),
   )

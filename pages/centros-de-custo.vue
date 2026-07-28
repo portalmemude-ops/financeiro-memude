@@ -16,13 +16,9 @@ interface CostCenterRow extends CostCenter {
 
 const rows = computed<CostCenterRow[]>(() => {
   return finance.companyCostCenters.map(cc => {
-    const revenue = finance.companyReceivables
-      .filter(r => r.costCenterId === cc.id && r.status === 'received')
-      .reduce((sum, r) => sum + (r.receivedAmount ?? r.amount), 0)
-
-    const expense = finance.companyPayables
-      .filter(p => p.costCenterId === cc.id && p.status === 'paid')
-      .reduce((sum, p) => sum + (p.paidAmount ?? p.amount), 0)
+    const transactions = finance.companyTransactions.filter(t => finance.transactionCostCenterId(t) === cc.id)
+    const revenue = transactions.reduce((sum, transaction) => sum + transactionIncome(transaction), 0)
+    const expense = transactions.reduce((sum, transaction) => sum + transactionExpense(transaction), 0)
 
     return { ...cc, revenue, expense, result: revenue - expense }
   })

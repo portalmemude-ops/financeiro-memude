@@ -16,6 +16,7 @@ export const payableStatusMeta = meta({
 
 export const receivableStatusMeta = meta({
   open: { label: 'Em aberto', color: 'info' },
+  partial: { label: 'Parcial', color: 'warning' },
   received: { label: 'Recebido', color: 'success' },
   overdue: { label: 'Vencido', color: 'error' },
   cancelled: { label: 'Cancelado', color: 'secondary' },
@@ -102,10 +103,22 @@ export const recurrenceLabels: Record<string, string> = {
 }
 
 export const invoiceRuleLabels: Record<string, string> = {
-  immediate: 'Antecipada',
-  on_receive: 'Ao receber',
-  scheduled: 'Agendada',
-  recurring: 'Recorrente',
+  immediate: 'Emitir ao cadastrar',
+  on_receive: 'Emitir ao receber',
+  scheduled: 'Agendar emissão',
+  recurring: 'Emissão recorrente',
+  manual: 'NFS-e já emitida',
+  none: 'Não emitir NFS-e',
+}
+
+export const receiptMethodLabels: Record<string, string> = {
+  pix: 'Pix',
+  transfer: 'Transferência',
+  boleto: 'Boleto',
+  card: 'Cartão',
+  cash: 'Dinheiro',
+  check: 'Cheque',
+  other: 'Outro',
 }
 
 export const developmentTypeLabels: Record<string, string> = {
