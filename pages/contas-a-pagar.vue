@@ -136,13 +136,20 @@ function askCancel(p: Payable) {
 // 👉 Recorrências
 const snackbar = ref(false)
 const snackbarText = ref('')
-function runRecurrences() {
-  const n = finance.generateRecurrences()
+async function runRecurrences() {
+  try {
+    const n = await finance.generateRecurrences()
 
-  snackbarText.value = n > 0
-    ? `${n} lançamento(s) recorrente(s) gerado(s).`
-    : 'Nenhuma recorrência pendente.'
-  snackbar.value = true
+    snackbarText.value = n > 0
+      ? `${n} lançamento(s) recorrente(s) gerado(s).`
+      : 'Nenhuma recorrência pendente.'
+  }
+  catch (error) {
+    snackbarText.value = error instanceof Error ? error.message : 'Não foi possível gerar as recorrências.'
+  }
+  finally {
+    snackbar.value = true
+  }
 }
 </script>
 
@@ -577,6 +584,8 @@ function runRecurrences() {
           />
           <FileUpload
             v-model="payProof"
+            entity-type="payable"
+            :entity-id="payTarget?.id ?? ''"
             label="Comprovante do pagamento"
           />
         </VCardText>

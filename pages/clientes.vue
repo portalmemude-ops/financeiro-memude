@@ -9,6 +9,7 @@ const db = useDb()
 useHead({ title: 'Clientes' })
 
 const search = ref('')
+
 const filtered = computed(() => finance.companyClients.filter(c =>
   !search.value
   || c.name.toLowerCase().includes(search.value.toLowerCase())
@@ -144,17 +145,42 @@ async function save() {
                   :rules="[requiredRule]"
                 />
               </VCol>
-              <VCol cols="12" md="6">
-                <VTextField v-model="form.document" label="CPF / CNPJ" />
+              <VCol
+                cols="12"
+                md="6"
+              >
+                <VTextField
+                  v-model="form.document"
+                  label="CPF / CNPJ"
+                />
               </VCol>
-              <VCol cols="12" md="6">
-                <VTextField v-model="form.phone" label="Telefone" />
+              <VCol
+                cols="12"
+                md="6"
+              >
+                <VTextField
+                  v-model="form.phone"
+                  label="Telefone"
+                />
               </VCol>
-              <VCol cols="12" md="6">
-                <VTextField v-model="form.email" label="E-mail" type="email" />
+              <VCol
+                cols="12"
+                md="6"
+              >
+                <VTextField
+                  v-model="form.email"
+                  label="E-mail"
+                  type="email"
+                />
               </VCol>
-              <VCol cols="12" md="6">
-                <VTextField v-model="form.city" label="Cidade" />
+              <VCol
+                cols="12"
+                md="6"
+              >
+                <VTextField
+                  v-model="form.city"
+                  label="Cidade"
+                />
               </VCol>
             </VRow>
           </VForm>

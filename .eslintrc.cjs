@@ -130,6 +130,7 @@ module.exports = {
         'virtual:generated-layouts',
         '#auth$',
         '#components$',
+        '#supabase/server',
 
         // Ignore vite's ?raw imports
         '.*\?raw',

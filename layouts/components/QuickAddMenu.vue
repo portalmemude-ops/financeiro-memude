@@ -49,6 +49,7 @@ const revenueAccounts = computed(() => finance.companyChartAccounts.filter(a => 
 const costCenters = computed(() => finance.companyCostCenters.map(c => ({ title: c.name, value: c.id })))
 const suppliers = computed(() => finance.companySuppliers.filter(s => s.isActive !== false).map(s => ({ title: s.tradeName || s.legalName, value: s.id })))
 const clients = computed(() => finance.companyClients.map(c => ({ title: c.name, value: c.name })))
+
 const employmentTypes = [
   { title: 'CLT', value: 'clt' },
   { title: 'PJ', value: 'pj' },
@@ -165,7 +166,10 @@ async function save() {
                     :rules="[requiredRule]"
                   />
                 </VCol>
-                <VCol cols="12" md="6">
+                <VCol
+                  cols="12"
+                  md="6"
+                >
                   <VTextField
                     v-model.number="form.amount"
                     label="Valor"
@@ -174,7 +178,10 @@ async function save() {
                     :rules="[requiredRule, positiveRule]"
                   />
                 </VCol>
-                <VCol cols="12" md="6">
+                <VCol
+                  cols="12"
+                  md="6"
+                >
                   <VTextField
                     v-model="form.dueDate"
                     label="Vencimento"
@@ -182,7 +189,10 @@ async function save() {
                     :rules="[requiredRule]"
                   />
                 </VCol>
-                <VCol cols="12" md="6">
+                <VCol
+                  cols="12"
+                  md="6"
+                >
                   <VSelect
                     v-model="form.categoryId"
                     label="Categoria"
@@ -190,7 +200,10 @@ async function save() {
                     clearable
                   />
                 </VCol>
-                <VCol cols="12" md="6">
+                <VCol
+                  cols="12"
+                  md="6"
+                >
                   <VSelect
                     v-model="form.costCenterId"
                     label="Centro de custo"
@@ -217,7 +230,10 @@ async function save() {
                     :rules="[requiredRule]"
                   />
                 </VCol>
-                <VCol cols="12" md="6">
+                <VCol
+                  cols="12"
+                  md="6"
+                >
                   <VTextField
                     v-model.number="form.amount"
                     label="Valor"
@@ -226,7 +242,10 @@ async function save() {
                     :rules="[requiredRule, positiveRule]"
                   />
                 </VCol>
-                <VCol cols="12" md="6">
+                <VCol
+                  cols="12"
+                  md="6"
+                >
                   <VTextField
                     v-model="form.dueDate"
                     label="Vencimento"
@@ -234,7 +253,10 @@ async function save() {
                     :rules="[requiredRule]"
                   />
                 </VCol>
-                <VCol cols="12" md="6">
+                <VCol
+                  cols="12"
+                  md="6"
+                >
                   <VCombobox
                     v-model="form.clientName"
                     label="Cliente"
@@ -244,7 +266,10 @@ async function save() {
                     :return-object="false"
                   />
                 </VCol>
-                <VCol cols="12" md="6">
+                <VCol
+                  cols="12"
+                  md="6"
+                >
                   <VSelect
                     v-model="form.categoryId"
                     label="Categoria"
@@ -263,17 +288,42 @@ async function save() {
                     :rules="[requiredRule]"
                   />
                 </VCol>
-                <VCol cols="12" md="6">
-                  <VTextField v-model="form.tradeName" label="Nome fantasia" />
+                <VCol
+                  cols="12"
+                  md="6"
+                >
+                  <VTextField
+                    v-model="form.tradeName"
+                    label="Nome fantasia"
+                  />
                 </VCol>
-                <VCol cols="12" md="6">
-                  <VTextField v-model="form.document" label="CNPJ / CPF" />
+                <VCol
+                  cols="12"
+                  md="6"
+                >
+                  <VTextField
+                    v-model="form.document"
+                    label="CNPJ / CPF"
+                  />
                 </VCol>
-                <VCol cols="12" md="6">
-                  <VTextField v-model="form.email" label="E-mail" type="email" />
+                <VCol
+                  cols="12"
+                  md="6"
+                >
+                  <VTextField
+                    v-model="form.email"
+                    label="E-mail"
+                    type="email"
+                  />
                 </VCol>
-                <VCol cols="12" md="6">
-                  <VTextField v-model="form.phone" label="Telefone" />
+                <VCol
+                  cols="12"
+                  md="6"
+                >
+                  <VTextField
+                    v-model="form.phone"
+                    label="Telefone"
+                  />
                 </VCol>
               </template>
 
@@ -286,14 +336,20 @@ async function save() {
                     :rules="[requiredRule]"
                   />
                 </VCol>
-                <VCol cols="12" md="6">
+                <VCol
+                  cols="12"
+                  md="6"
+                >
                   <VSelect
                     v-model="form.employmentType"
                     label="Vínculo"
                     :items="employmentTypes"
                   />
                 </VCol>
-                <VCol cols="12" md="6">
+                <VCol
+                  cols="12"
+                  md="6"
+                >
                   <VTextField
                     v-model.number="form.salary"
                     label="Salário / valor"
@@ -301,11 +357,24 @@ async function save() {
                     prefix="R$"
                   />
                 </VCol>
-                <VCol cols="12" md="6">
-                  <VTextField v-model="form.email" label="E-mail" type="email" />
+                <VCol
+                  cols="12"
+                  md="6"
+                >
+                  <VTextField
+                    v-model="form.email"
+                    label="E-mail"
+                    type="email"
+                  />
                 </VCol>
-                <VCol cols="12" md="6">
-                  <VTextField v-model="form.phone" label="Telefone" />
+                <VCol
+                  cols="12"
+                  md="6"
+                >
+                  <VTextField
+                    v-model="form.phone"
+                    label="Telefone"
+                  />
                 </VCol>
               </template>
 
@@ -318,17 +387,42 @@ async function save() {
                     :rules="[requiredRule]"
                   />
                 </VCol>
-                <VCol cols="12" md="6">
-                  <VTextField v-model="form.document" label="CPF / CNPJ" />
+                <VCol
+                  cols="12"
+                  md="6"
+                >
+                  <VTextField
+                    v-model="form.document"
+                    label="CPF / CNPJ"
+                  />
                 </VCol>
-                <VCol cols="12" md="6">
-                  <VTextField v-model="form.phone" label="Telefone" />
+                <VCol
+                  cols="12"
+                  md="6"
+                >
+                  <VTextField
+                    v-model="form.phone"
+                    label="Telefone"
+                  />
                 </VCol>
-                <VCol cols="12" md="6">
-                  <VTextField v-model="form.email" label="E-mail" type="email" />
+                <VCol
+                  cols="12"
+                  md="6"
+                >
+                  <VTextField
+                    v-model="form.email"
+                    label="E-mail"
+                    type="email"
+                  />
                 </VCol>
-                <VCol cols="12" md="6">
-                  <VTextField v-model="form.city" label="Cidade" />
+                <VCol
+                  cols="12"
+                  md="6"
+                >
+                  <VTextField
+                    v-model="form.city"
+                    label="Cidade"
+                  />
                 </VCol>
               </template>
             </VRow>

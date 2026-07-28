@@ -128,7 +128,7 @@ export interface Supplier {
   createdAt: string
 }
 
-export type EmploymentType = 'clt' | 'pj' | 'freelancer' | 'commission_only'
+export type EmploymentType = 'clt' | 'pj' | 'freelancer' | 'commission_only' | 'intern'
 export type EmployeeStatus = 'active' | 'inactive' | 'terminated'
 
 export interface Employee {
@@ -149,8 +149,8 @@ export interface Employee {
   createdAt: string
 }
 
-export type Recurrence = 'once' | 'weekly' | 'monthly' | 'quarterly' | 'yearly'
-export type PayableStatus = 'open' | 'paid' | 'overdue' | 'cancelled'
+export type Recurrence = 'once' | 'weekly' | 'monthly' | 'quarterly' | 'yearly' | 'installment'
+export type PayableStatus = 'open' | 'partial' | 'paid' | 'overdue' | 'cancelled'
 
 export interface Payable {
   id: string
@@ -176,7 +176,7 @@ export interface Payable {
 }
 
 export type InvoiceRule = 'immediate' | 'on_receive' | 'scheduled' | 'recurring'
-export type ReceivableStatus = 'open' | 'received' | 'overdue' | 'cancelled'
+export type ReceivableStatus = 'open' | 'partial' | 'received' | 'overdue' | 'cancelled'
 
 export interface Receivable {
   id: string

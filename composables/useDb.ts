@@ -1,78 +1,468 @@
-// ============================================================================
-// Camada de ESCRITA no Supabase (Fase 3). Cada create insere no banco (RLS por
-// empresa garante a permissão — qualquer membro da empresa pode gravar),
-// injeta company_id, e atualiza o store local para refletir na UI na hora.
-// ============================================================================
-import { useFinanceStore } from '@/stores/finance'
+import type {
+  ChartAccount,
+  Client,
+  CostCenter,
+  Development,
+  Employee,
+  FunnelCard,
+  Invoice,
+  NotificationRule,
+  Payable,
+  Receivable,
+  Sale,
+  Supplier,
+  Transaction,
+} from '@/types/finance'
+import type { Database } from '@/types/database.types'
 import { useAppStore } from '@/stores/app'
 
-const toCamel = (s: string) => s.replace(/_([a-z])/g, (_, c: string) => c.toUpperCase())
-function camelize(row: Record<string, unknown>): any {
-  const out: Record<string, unknown> = {}
-  for (const k in row) out[toCamel(k)] = row[k]
+const toCamel = (value: string) => value.replace(/_([a-z])/g, (_, letter: string) => letter.toUpperCase())
 
-  return out
+function camelize(row: Record<string, unknown>): Record<string, unknown> {
+  return Object.fromEntries(Object.entries(row).map(([key, value]) => [toCamel(key), value]))
 }
 
-/** Remove chaves undefined/'' para não gravar vazio à toa. */
-function clean(obj: Record<string, unknown>): Record<string, unknown> {
-  const out: Record<string, unknown> = {}
-  for (const k in obj) {
-    const v = obj[k]
-    if (v !== undefined && v !== null && v !== '')
-      out[k] = v
-  }
+function clean(payload: Record<string, unknown>): Record<string, unknown> {
+  return Object.fromEntries(
+    Object.entries(payload).filter(([, value]) => value !== undefined && value !== ''),
+  )
+}
 
-  return out
+function supplierFromRow(row: Record<string, unknown>): Supplier {
+  const data = camelize(row)
+  const documentNumber = String(data.document ?? '')
+
+  return {
+    ...data,
+    documentNumber,
+    documentType: documentNumber.replace(/\D/g, '').length === 11 ? 'cpf' : 'cnpj',
+    bankInfo: data.bankInfo ?? {},
+  } as unknown as Supplier
+}
+
+function employeeFromRow(row: Record<string, unknown>): Employee {
+  const data = camelize(row)
+
+  return {
+    ...data,
+    cpf: String(data.document ?? ''),
+    baseSalary: data.salary,
+    bankInfo: data.bankInfo ?? {},
+  } as unknown as Employee
 }
 
 export function useDb() {
-  const supabase = useSupabaseClient()
+  const supabase = useSupabaseClient<Database>()
+
+  // As tabelas novas entram nos tipos gerados após a migração remota.
+  const db = supabase as any
   const app = useAppStore()
-  const finance = useFinanceStore()
-  const cid = () => app.currentCompanyId
 
-  async function insert(table: string, payload: Record<string, unknown>, target: unknown[]) {
-    const { data, error } = await supabase
-      .from(table)
-      .insert({ company_id: cid(), ...clean(payload) })
-      .select()
-      .single()
+  function companyId() {
+    if (!app.currentCompanyId)
+      throw new Error('Selecione uma empresa antes de salvar.')
+
+    return app.currentCompanyId
+  }
+
+  async function saveRow(
+    table: string,
+    id: string | undefined,
+    payload: Record<string, unknown>,
+    map: (row: Record<string, unknown>) => any = camelize,
+  ) {
+    const cid = companyId()
+    if (!app.canManageFinance && !app.isBroker)
+      throw new Error('Seu perfil não permite alterações nesta empresa.')
+
+    const query = id
+      ? db.from(table).update(clean(payload)).eq('id', id).eq('company_id', cid)
+      : db.from(table).insert({ company_id: cid, ...clean(payload) })
+
+    const { data, error } = await query.select().single()
     if (error)
-      throw error
-    const row = camelize(data as Record<string, unknown>)
-    target.unshift(row)
+      throw new Error(error.message)
 
-    return row
+    return map(data as Record<string, unknown>)
+  }
+
+  async function updateRow(table: string, id: string, payload: Record<string, unknown>) {
+    return saveRow(table, id, payload)
   }
 
   return {
-    createClient: (i: Record<string, unknown>) => insert('clients', {
-      name: i.name, document: i.document, email: i.email, phone: i.phone,
-      city: i.city, state: i.state, notes: i.notes, is_active: true,
-    }, finance.clients),
+    async saveCompany(id: string, payload: Record<string, unknown>) {
+      const { data, error } = await db
+        .from('companies')
+        .update(clean(payload))
+        .eq('id', id)
+        .select()
+        .single()
 
-    createSupplier: (i: Record<string, unknown>) => insert('suppliers', {
-      legal_name: i.legalName, trade_name: i.tradeName, document: i.document,
-      email: i.email, phone: i.phone, is_active: true, notes: i.notes,
-    }, finance.suppliers),
+      if (error)
+        throw new Error(error.message)
 
-    createEmployee: (i: Record<string, unknown>) => insert('employees', {
-      full_name: i.fullName, employment_type: i.employmentType, status: 'active',
-      salary: i.salary, email: i.email, phone: i.phone, document: i.document, role_title: i.roleTitle,
-    }, finance.employees),
+      return camelize(data as Record<string, unknown>)
+    },
 
-    createPayable: (i: Record<string, unknown>) => insert('payables', {
-      description: i.description, amount: i.amount, due_date: i.dueDate,
-      category_id: i.categoryId, cost_center_id: i.costCenterId,
-      supplier_id: i.supplierId, employee_id: i.employeeId,
-      status: i.status ?? 'open', recurrence: i.recurrence ?? 'once', payment_method: i.paymentMethod,
-    }, finance.payables),
+    async createClient(input: Record<string, unknown>) {
+      return saveRow('clients', undefined, {
+        name: input.name,
+        document: input.document,
+        email: input.email,
+        phone: input.phone,
+        address: input.address,
+        city: input.city,
+        state: input.state,
+        notes: input.notes,
+        is_active: true,
+      }) as Promise<Client>
+    },
 
-    createReceivable: (i: Record<string, unknown>) => insert('receivables', {
-      description: i.description, amount: i.amount, due_date: i.dueDate,
-      client_name: i.clientName, category_id: i.categoryId, cost_center_id: i.costCenterId,
-      invoice_rule: i.invoiceRule ?? 'none', recurrence: i.recurrence ?? 'once', status: i.status ?? 'open',
-    }, finance.receivables),
+    saveSupplier(input: Partial<Supplier>) {
+      return saveRow('suppliers', input.id, {
+        legal_name: input.legalName,
+        trade_name: input.tradeName,
+        document: input.documentNumber,
+        email: input.email,
+        phone: input.phone,
+        notes: input.notes,
+        is_active: input.isActive,
+      }, supplierFromRow) as Promise<Supplier>
+    },
+
+    createSupplier(input: Record<string, unknown>) {
+      return saveRow('suppliers', undefined, {
+        legal_name: input.legalName,
+        trade_name: input.tradeName,
+        document: input.document,
+        email: input.email,
+        phone: input.phone,
+        notes: input.notes,
+        is_active: true,
+      }, supplierFromRow) as Promise<Supplier>
+    },
+
+    saveEmployee(input: Partial<Employee>) {
+      return saveRow('employees', input.id, {
+        full_name: input.fullName,
+        employment_type: input.employmentType,
+        status: input.status ?? 'active',
+        salary: input.baseSalary,
+        email: input.email,
+        phone: input.phone,
+        document: input.cpf,
+        user_id: input.userId,
+      }, employeeFromRow) as Promise<Employee>
+    },
+
+    createEmployee(input: Record<string, unknown>) {
+      return saveRow('employees', undefined, {
+        full_name: input.fullName,
+        employment_type: input.employmentType,
+        status: 'active',
+        salary: input.salary,
+        email: input.email,
+        phone: input.phone,
+        document: input.document,
+        role_title: input.roleTitle,
+      }, employeeFromRow) as Promise<Employee>
+    },
+
+    saveCostCenter(input: Partial<CostCenter>) {
+      return saveRow('cost_centers', input.id, {
+        name: input.name,
+        description: input.description,
+        is_active: input.isActive,
+      }) as Promise<CostCenter>
+    },
+
+    saveChartAccount(input: Partial<ChartAccount>) {
+      return saveRow('chart_accounts', input.id, {
+        code: input.code,
+        name: input.name,
+        type: input.type,
+        parent_id: input.parentId,
+        is_active: input.isActive,
+      }) as Promise<ChartAccount>
+    },
+
+    savePayable(input: Partial<Payable>) {
+      return saveRow('payables', input.id, {
+        description: input.description,
+        amount: input.amount,
+        due_date: input.dueDate,
+        competence_date: input.competenceDate,
+        category_id: input.categoryId,
+        cost_center_id: input.costCenterId,
+        supplier_id: input.supplierId,
+        employee_id: input.employeeId,
+        status: input.status ?? 'open',
+        recurrence: input.recurrence ?? 'once',
+        installment_number: input.installmentNumber,
+        total_installments: input.totalInstallments,
+        parent_payable_id: input.parentPayableId,
+        proof_url: input.proofUrl,
+        notes: input.notes,
+      }) as Promise<Payable>
+    },
+
+    createPayable(input: Record<string, unknown>) {
+      return saveRow('payables', undefined, {
+        description: input.description,
+        amount: input.amount,
+        due_date: input.dueDate,
+        category_id: input.categoryId,
+        cost_center_id: input.costCenterId,
+        supplier_id: input.supplierId,
+        employee_id: input.employeeId,
+        status: input.status ?? 'open',
+        recurrence: input.recurrence ?? 'once',
+      }) as Promise<Payable>
+    },
+
+    async createPayableInstallments(items: Partial<Payable>[]) {
+      const cid = companyId()
+
+      const payload = items.map(item => ({
+        company_id: cid,
+        description: item.description,
+        amount: item.amount,
+        due_date: item.dueDate,
+        competence_date: item.competenceDate,
+        category_id: item.categoryId,
+        cost_center_id: item.costCenterId,
+        supplier_id: item.supplierId,
+        employee_id: item.employeeId,
+        recurrence: 'installment',
+        installment_number: item.installmentNumber,
+        total_installments: item.totalInstallments,
+        parent_payable_id: item.parentPayableId,
+        notes: item.notes,
+        status: 'open',
+      }))
+
+      const { data, error } = await db.from('payables').insert(payload).select()
+      if (error)
+        throw new Error(error.message)
+
+      return (data as Record<string, unknown>[]).map(camelize) as unknown as Payable[]
+    },
+
+    saveReceivable(input: Partial<Receivable>) {
+      return saveRow('receivables', input.id, {
+        description: input.description,
+        amount: input.amount,
+        due_date: input.dueDate,
+        competence_date: input.competenceDate,
+        client_name: input.clientName,
+        client_document: input.clientDocument,
+        category_id: input.categoryId,
+        cost_center_id: input.costCenterId,
+        invoice_rule: input.invoiceRule ?? 'none',
+        recurrence: input.recurrence ?? 'once',
+        status: input.status ?? 'open',
+        proof_url: input.proofUrl,
+        notes: input.notes,
+        sale_id: input.saleId,
+        commission_installment_id: input.commissionInstallmentId,
+      }) as Promise<Receivable>
+    },
+
+    createReceivable(input: Record<string, unknown>) {
+      return saveRow('receivables', undefined, {
+        description: input.description,
+        amount: input.amount,
+        due_date: input.dueDate,
+        client_name: input.clientName,
+        category_id: input.categoryId,
+        cost_center_id: input.costCenterId,
+        invoice_rule: input.invoiceRule ?? 'none',
+        recurrence: input.recurrence ?? 'once',
+        status: input.status ?? 'open',
+      }) as Promise<Receivable>
+    },
+
+    async settlePayable(id: string, amount: number, proofUrl?: string) {
+      const { data, error } = await db.rpc('settle_payable', {
+        target_id: id,
+        settle_amount: amount,
+        settle_at: new Date().toISOString(),
+        proof: proofUrl,
+      })
+
+      if (error)
+        throw new Error(error.message)
+
+      return camelize(data as Record<string, unknown>) as unknown as Payable
+    },
+
+    async settleReceivable(id: string, amount: number, proofUrl?: string) {
+      const { data, error } = await db.rpc('settle_receivable', {
+        target_id: id,
+        settle_amount: amount,
+        settle_at: new Date().toISOString(),
+        proof: proofUrl,
+      })
+
+      if (error)
+        throw new Error(error.message)
+
+      return camelize(data as Record<string, unknown>) as unknown as Receivable
+    },
+
+    async loadTransactions() {
+      const { data, error } = await db
+        .from('transactions')
+        .select('*')
+        .eq('company_id', companyId())
+        .order('date', { ascending: false })
+
+      if (error)
+        throw new Error(error.message)
+
+      return (data as Record<string, unknown>[]).map(row => camelize(row) as unknown as Transaction)
+    },
+
+    cancelPayable: (id: string) => updateRow('payables', id, { status: 'cancelled' }) as Promise<Payable>,
+    cancelReceivable: (id: string) => updateRow('receivables', id, { status: 'cancelled' }) as Promise<Receivable>,
+
+    saveDevelopment(input: Partial<Development>) {
+      return saveRow('developments', input.id, {
+        name: input.name,
+        developer: input.developer,
+        address: input.address,
+        type: input.type,
+        commission_percentage: input.commissionPercentage,
+        broker_split_percentage: input.brokerSplitPercentage,
+        is_active: input.isActive,
+        notes: input.notes,
+      }) as Promise<Development>
+    },
+
+    saveSale(input: Partial<Sale>) {
+      return saveRow('sales', input.id, {
+        development_id: input.developmentId,
+        unit: input.unit,
+        sale_value: input.saleValue,
+        buyer_name: input.buyerName,
+        buyer_document: input.buyerDocument,
+        buyer_contact: input.buyerContact,
+        payment_method: input.paymentMethod,
+        broker_id: input.brokerId,
+        sale_date: input.saleDate,
+        status: input.status,
+        notes: input.notes,
+      }) as Promise<Sale>
+    },
+
+    async generateCommissionForSale(
+      saleId: string,
+      options: { installments?: number; managerPct?: number; captadorPct?: number },
+    ) {
+      const { data, error } = await db.rpc('generate_commission_for_sale', {
+        target_sale: saleId,
+        installment_count: options.installments ?? 1,
+        manager_percentage: options.managerPct ?? 0,
+        captador_percentage: options.captadorPct ?? 0,
+      })
+
+      if (error)
+        throw new Error(error.message)
+
+      return data as string
+    },
+
+    saveFunnelCard(input: Partial<FunnelCard>) {
+      return saveRow('funnel_cards', input.id, {
+        contact_name: input.contactName,
+        contact_phone: input.contactPhone,
+        contact_email: input.contactEmail,
+        development_id: input.developmentId,
+        estimated_value: input.estimatedValue,
+        broker_id: input.brokerId,
+        current_stage: input.currentStage,
+        sale_id: input.saleId,
+        notes: input.notes,
+        stage_entered_at: input.stageEnteredAt,
+        updated_at: new Date().toISOString(),
+      }) as Promise<FunnelCard>
+    },
+
+    async moveFunnelCard(id: string, stage: string) {
+      const { data, error } = await db.rpc('move_funnel_card', {
+        target_id: id,
+        target_stage: stage,
+      })
+
+      if (error)
+        throw new Error(error.message)
+
+      return camelize(data as Record<string, unknown>) as unknown as FunnelCard
+    },
+
+    saveNotificationRule(input: NotificationRule) {
+      return saveRow('notification_rules', input.id, {
+        type: input.type,
+        name: input.label,
+        is_active: input.isActive,
+        channels: input.channels,
+        days_before: input.advanceDays,
+        config: input,
+        updated_at: new Date().toISOString(),
+      }) as Promise<NotificationRule>
+    },
+
+    async markNotificationRead(id: string) {
+      const { data, error } = await db
+        .from('notifications')
+        .update({ status: 'read', read_at: new Date().toISOString() })
+        .eq('id', id)
+        .select()
+        .single()
+
+      if (error)
+        throw new Error(error.message)
+
+      return camelize(data as Record<string, unknown>)
+    },
+
+    async markAllNotificationsRead() {
+      const { error } = await db
+        .from('notifications')
+        .update({ status: 'read', read_at: new Date().toISOString() })
+        .eq('company_id', companyId())
+        .neq('status', 'read')
+
+      if (error)
+        throw new Error(error.message)
+    },
+
+    saveInvoice(input: Partial<Invoice>) {
+      return saveRow('invoices', input.id, {
+        receivable_id: input.receivableId,
+        status: input.status ?? 'pending',
+        environment: input.environment ?? 'homologacao',
+        provider: 'ginfes',
+        rps_series: input.rpsSeries ?? '1',
+        nfse_number: input.invoiceNumber,
+        verification_code: input.verificationCode,
+        protocol: input.protocol,
+        service_code: input.lc116Item,
+        service_description: input.serviceDescription,
+        amount: input.amount,
+        iss_rate: input.issRate,
+        taker_name: input.takerName,
+        taker_document: input.takerDocument,
+        taker_email: input.takerEmail,
+        error_message: input.errorMessage,
+        issued_at: input.issuedAt,
+        cancelled_at: input.cancelledAt,
+      }) as Promise<Invoice>
+    },
+
+    async toggleActive(table: string, id: string, active: boolean) {
+      return updateRow(table, id, { is_active: active })
+    },
   }
 }

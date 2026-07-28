@@ -9,10 +9,18 @@ import type { Company, Role, UserProfile } from '@/types/finance'
 // Fallbacks seguros para o intervalo entre boot e hidratação (evita acessar
 // `.type`/`.fullName` de undefined em getters durante o SSR/primeiro render).
 const EMPTY_COMPANY: Company = {
-  id: '', name: '', tradeName: '', type: 'real_estate', cnpj: '',
-  taxRegime: 'simples_nacional', city: '', state: '', logoColor: 'primary',
+  id: '',
+  name: '',
+  tradeName: '',
+  type: 'real_estate',
+  cnpj: '',
+  taxRegime: 'simples_nacional',
+  city: '',
+  state: '',
+  logoColor: 'primary',
   invoiceConfig: { defaultCnae: '', defaultIssRate: 0, defaultServiceDescription: '' },
 }
+
 const EMPTY_USER: UserProfile = { id: '', fullName: '', email: '', avatarColor: 'primary', roles: [] }
 
 export const useAppStore = defineStore('app', {
@@ -21,6 +29,8 @@ export const useAppStore = defineStore('app', {
     users: [] as UserProfile[],
     currentCompanyId: '' as string,
     currentUserId: '' as string,
+    isHydrating: false,
+    dataError: '' as string,
   }),
 
   getters: {
@@ -77,6 +87,8 @@ export const useAppStore = defineStore('app', {
       this.users = []
       this.currentCompanyId = ''
       this.currentUserId = ''
+      this.isHydrating = false
+      this.dataError = ''
     },
 
     setCompany(id: string) {
@@ -89,6 +101,11 @@ export const useAppStore = defineStore('app', {
       const c = this.companies.find(x => x.id === id)
       if (c)
         Object.assign(c, patch)
+    },
+
+    setHydrationState(loading: boolean, error = '') {
+      this.isHydrating = loading
+      this.dataError = error
     },
   },
 })

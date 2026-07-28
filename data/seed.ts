@@ -27,19 +27,22 @@ import type {
 
 // 👉 Helpers de data ----------------------------------------------------------
 const base = new Date()
+
 base.setHours(0, 0, 0, 0)
 
 /** Data ISO (yyyy-mm-dd) deslocada N dias a partir de hoje. */
 function d(offsetDays: number): string {
-  const dt = new Date(base)
-  dt.setDate(dt.getDate() + offsetDays)
+  const shiftedDate = new Date(base)
 
-  return dt.toISOString().slice(0, 10)
+  shiftedDate.setDate(shiftedDate.getDate() + offsetDays)
+
+  return shiftedDate.toISOString().slice(0, 10)
 }
 
 /** Datetime ISO deslocado N dias. */
 function dt(offsetDays: number): string {
   const x = new Date(base)
+
   x.setDate(x.getDate() + offsetDays)
 
   return x.toISOString()
@@ -68,7 +71,7 @@ export const companies: Company[] = [
     state: 'CE',
     cityIbge: '2304400',
     address: {
-      street: 'Av. Dom Luís',
+      street: 'Av. DOM Luís',
       number: '1200',
       complement: 'Sala 1601',
       neighborhood: 'Aldeota',
@@ -201,6 +204,7 @@ export const chartAccounts: ChartAccount[] = [
     ['2.6', 'Impostos', 'expense', '2'],
     ['2.7', 'Salários', 'expense', '2'],
   ]),
+
   // RE9 Online
   ...coaFor(C2, [
     ['1', 'Receitas', 'revenue', null],
@@ -305,8 +309,10 @@ export const commissionInstallments: CommissionInstallment[] = [
   // com_1 — 850k * 5% = 42.5k em 2 parcelas
   { id: 'ci_1a', commissionId: 'com_1', installmentNumber: 1, amount: 21250, expectedDate: d(-15), receivedDate: d(-14), status: 'received', receivableId: 'rec_com1_1' },
   { id: 'ci_1b', commissionId: 'com_1', installmentNumber: 2, amount: 21250, expectedDate: d(15), status: 'pending', receivableId: 'rec_com1_2' },
+
   // com_2 — 720k * 5% = 36k em 1 parcela (atrasada → alerta)
   { id: 'ci_2a', commissionId: 'com_2', installmentNumber: 1, amount: 36000, expectedDate: d(-12), status: 'overdue', receivableId: 'rec_com2_1' },
+
   // com_3 — 480k * 6% = 28.8k recebida
   { id: 'ci_3a', commissionId: 'com_3', installmentNumber: 1, amount: 28800, expectedDate: d(-5), receivedDate: d(-5), status: 'received', receivableId: 'rec_com3_1' },
 ]
@@ -315,9 +321,11 @@ export const commissionSplits: CommissionSplit[] = [
   // com_1: 60% corretor / 40% imobiliária
   { id: 'cs_1a', commissionId: 'com_1', beneficiaryType: 'brokerage', percentage: 40, amount: 17000, status: 'not_applicable' },
   { id: 'cs_1b', commissionId: 'com_1', beneficiaryType: 'broker', beneficiaryId: 'emp_lucas', percentage: 60, amount: 25500, payableId: 'pay_com1_broker', status: 'pending' },
+
   // com_2
   { id: 'cs_2a', commissionId: 'com_2', beneficiaryType: 'brokerage', percentage: 40, amount: 14400, status: 'not_applicable' },
   { id: 'cs_2b', commissionId: 'com_2', beneficiaryType: 'broker', beneficiaryId: 'emp_carla', percentage: 60, amount: 21600, status: 'pending' },
+
   // com_3: avulso consolidado 50/50
   { id: 'cs_3a', commissionId: 'com_3', beneficiaryType: 'brokerage', percentage: 50, amount: 14400, status: 'not_applicable' },
   { id: 'cs_3b', commissionId: 'com_3', beneficiaryType: 'broker', beneficiaryId: 'emp_lucas', percentage: 50, amount: 14400, payableId: 'pay_com3_broker', status: 'paid' },

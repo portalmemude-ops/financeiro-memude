@@ -40,9 +40,9 @@ services:
       NITRO_PORT: 3000
       # --- Integrações externas (opcionais; só ao ligar o backend real) ---
       # Preencha na aba "Environment" do Dokploy (não versione segredos aqui).
-      # NUXT_PUBLIC_SUPABASE_URL: ${SUPABASE_URL}
-      # NUXT_PUBLIC_SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
-      # SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      # NUXT_PUBLIC_SUPABASE_URL: ${NUXT_PUBLIC_SUPABASE_URL}
+      # NUXT_PUBLIC_SUPABASE_KEY: ${NUXT_PUBLIC_SUPABASE_KEY}
+      # NUXT_SUPABASE_SECRET_KEY: ${NUXT_SUPABASE_SECRET_KEY}
       # EVOLUTION_API_URL: https://evo.re9imob.com.br
       # EVOLUTION_API_KEY: ${EVOLUTION_API_KEY}
       # SMTP_HOST: ${SMTP_HOST}

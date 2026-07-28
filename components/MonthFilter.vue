@@ -2,6 +2,7 @@
 import { buildMonthOptions } from '@/utils/dateFilter'
 
 const props = defineProps<{
+
   /** Datas candidatas (ex.: vencimentos) para montar as opções de mês. */
   dates: Array<string | null | undefined>
 }>()

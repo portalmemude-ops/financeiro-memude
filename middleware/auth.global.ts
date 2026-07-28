@@ -4,7 +4,7 @@
 // restaurada do cookie tanto no SSR quanto no cliente.
 // ============================================================================
 
-const publicPages = new Set(['/login', '/register'])
+const publicPages = new Set(['/login', '/register', '/aceitar-convite'])
 
 export default defineNuxtRouteMiddleware(to => {
   const user = useSupabaseUser()
@@ -12,6 +12,6 @@ export default defineNuxtRouteMiddleware(to => {
   if (!user.value && !publicPages.has(to.path))
     return navigateTo('/login')
 
-  if (user.value && publicPages.has(to.path))
+  if (user.value && publicPages.has(to.path) && to.path !== '/aceitar-convite')
     return navigateTo('/dashboard')
 })

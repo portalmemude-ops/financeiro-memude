@@ -1,3 +1,5 @@
+import { Buffer } from 'node:buffer'
+
 // ============================================================================
 // Transporte SOAP 1.2 para o webservice GINFES v03 (SEFIN Fortaleza).
 //
@@ -17,6 +19,7 @@ import type { NfseConfig } from '../config'
 import { getTlsOptions } from '../certificate'
 
 const NS_CABECALHO = 'http://www.ginfes.com.br/cabecalho_v03.xsd'
+
 // Namespace (tns) do serviço GINFES v03 — usado no elemento da operação.
 const NS_SERVICE = 'http://ginfes.com.br/service_v03'
 
@@ -38,15 +41,15 @@ function buildCabecalho(versao: string): string {
 }
 
 function buildEnvelope(op: GinfesOperation, cabec: string, dados: string): string {
-  return `<?xml version="1.0" encoding="UTF-8"?>`
+  return '<?xml version="1.0" encoding="UTF-8"?>'
     + `<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:ns="${NS_SERVICE}">`
-    + `<soap:Body>`
+    + '<soap:Body>'
     + `<ns:${op}>`
     + `<ns:nfseCabecMsg>${esc(cabec)}</ns:nfseCabecMsg>`
     + `<ns:nfseDadosMsg>${esc(dados)}</ns:nfseDadosMsg>`
     + `</ns:${op}>`
-    + `</soap:Body>`
-    + `</soap:Envelope>`
+    + '</soap:Body>'
+    + '</soap:Envelope>'
 }
 
 async function post(endpoint: string, body: string, cfg: NfseConfig): Promise<string> {
@@ -67,6 +70,7 @@ async function post(endpoint: string, body: string, cfg: NfseConfig): Promise<st
 
   if (isHttps) {
     const tls = getTlsOptions()
+
     options.pfx = tls.pfx
     options.passphrase = tls.passphrase
     if (cfg.skipServerHostnameCheck)
@@ -78,9 +82,11 @@ async function post(endpoint: string, body: string, cfg: NfseConfig): Promise<st
   return new Promise<string>((resolve, reject) => {
     const req = transport.request(options, res => {
       const chunks: Buffer[] = []
+
       res.on('data', c => chunks.push(c))
       res.on('end', () => {
         const text = Buffer.concat(chunks).toString('utf8')
+
         // SOAP Fault ou HTTP >= 400: propaga para o parser lidar.
         if ((res.statusCode ?? 0) >= 400 && !text.includes('Fault') && !text.includes('Msg'))
           reject(new Error(`HTTP ${res.statusCode} do webservice SEFIN: ${text.slice(0, 500)}`))

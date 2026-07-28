@@ -22,7 +22,7 @@ export default defineNuxtConfig({
   },
 
   devtools: {
-    enabled: true,
+    enabled: process.env.NODE_ENV !== 'production',
   },
 
   css: [
@@ -100,7 +100,7 @@ export default defineNuxtConfig({
     },
 
     build: {
-      chunkSizeWarningLimit: 5000,
+      chunkSizeWarningLimit: 600,
     },
 
     optimizeDeps: {

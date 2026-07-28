@@ -4,6 +4,21 @@ import { useAppStore } from '@/stores/app'
 
 const audit = useAuditStore()
 const app = useAppStore()
+const loadingAudit = ref(false)
+const auditError = ref('')
+
+onMounted(async () => {
+  loadingAudit.value = true
+  try {
+    await audit.load()
+  }
+  catch (error) {
+    auditError.value = (error as Error).message
+  }
+  finally {
+    loadingAudit.value = false
+  }
+})
 
 useHead({ title: 'Auditoria' })
 
@@ -60,6 +75,13 @@ const headers = [
     />
 
     <VCard>
+      <VAlert
+        v-if="auditError"
+        type="error"
+        variant="tonal"
+        class="ma-4"
+        :text="auditError"
+      />
       <VCardText class="d-flex flex-wrap gap-4 align-center">
         <VTextField
           v-model="search"
@@ -83,6 +105,7 @@ const headers = [
       <VDivider />
 
       <VDataTable
+        :loading="loadingAudit"
         :headers="headers"
         :items="filtered"
         :items-per-page="15"

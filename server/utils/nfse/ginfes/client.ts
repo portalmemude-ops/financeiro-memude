@@ -1,3 +1,5 @@
+import { Buffer } from 'node:buffer'
+
 // ============================================================================
 // Orquestração das operações de NFS-e no padrão GINFES v03 (Fortaleza).
 // Fluxo de emissão é ASSÍNCRONO: envia o lote → recebe protocolo → consulta a
@@ -11,7 +13,6 @@ import type {
   ConsultarNfsePayload,
   EmitirNfsePayload,
   EmitirNfseResult,
-  NfseData,
 } from '../types'
 import { signElement } from './sign'
 import {
@@ -23,8 +24,9 @@ import {
 } from './xml'
 import { callGinfes } from './soap'
 import { parseCancelamento, parseEnvioLote, parseNfse, parseSituacao } from './parse'
+import type { NfseData } from './parse'
 
-const delay = (ms: number) => new Promise<void>(r => setTimeout(r, ms))
+const delay = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms))
 
 function uid(prefix: string): string {
   return `${prefix}${Date.now().toString(36)}${Math.floor(Math.random() * 1e6).toString(36)}`
@@ -71,6 +73,7 @@ export async function emitirNfse(payload: EmitirNfsePayload, cfg: NfseConfig): P
 
   for (let i = 0; i < cfg.pollAttempts; i++) {
     await delay(cfg.pollIntervalMs)
+
     const sitXml = await callGinfes('ConsultarSituacaoLoteRpsV3', buildConsultarSituacaoLote(cnpj, im, envio.protocolo), cfg)
     const sit = parseSituacao(sitXml)
 
@@ -100,6 +103,7 @@ export async function emitirNfse(payload: EmitirNfsePayload, cfg: NfseConfig): P
     rpsSerie: payload.rps.serie,
     rpsTipo: payload.rps.tipo,
   }
+
   const nfseXml = await callGinfes('ConsultarNfsePorRpsV3', buildConsultarNfsePorRps(consulta), cfg)
   const nfse = parseNfse(nfseXml)
 
@@ -136,6 +140,7 @@ function buildIssuedResult(nfse: NfseData, protocolo: string | undefined, cfg: N
 /** Consulta uma NFS-e por RPS (usada para retomar emissões que ficaram em processamento). */
 export async function consultarPorRps(payload: ConsultarNfsePayload, cfg: NfseConfig): Promise<EmitirNfseResult> {
   loadCertificate() // valida certificado antes de chamar
+
   const nfseXml = await callGinfes('ConsultarNfsePorRpsV3', buildConsultarNfsePorRps(payload), cfg)
   const nfse = parseNfse(nfseXml)
 

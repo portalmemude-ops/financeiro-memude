@@ -30,15 +30,19 @@ assert('inMonth rejeita vazio', !inMonth(undefined, '2026-07'))
 
 // ---- buildMonthOptions ------------------------------------------------------
 const opts = buildMonthOptions(['2026-05-29', '2026-07-11', '2026-06-23', '2026-07-01', null, undefined])
+
 assert('buildMonthOptions começa com "Todos os meses"', opts[0]?.value === 'all')
 assert('buildMonthOptions deduplica meses (3 meses + all = 4)', opts.length === 4)
 assert('buildMonthOptions ordena do mais recente ao mais antigo', opts[1]?.value === '2026-07' && opts[2]?.value === '2026-06' && opts[3]?.value === '2026-05')
 
 // ---- presetWindow -----------------------------------------------------------
 const w7 = presetWindow('7d', '2026-07-13')
+
 assert('presetWindow 7d termina hoje', w7.end === '2026-07-13')
 assert('presetWindow 7d começa 6 dias antes (7 dias corridos)', w7.start === '2026-07-07')
+
 const w30 = presetWindow('30d', '2026-07-13')
+
 assert('presetWindow 30d começa 29 dias antes', w30.start === '2026-06-14')
 assert('presetWindow all sem limites', presetWindow('all').start === null && presetWindow('all').end === null)
 assert('presetWindow custom sem limites', presetWindow('custom').start === null && presetWindow('custom').end === null)

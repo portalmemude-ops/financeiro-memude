@@ -72,10 +72,6 @@ export function isWithin(iso: string | null | undefined, win: DateWindow): boole
   if (!iso)
     return false
   const d = dateOnly(iso)
-  if (win.start && d < win.start)
-    return false
-  if (win.end && d > win.end)
-    return false
 
-  return true
+  return (!win.start || d >= win.start) && (!win.end || d <= win.end)
 }

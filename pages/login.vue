@@ -152,12 +152,12 @@ definePageMeta({ layout: 'blank' })
               cols="12"
               class="text-center text-base"
             >
-              <span>Novo por aqui?</span>
+              <span>Precisa de acesso?</span>
               <NuxtLink
                 class="text-primary ms-2"
                 to="/register"
               >
-                Criar uma conta
+                Entenda como receber um convite
               </NuxtLink>
             </VCol>
           </VRow>

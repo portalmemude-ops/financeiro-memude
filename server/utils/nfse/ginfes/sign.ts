@@ -48,6 +48,7 @@ export function signElement(xml: string, referenceLocalName: string, opts: SignO
     publicCert: opts.certificatePem,
     signatureAlgorithm: algo.signature,
     canonicalizationAlgorithm: C14N,
+
     // GINFES espera a chave pública embutida via <X509Certificate>.
     getKeyInfoContent: getKeyInfoContent(opts.certificatePem),
   })

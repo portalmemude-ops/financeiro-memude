@@ -3,6 +3,7 @@ import { useAppStore } from '@/stores/app'
 import type { Company } from '@/types/finance'
 
 const app = useAppStore()
+const db = useDb()
 
 useHead({ title: 'Configurações' })
 
@@ -22,8 +23,14 @@ const taxRegimeOptions = computed(() =>
   Object.entries(taxRegimeLabels).map(([value, title]) => ({ title, value })),
 )
 
-function saveCompany() {
-  app.updateCompany(app.currentCompany.id, {
+const savingCompany = ref(false)
+const companyMessage = ref('')
+
+async function saveCompany() {
+  savingCompany.value = true
+  companyMessage.value = ''
+
+  const patch = {
     name: form.value.name,
     tradeName: form.value.tradeName,
     cnpj: form.value.cnpj,
@@ -31,13 +38,31 @@ function saveCompany() {
     city: form.value.city,
     state: form.value.state,
     taxRegime: form.value.taxRegime,
-  })
+  }
+
+  try {
+    await db.saveCompany(app.currentCompany.id, {
+      name: patch.name,
+      trade_name: patch.tradeName,
+      cnpj: patch.cnpj,
+      creci: patch.creci,
+      city: patch.city,
+      state: patch.state,
+      tax_regime: patch.taxRegime,
+    })
+    app.updateCompany(app.currentCompany.id, patch)
+    companyMessage.value = 'Dados da empresa salvos.'
+  }
+  finally {
+    savingCompany.value = false
+  }
 }
 
-function saveInvoiceConfig() {
-  app.updateCompany(app.currentCompany.id, {
-    invoiceConfig: { ...form.value.invoiceConfig },
-  })
+async function saveInvoiceConfig() {
+  const invoiceConfig = { ...form.value.invoiceConfig }
+
+  await db.saveCompany(app.currentCompany.id, { invoice_config: invoiceConfig })
+  app.updateCompany(app.currentCompany.id, { invoiceConfig })
 }
 
 // 👉 Certificado A1
@@ -74,6 +99,47 @@ const userHeaders = [
   { title: 'E-mail', key: 'email' },
   { title: 'Perfis por empresa', key: 'roles', sortable: false },
 ]
+
+const invite = ref({
+  fullName: '',
+  email: '',
+  role: 'viewer',
+})
+
+const inviteLoading = ref(false)
+const inviteMessage = ref('')
+const inviteError = ref('')
+
+const inviteRoles = computed(() => [
+  ...(app.isSuperAdmin ? [{ title: 'Administrador', value: 'admin' }] : []),
+  { title: 'Financeiro', value: 'financial' },
+  { title: 'Corretor', value: 'broker' },
+  { title: 'Contador', value: 'accountant' },
+  { title: 'Visualizador', value: 'viewer' },
+])
+
+async function sendInvite() {
+  inviteError.value = ''
+  inviteMessage.value = ''
+  inviteLoading.value = true
+  try {
+    await $fetch('/api/admin/invite', {
+      method: 'POST',
+      body: {
+        companyId: app.currentCompanyId,
+        ...invite.value,
+      },
+    })
+    inviteMessage.value = `Convite enviado para ${invite.value.email}.`
+    invite.value = { fullName: '', email: '', role: 'viewer' }
+  }
+  catch (error) {
+    inviteError.value = (error as Error).message
+  }
+  finally {
+    inviteLoading.value = false
+  }
+}
 </script>
 
 <template>
@@ -296,6 +362,70 @@ const userHeaders = [
 
           <!-- Aba: Perfis & Acesso -->
           <VWindowItem value="access">
+            <VCard
+              v-if="app.currentRole === 'super_admin' || app.currentRole === 'admin'"
+              variant="outlined"
+              class="mb-6"
+            >
+              <VCardTitle>Convidar usuário</VCardTitle>
+              <VCardText>
+                <VAlert
+                  v-if="inviteMessage || inviteError"
+                  :type="inviteError ? 'error' : 'success'"
+                  variant="tonal"
+                  class="mb-4"
+                  :text="inviteError || inviteMessage"
+                />
+                <VForm @submit.prevent="sendInvite">
+                  <VRow>
+                    <VCol
+                      cols="12"
+                      md="4"
+                    >
+                      <VTextField
+                        v-model="invite.fullName"
+                        label="Nome"
+                        required
+                      />
+                    </VCol>
+                    <VCol
+                      cols="12"
+                      md="4"
+                    >
+                      <VTextField
+                        v-model="invite.email"
+                        label="E-mail"
+                        type="email"
+                        required
+                      />
+                    </VCol>
+                    <VCol
+                      cols="12"
+                      md="2"
+                    >
+                      <VSelect
+                        v-model="invite.role"
+                        :items="inviteRoles"
+                        label="Perfil"
+                      />
+                    </VCol>
+                    <VCol
+                      cols="12"
+                      md="2"
+                    >
+                      <VBtn
+                        type="submit"
+                        block
+                        height="48"
+                        :loading="inviteLoading"
+                      >
+                        Convidar
+                      </VBtn>
+                    </VCol>
+                  </VRow>
+                </VForm>
+              </VCardText>
+            </VCard>
             <VAlert
               type="info"
               variant="tonal"

@@ -13,6 +13,7 @@ function camelizeRow<T = Record<string, unknown>>(row: Record<string, unknown>):
 
   return out as T
 }
+
 const camelizeRows = (rows: unknown): Record<string, unknown>[] =>
   ((rows as Record<string, unknown>[]) ?? []).map(r => camelizeRow(r))
 
@@ -22,12 +23,64 @@ export interface AppData {
   finance: Record<string, unknown[]>
 }
 
-const TABLES = [
-  'companies', 'company_members', 'user_profiles',
-  'chart_accounts', 'cost_centers', 'suppliers', 'employees', 'clients',
-  'developments', 'sales', 'commissions', 'commission_installments', 'commission_splits',
-  'payables', 'receivables', 'transactions',
+const CORE_TABLES = [
+  'companies',
+  'company_members',
+  'user_profiles',
+  'chart_accounts',
+  'cost_centers',
+  'suppliers',
+  'employees',
+  'clients',
+  'developments',
+  'sales',
+  'commissions',
+  'commission_installments',
+  'commission_splits',
+  'payables',
+  'receivables',
+  'transactions',
 ] as const
+
+const OPTIONAL_TABLES = [
+  'funnel_cards', 'funnel_history', 'invoices', 'notifications', 'notification_rules',
+] as const
+
+const TABLES = [...CORE_TABLES, ...OPTIONAL_TABLES] as const
+
+function mapSuppliers(rows: Record<string, unknown>[]) {
+  return camelizeRows(rows).map(row => {
+    const documentNumber = String(row.document ?? '')
+
+    return {
+      ...row,
+      documentNumber,
+      documentType: documentNumber.replace(/\D/g, '').length === 11 ? 'cpf' : 'cnpj',
+      bankInfo: row.bankInfo ?? {},
+    }
+  })
+}
+
+function mapEmployees(rows: Record<string, unknown>[]) {
+  return camelizeRows(rows).map(row => ({
+    ...row,
+    cpf: String(row.document ?? ''),
+    baseSalary: row.salary,
+    bankInfo: row.bankInfo ?? {},
+  }))
+}
+
+function mapInvoices(rows: Record<string, unknown>[]) {
+  return camelizeRows(rows).map(row => ({
+    ...row,
+    invoiceNumber: row.nfseNumber,
+    rpsNumber: row.rpsNumber == null ? undefined : String(row.rpsNumber),
+    lc116Item: row.serviceCode,
+    cnae: row.serviceCode ?? '',
+    verificationCode: row.verificationCode,
+    xmlBase64: row.xmlResponse,
+  }))
+}
 
 export async function loadAppData(): Promise<AppData | null> {
   const supabase = useSupabaseClient()
@@ -35,22 +88,21 @@ export async function loadAppData(): Promise<AppData | null> {
   if (!user.value)
     return null
 
-  const results = await Promise.all(TABLES.map(t => supabase.from(t).select('*')))
+  const results = await Promise.all(TABLES.map(t => supabase.from(t as any).select('*')))
   const data: Record<string, Record<string, unknown>[]> = {}
-  TABLES.forEach((t, i) => {
-    if (results[i].error)
-      throw results[i].error
-    data[t] = (results[i].data as Record<string, unknown>[]) ?? []
-  })
 
-  // Diagnóstico temporário do carregamento (ver console do navegador).
-  console.info('[loadAppData] user', user.value?.id, 'counts',
-    Object.fromEntries(TABLES.map((t, i) => [t, results[i].data?.length ?? 0])))
+  TABLES.forEach((t, i) => {
+    const optional = (OPTIONAL_TABLES as readonly string[]).includes(t)
+    if (results[i].error && !optional)
+      throw results[i].error
+    data[t] = (results[i].data as unknown as Record<string, unknown>[]) ?? []
+  })
 
   const companies = camelizeRows(data.companies) as unknown as Company[]
 
   const members = data.company_members as unknown as { user_id: string; company_id: string; role: Role }[]
   const profile = data.user_profiles.find(p => p.id === user.value!.id) as Record<string, unknown> | undefined
+
   const currentUser: UserProfile = {
     id: user.value.id,
     fullName: (profile?.full_name as string) || (profile?.email as string) || (user.value.email ?? 'Usuário'),
@@ -61,7 +113,6 @@ export async function loadAppData(): Promise<AppData | null> {
       .filter(m => m.user_id === user.value!.id)
       .map(m => ({ companyId: m.company_id, role: m.role })),
   }
-  console.info('[loadAppData] roles', currentUser.roles, 'membersRaw', members?.length)
 
   // Fallback robusto: se os vínculos não vieram na leitura direta da tabela,
   // busca-os pela RPC my_memberships() (sempre exposta; RLS aplica).
@@ -69,7 +120,8 @@ export async function loadAppData(): Promise<AppData | null> {
     const { data: cm, error: cmErr } = await (supabase.rpc as any)('my_memberships')
     if (cm?.length)
       currentUser.roles = (cm as { company_id: string; role: Role }[]).map(m => ({ companyId: m.company_id, role: m.role }))
-    console.info('[loadAppData] roles via RPC', currentUser.roles, 'err', cmErr?.message)
+    if (cmErr)
+      console.warn('[loadAppData] memberships RPC indisponível:', cmErr.message)
   }
 
   // Fixups: colunas ausentes no banco que o app espera com default.
@@ -81,8 +133,8 @@ export async function loadAppData(): Promise<AppData | null> {
     finance: {
       chartAccounts: withActive(camelizeRows(data.chart_accounts)),
       costCenters: withActive(camelizeRows(data.cost_centers)),
-      suppliers: camelizeRows(data.suppliers),
-      employees: camelizeRows(data.employees),
+      suppliers: mapSuppliers(data.suppliers),
+      employees: mapEmployees(data.employees),
       clients: camelizeRows(data.clients),
       developments: camelizeRows(data.developments),
       sales: camelizeRows(data.sales),
@@ -92,6 +144,11 @@ export async function loadAppData(): Promise<AppData | null> {
       payables: camelizeRows(data.payables),
       receivables: camelizeRows(data.receivables),
       transactions: camelizeRows(data.transactions),
+      funnelCards: camelizeRows(data.funnel_cards),
+      funnelHistory: camelizeRows(data.funnel_history),
+      invoices: mapInvoices(data.invoices),
+      notifications: camelizeRows(data.notifications),
+      notificationRules: camelizeRows(data.notification_rules),
     },
   }
 }

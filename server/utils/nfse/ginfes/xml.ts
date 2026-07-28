@@ -47,15 +47,15 @@ function enderecoXml(e?: NfseEndereco): string {
   if (!e)
     return ''
 
-  return `<Endereco>`
+  return '<Endereco>'
     + `<Endereco>${esc(e.logradouro)}</Endereco>`
-    + `<Numero>${esc(e.numero) || 'S/N'}</Numero>`
-    + (e.complemento ? `<Complemento>${esc(e.complemento)}</Complemento>` : '')
-    + `<Bairro>${esc(e.bairro)}</Bairro>`
+    + `<Numero>${esc(e.numero) || 'S/N'}</Numero>${
+      e.complemento ? `<Complemento>${esc(e.complemento)}</Complemento>` : ''
+    }<Bairro>${esc(e.bairro)}</Bairro>`
     + `<CodigoMunicipio>${digits(e.cidadeIbge)}</CodigoMunicipio>`
     + `<Uf>${esc(e.uf)}</Uf>`
     + `<Cep>${digits(e.cep)}</Cep>`
-    + `</Endereco>`
+    + '</Endereco>'
 }
 
 // ---------------------------------------------------------------------------
@@ -70,54 +70,54 @@ export function buildEnviarLoteRps(p: EmitirNfsePayload, cfg: NfseConfig, ids: L
   const valorIss = Number((valorServicos * (p.servico.aliquota / 100)).toFixed(2))
 
   const infRps = `<InfRps Id="${ids.rpsId}">`
-    + `<IdentificacaoRps>`
+    + '<IdentificacaoRps>'
     + `<Numero>${esc(p.rps.numero)}</Numero>`
     + `<Serie>${esc(p.rps.serie)}</Serie>`
     + `<Tipo>${p.rps.tipo}</Tipo>`
-    + `</IdentificacaoRps>`
+    + '</IdentificacaoRps>'
     + `<DataEmissao>${dateOnly(p.rps.dataEmissao)}</DataEmissao>`
-    + `<NaturezaOperacao>${p.rps.naturezaOperacao ?? 1}</NaturezaOperacao>`
-    + (p.rps.regimeEspecialTributacao ? `<RegimeEspecialTributacao>${p.rps.regimeEspecialTributacao}</RegimeEspecialTributacao>` : '')
-    + `<OptanteSimplesNacional>${p.prestador.optanteSimplesNacional === false ? 2 : 1}</OptanteSimplesNacional>`
-    + `<IncentivadorCultural>2</IncentivadorCultural>`
-    + `<Status>1</Status>`
-    + `<Servico>`
-    + `<Valores>`
+    + `<NaturezaOperacao>${p.rps.naturezaOperacao ?? 1}</NaturezaOperacao>${
+      p.rps.regimeEspecialTributacao ? `<RegimeEspecialTributacao>${p.rps.regimeEspecialTributacao}</RegimeEspecialTributacao>` : ''
+    }<OptanteSimplesNacional>${p.prestador.optanteSimplesNacional === false ? 2 : 1}</OptanteSimplesNacional>`
+    + '<IncentivadorCultural>2</IncentivadorCultural>'
+    + '<Status>1</Status>'
+    + '<Servico>'
+    + '<Valores>'
     + `<ValorServicos>${money(valorServicos)}</ValorServicos>`
     + `<ValorDeducoes>${money(p.servico.valorDeducoes)}</ValorDeducoes>`
-    + `<ValorPis>0.00</ValorPis>`
-    + `<ValorCofins>0.00</ValorCofins>`
-    + `<ValorInss>0.00</ValorInss>`
-    + `<ValorIr>0.00</ValorIr>`
-    + `<ValorCsll>0.00</ValorCsll>`
+    + '<ValorPis>0.00</ValorPis>'
+    + '<ValorCofins>0.00</ValorCofins>'
+    + '<ValorInss>0.00</ValorInss>'
+    + '<ValorIr>0.00</ValorIr>'
+    + '<ValorCsll>0.00</ValorCsll>'
     + `<IssRetido>${issRetido}</IssRetido>`
-    + `<ValorIss>${money(valorIss)}</ValorIss>`
-    + (p.servico.issRetido ? `<ValorIssRetido>${money(valorIss)}</ValorIssRetido>` : '')
-    + `<OutrasRetencoes>0.00</OutrasRetencoes>`
+    + `<ValorIss>${money(valorIss)}</ValorIss>${
+      p.servico.issRetido ? `<ValorIssRetido>${money(valorIss)}</ValorIssRetido>` : ''
+    }<OutrasRetencoes>0.00</OutrasRetencoes>`
     + `<BaseCalculo>${money(valorServicos - (p.servico.valorDeducoes ?? 0))}</BaseCalculo>`
     + `<Aliquota>${aliquota}</Aliquota>`
-    + `<DescontoIncondicionado>0.00</DescontoIncondicionado>`
-    + `<DescontoCondicionado>0.00</DescontoCondicionado>`
-    + `</Valores>`
-    + `<ItemListaServico>${esc(p.servico.itemListaServico)}</ItemListaServico>`
-    + (p.servico.cnaeCode ? `<CodigoCnae>${digits(p.servico.cnaeCode)}</CodigoCnae>` : '')
-    + (p.servico.codigoTributacaoMunicipio ? `<CodigoTributacaoMunicipio>${esc(p.servico.codigoTributacaoMunicipio)}</CodigoTributacaoMunicipio>` : '')
-    + `<Discriminacao>${esc(p.servico.discriminacao)}</Discriminacao>`
+    + '<DescontoIncondicionado>0.00</DescontoIncondicionado>'
+    + '<DescontoCondicionado>0.00</DescontoCondicionado>'
+    + '</Valores>'
+    + `<ItemListaServico>${esc(p.servico.itemListaServico)}</ItemListaServico>${
+      p.servico.cnaeCode ? `<CodigoCnae>${digits(p.servico.cnaeCode)}</CodigoCnae>` : ''
+    }${p.servico.codigoTributacaoMunicipio ? `<CodigoTributacaoMunicipio>${esc(p.servico.codigoTributacaoMunicipio)}</CodigoTributacaoMunicipio>` : ''
+    }<Discriminacao>${esc(p.servico.discriminacao)}</Discriminacao>`
     + `<CodigoMunicipio>${digits(p.servico.codigoMunicipio)}</CodigoMunicipio>`
-    + `</Servico>`
-    + `<Prestador>`
+    + '</Servico>'
+    + '<Prestador>'
     + `<Cnpj>${digits(p.prestador.cnpj)}</Cnpj>`
     + `<InscricaoMunicipal>${digits(p.prestador.inscricaoMunicipal)}</InscricaoMunicipal>`
-    + `</Prestador>`
-    + `<Tomador>`
-    + `<IdentificacaoTomador><CpfCnpj>${cpfCnpjTag(p.tomador.documento)}</CpfCnpj>`
-    + (p.tomador.inscricaoMunicipal ? `<InscricaoMunicipal>${digits(p.tomador.inscricaoMunicipal)}</InscricaoMunicipal>` : '')
-    + `</IdentificacaoTomador>`
-    + `<RazaoSocial>${esc(p.tomador.razaoSocial)}</RazaoSocial>`
-    + enderecoXml(p.tomador.endereco)
-    + (p.tomador.email ? `<Contato><Email>${esc(p.tomador.email)}</Email></Contato>` : '')
-    + `</Tomador>`
-    + `</InfRps>`
+    + '</Prestador>'
+    + '<Tomador>'
+    + `<IdentificacaoTomador><CpfCnpj>${cpfCnpjTag(p.tomador.documento)}</CpfCnpj>${
+      p.tomador.inscricaoMunicipal ? `<InscricaoMunicipal>${digits(p.tomador.inscricaoMunicipal)}</InscricaoMunicipal>` : ''
+    }</IdentificacaoTomador>`
+    + `<RazaoSocial>${esc(p.tomador.razaoSocial)}</RazaoSocial>${
+      enderecoXml(p.tomador.endereco)
+    }${p.tomador.email ? `<Contato><Email>${esc(p.tomador.email)}</Email></Contato>` : ''
+    }</Tomador>`
+    + '</InfRps>'
 
   const rps = `<Rps>${infRps}</Rps>`
 
@@ -125,11 +125,11 @@ export function buildEnviarLoteRps(p: EmitirNfsePayload, cfg: NfseConfig, ids: L
     + `<NumeroLote>${esc(p.rps.numero)}</NumeroLote>`
     + `<Cnpj>${digits(p.prestador.cnpj)}</Cnpj>`
     + `<InscricaoMunicipal>${digits(p.prestador.inscricaoMunicipal)}</InscricaoMunicipal>`
-    + `<QuantidadeRps>1</QuantidadeRps>`
+    + '<QuantidadeRps>1</QuantidadeRps>'
     + `<ListaRps>${rps}</ListaRps>`
-    + `</LoteRps>`
+    + '</LoteRps>'
 
-  return `<?xml version="1.0" encoding="UTF-8"?>`
+  return '<?xml version="1.0" encoding="UTF-8"?>'
     + `<EnviarLoteRpsEnvio xmlns="${NS_ENVIO}">${lote}</EnviarLoteRpsEnvio>`
 }
 
@@ -141,27 +141,27 @@ function prestadorTag(cnpj: string, im?: string): string {
 }
 
 export function buildConsultarSituacaoLote(cnpj: string, im: string | undefined, protocolo: string): string {
-  return `<?xml version="1.0" encoding="UTF-8"?>`
-    + `<ConsultarSituacaoLoteRpsEnvio xmlns="${NS_CONSULTA_SIT}">`
-    + prestadorTag(cnpj, im)
-    + `<Protocolo>${esc(protocolo)}</Protocolo>`
-    + `</ConsultarSituacaoLoteRpsEnvio>`
+  return '<?xml version="1.0" encoding="UTF-8"?>'
+    + `<ConsultarSituacaoLoteRpsEnvio xmlns="${NS_CONSULTA_SIT}">${
+      prestadorTag(cnpj, im)
+    }<Protocolo>${esc(protocolo)}</Protocolo>`
+    + '</ConsultarSituacaoLoteRpsEnvio>'
 }
 
 export function buildConsultarLote(cnpj: string, im: string | undefined, protocolo: string): string {
-  return `<?xml version="1.0" encoding="UTF-8"?>`
-    + `<ConsultarLoteRpsEnvio xmlns="${NS_CONSULTA_LOTE}">`
-    + prestadorTag(cnpj, im)
-    + `<Protocolo>${esc(protocolo)}</Protocolo>`
-    + `</ConsultarLoteRpsEnvio>`
+  return '<?xml version="1.0" encoding="UTF-8"?>'
+    + `<ConsultarLoteRpsEnvio xmlns="${NS_CONSULTA_LOTE}">${
+      prestadorTag(cnpj, im)
+    }<Protocolo>${esc(protocolo)}</Protocolo>`
+    + '</ConsultarLoteRpsEnvio>'
 }
 
 export function buildConsultarNfsePorRps(p: ConsultarNfsePayload): string {
-  return `<?xml version="1.0" encoding="UTF-8"?>`
+  return '<?xml version="1.0" encoding="UTF-8"?>'
     + `<ConsultarNfseRpsEnvio xmlns="${NS_CONSULTA_RPS}">`
-    + `<IdentificacaoRps><Numero>${esc(p.rpsNumero)}</Numero><Serie>${esc(p.rpsSerie)}</Serie><Tipo>${p.rpsTipo}</Tipo></IdentificacaoRps>`
-    + prestadorTag(p.prestador.cnpj, p.prestador.inscricaoMunicipal)
-    + `</ConsultarNfseRpsEnvio>`
+    + `<IdentificacaoRps><Numero>${esc(p.rpsNumero)}</Numero><Serie>${esc(p.rpsSerie)}</Serie><Tipo>${p.rpsTipo}</Tipo></IdentificacaoRps>${
+      prestadorTag(p.prestador.cnpj, p.prestador.inscricaoMunicipal)
+    }</ConsultarNfseRpsEnvio>`
 }
 
 // ---------------------------------------------------------------------------
@@ -169,17 +169,17 @@ export function buildConsultarNfsePorRps(p: ConsultarNfsePayload): string {
 // ---------------------------------------------------------------------------
 export function buildCancelarNfse(p: CancelarNfsePayload, pedidoId: string): string {
   const infPedido = `<InfPedidoCancelamento Id="${pedidoId}">`
-    + `<IdentificacaoNfse>`
+    + '<IdentificacaoNfse>'
     + `<Numero>${esc(p.numeroNfse)}</Numero>`
     + `<Cnpj>${digits(p.prestador.cnpj)}</Cnpj>`
     + `<InscricaoMunicipal>${digits(p.prestador.inscricaoMunicipal)}</InscricaoMunicipal>`
     + `<CodigoMunicipio>${digits(p.codigoMunicipio)}</CodigoMunicipio>`
-    + `</IdentificacaoNfse>`
+    + '</IdentificacaoNfse>'
     + `<CodigoCancelamento>${esc(p.codigoCancelamento)}</CodigoCancelamento>`
-    + `</InfPedidoCancelamento>`
+    + '</InfPedidoCancelamento>'
 
-  return `<?xml version="1.0" encoding="UTF-8"?>`
+  return '<?xml version="1.0" encoding="UTF-8"?>'
     + `<CancelarNfseEnvio xmlns="${NS_CANCELAR}">`
     + `<Pedido>${infPedido}</Pedido>`
-    + `</CancelarNfseEnvio>`
+    + '</CancelarNfseEnvio>'
 }

@@ -1,148 +1,129 @@
-// ============================================================================
-// POST /api/nfse/emitir
-// Emite uma NFS-e real na SEFIN Fortaleza (GINFES v03) a partir dos dados do
-// prestador + nota. Roda server-side; o certificado A1 nunca sai do servidor.
-// ============================================================================
 import { getNfseConfig } from '../../utils/nfse/config'
 import { isCertificateConfigured } from '../../utils/nfse/certificate'
 import type { EmitirNfsePayload, EmitirNfseResult } from '../../utils/nfse/types'
 import { emitirNfse } from '../../utils/nfse/ginfes/client'
-
-interface EmitirRequest {
-  company: {
-    cnpj: string
-    municipalRegistration?: string
-    razaoSocial: string
-    nomeFantasia?: string
-    cnaeCode?: string
-    cityIbge?: string
-    optanteSimplesNacional?: boolean
-    address?: EmitirNfsePayload['prestador']['endereco']
-  }
-  invoice: {
-    rpsNumber: string
-    rpsSeries?: string
-    rpsType?: number
-    dataEmissao?: string
-    competencia?: string
-    lc116Item: string
-    ctiss?: string
-    cnaeCode?: string
-    issRate: number
-    issRetido?: boolean
-    serviceDescription: string
-    amount: number
-    deductionsAmount?: number
-    municipioIbge?: string
-    taker: {
-      name: string
-      document: string
-      email?: string
-      inscricaoMunicipal?: string
-      address?: EmitirNfsePayload['tomador']['endereco']
-    }
-  }
-}
+import { emitirRequestSchema, parseBody } from '../../utils/nfse/schemas'
+import { enforceRateLimit, requireAuthenticatedUser, requireCompanyRole } from '../../utils/security'
 
 export default defineEventHandler(async (event): Promise<EmitirNfseResult> => {
+  await requireAuthenticatedUser(event)
+
+  const body = await parseBody(event, emitirRequestSchema)
+  const { user, client, company } = await requireCompanyRole(event, body.companyId, ['super_admin', 'admin', 'financial'])
+  const db = client as any
+
+  enforceRateLimit(event, user.id, 5)
+
   const cfg = getNfseConfig()
+  if (!cfg.enabled)
+    throw createError({ statusCode: 503, message: 'Emissão fiscal desabilitada por segurança.' })
+  if (!isCertificateConfigured())
+    throw createError({ statusCode: 503, message: 'Certificado fiscal não configurado.' })
+  if (cfg.provider === 'nacional')
+    throw createError({ statusCode: 503, message: 'NFS-e Nacional ainda não habilitada.' })
+  if (!company.cnpj || !company.municipal_registration)
+    throw createError({ statusCode: 422, message: 'CNPJ ou inscrição municipal da empresa não configurados.' })
 
-  if (!isCertificateConfigured()) {
-    return {
-      success: false,
-      status: 'error',
-      errors: [{ code: 'NAO_CONFIGURADO', message: 'Emissão real não configurada: certificado A1 ausente no servidor.' }],
-      environment: cfg.ambiente,
-    }
-  }
+  const { data: persistedInvoice, error: invoiceError } = await db
+    .from('invoices')
+    .select('id, status')
+    .eq('id', body.invoiceId)
+    .eq('company_id', body.companyId)
+    .single()
 
-  if (cfg.provider === 'nacional') {
-    return {
-      success: false,
-      status: 'error',
-      errors: [{ code: 'PROVIDER_NACIONAL', message: 'NFS-e Nacional (DPS/REST) ainda não habilitada nesta versão. Use NFSE_PROVIDER=ginfes (Fortaleza).' }],
-      environment: cfg.ambiente,
-    }
-  }
+  if (invoiceError || !persistedInvoice)
+    throw createError({ statusCode: 404, message: 'Nota fiscal persistida não encontrada.' })
+  if (persistedInvoice.status === 'issued')
+    throw createError({ statusCode: 409, message: 'A nota já foi emitida.' })
 
-  const body = await readBody<EmitirRequest>(event)
-  const err = validate(body)
-  if (err) {
-    return { success: false, status: 'error', errors: [{ code: 'DADOS_INVALIDOS', message: err }], environment: cfg.ambiente }
-  }
+  const { data: rpsNumber, error: rpsError } = await db.rpc('next_rps_number', {
+    target_company: body.companyId,
+    target_environment: cfg.ambiente,
+    target_series: body.invoice.rpsSeries,
+  })
 
-  const c = body.company
-  const inv = body.invoice
-  const municipio = inv.municipioIbge || c.cityIbge || cfg.municipioIbge
+  if (rpsError)
+    throw createError({ statusCode: 409, message: `Não foi possível reservar o RPS: ${rpsError.message}` })
+
+  const invoice = body.invoice
+  const municipio = invoice.municipioIbge || company.city_ibge || cfg.municipioIbge
 
   const payload: EmitirNfsePayload = {
     prestador: {
-      cnpj: c.cnpj,
-      inscricaoMunicipal: c.municipalRegistration,
-      razaoSocial: c.razaoSocial,
-      nomeFantasia: c.nomeFantasia,
-      cnaeCode: c.cnaeCode,
-      optanteSimplesNacional: c.optanteSimplesNacional,
-      cityIbge: c.cityIbge || cfg.municipioIbge,
-      endereco: c.address,
+      cnpj: company.cnpj,
+      inscricaoMunicipal: company.municipal_registration,
+      razaoSocial: company.name,
+      nomeFantasia: company.trade_name ?? undefined,
+      cnaeCode: invoice.cnaeCode || company.main_cnae || undefined,
+      optanteSimplesNacional: company.tax_regime === 'simples_nacional',
+      cityIbge: company.city_ibge || cfg.municipioIbge,
     },
     tomador: {
-      razaoSocial: inv.taker.name,
-      documento: inv.taker.document,
-      inscricaoMunicipal: inv.taker.inscricaoMunicipal,
-      email: inv.taker.email,
-      endereco: inv.taker.address,
+      razaoSocial: invoice.taker.name,
+      documento: invoice.taker.document,
+      inscricaoMunicipal: invoice.taker.inscricaoMunicipal,
+      email: invoice.taker.email,
+      endereco: invoice.taker.address,
     },
     servico: {
-      itemListaServico: inv.lc116Item,
-      codigoTributacaoMunicipio: inv.ctiss,
-      cnaeCode: inv.cnaeCode || c.cnaeCode,
-      discriminacao: inv.serviceDescription,
-      valorServicos: inv.amount,
-      valorDeducoes: inv.deductionsAmount,
-      aliquota: inv.issRate,
-      issRetido: inv.issRetido ?? false,
+      itemListaServico: invoice.lc116Item,
+      codigoTributacaoMunicipio: invoice.ctiss,
+      cnaeCode: invoice.cnaeCode || company.main_cnae || undefined,
+      discriminacao: invoice.serviceDescription,
+      valorServicos: invoice.amount,
+      valorDeducoes: invoice.deductionsAmount,
+      aliquota: invoice.issRate,
+      issRetido: invoice.issRetido,
       codigoMunicipio: municipio,
       exigibilidadeIss: 1,
     },
     rps: {
-      numero: inv.rpsNumber,
-      serie: inv.rpsSeries || '1',
-      tipo: inv.rpsType || 1,
-      dataEmissao: inv.dataEmissao || new Date().toISOString(),
-      competencia: inv.competencia,
+      numero: String(rpsNumber),
+      serie: invoice.rpsSeries,
+      tipo: invoice.rpsType,
+      dataEmissao: invoice.dataEmissao || new Date().toISOString(),
+      competencia: invoice.competencia,
       naturezaOperacao: 1,
     },
   }
 
   try {
-    return await emitirNfse(payload, cfg)
+    await db.from('invoices').update({
+      status: 'processing',
+      rps_number: rpsNumber,
+      rps_series: invoice.rpsSeries,
+      environment: cfg.ambiente,
+      updated_at: new Date().toISOString(),
+    }).eq('id', body.invoiceId)
+
+    const result = await emitirNfse(payload, cfg)
+
+    await db.from('invoices').update({
+      status: result.success ? 'issued' : 'error',
+      nfse_number: result.invoiceNumber,
+      verification_code: result.verificationCode,
+      protocol: result.protocol,
+      issued_at: result.issuedAt,
+      xml_response: result.xmlBase64,
+      error_message: result.errors?.map(error => error.message).join(' · ') || null,
+      updated_at: new Date().toISOString(),
+    }).eq('id', body.invoiceId)
+
+    return result
   }
-  catch (e) {
+  catch (error) {
+    await db.from('invoices').update({
+      status: 'error',
+      error_message: (error as Error).message,
+      updated_at: new Date().toISOString(),
+    }).eq('id', body.invoiceId)
+    setResponseStatus(event, 502)
+
     return {
       success: false,
       status: 'error',
-      errors: [{ code: 'FALHA_EMISSAO', message: (e as Error).message }],
+      errors: [{ code: 'FALHA_EMISSAO', message: (error as Error).message }],
       environment: cfg.ambiente,
     }
   }
 })
-
-function validate(b: EmitirRequest | undefined): string | null {
-  if (!b?.company || !b.invoice)
-    return 'Payload incompleto: informe company e invoice.'
-  if (!b.company.cnpj)
-    return 'CNPJ do prestador ausente.'
-  if (!b.company.municipalRegistration)
-    return 'Inscrição Municipal do prestador ausente (obrigatória para NFS-e Fortaleza).'
-  if (!b.invoice.rpsNumber)
-    return 'Número do RPS ausente.'
-  if (!b.invoice.lc116Item)
-    return 'Item da Lista de Serviços (LC 116) ausente.'
-  if (!b.invoice.amount || b.invoice.amount <= 0)
-    return 'Valor do serviço inválido.'
-  if (!b.invoice.taker?.document)
-    return 'Documento do tomador ausente.'
-
-  return null
-}

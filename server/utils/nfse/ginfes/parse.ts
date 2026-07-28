@@ -20,6 +20,7 @@ export interface LoteEnvioResult {
 }
 
 export interface SituacaoResult {
+
   /** 1=não recebido, 2=não processado, 3=processado c/ erro, 4=processado c/ sucesso. */
   situacao?: number
   errors: NfseError[]
@@ -30,6 +31,7 @@ export interface NfseData {
   codigoVerificacao?: string
   dataEmissao?: string
   errors: NfseError[]
+
   /** XML bruto da NFS-e, quando presente. */
   rawXml?: string
 }

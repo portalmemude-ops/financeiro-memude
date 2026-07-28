@@ -5,6 +5,7 @@
 .nitro
 .cache
 dist
+supabase/.temp/
 
 # Node dependencies
 node_modules

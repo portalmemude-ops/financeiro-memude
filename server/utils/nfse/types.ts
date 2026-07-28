@@ -8,6 +8,7 @@ export interface NfsePrestador {
   razaoSocial: string
   nomeFantasia?: string
   cnaeCode?: string
+
   /** Optante pelo Simples Nacional (1 = sim, 2 = não). */
   optanteSimplesNacional?: boolean
   cityIbge: string
@@ -33,8 +34,10 @@ export interface NfseTomador {
 }
 
 export interface NfseServico {
+
   /** Item da Lista de Serviços (LC 116/2003), ex.: '10.05'. */
   itemListaServico: string
+
   /** Código de Tributação do Município (CTISS Fortaleza), se aplicável. */
   codigoTributacaoMunicipio?: string
   cnaeCode?: string
@@ -43,8 +46,10 @@ export interface NfseServico {
   valorDeducoes?: number
   aliquota: number // % do ISS (ex.: 2 = 2%)
   issRetido: boolean
+
   /** Código IBGE do município de incidência do ISS. */
   codigoMunicipio: string
+
   /** Exigibilidade do ISS (1 = exigível). */
   exigibilidadeIss?: number
 }
@@ -71,6 +76,7 @@ export interface CancelarNfsePayload {
   numeroNfse: string
   codigoVerificacao?: string
   codigoMunicipio: string
+
   /** Código do motivo do cancelamento (1 = erro na emissão). */
   codigoCancelamento: string
   motivo?: string

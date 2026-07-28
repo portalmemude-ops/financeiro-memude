@@ -9,6 +9,8 @@
 name: Publish image (GHCR)
 
 on:
+  pull_request:
+    branches: [main]
   push:
     branches: [main]
   workflow_dispatch:
@@ -18,7 +20,37 @@ permissions:
   packages: write
 
 jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+        env:
+          SUPABASE_URL: https://example.supabase.co
+          SUPABASE_KEY: sb_publishable_ci_placeholder
+      - run: pnpm lint:ci
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
+        env:
+          SUPABASE_URL: https://example.supabase.co
+          SUPABASE_KEY: sb_publishable_ci_placeholder
+      - name: Dependency audit (high visibility)
+        continue-on-error: true
+        run: pnpm audit --prod --audit-level high
+      - name: Block critical vulnerabilities
+        run: pnpm audit --prod --audit-level critical
+
   publish:
+    needs: quality
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -46,6 +78,9 @@ jobs:
         with:
           context: .
           push: true
+          build-args: |
+            SUPABASE_URL=${{ vars.SUPABASE_URL }}
+            SUPABASE_KEY=${{ vars.SUPABASE_KEY }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha

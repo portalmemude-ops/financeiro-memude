@@ -20,7 +20,7 @@ defineProps<{
       :target="item.target"
     >
       <VIcon
-        :icon="item.icon || 'ri-checkbox-blank-circle-line'"
+        :icon="String(item.icon || 'ri-checkbox-blank-circle-line')"
         class="nav-item-icon"
       />
       <!-- 👉 Title -->
