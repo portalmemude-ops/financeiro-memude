@@ -43,7 +43,7 @@ const CORE_TABLES = [
 ] as const
 
 const OPTIONAL_TABLES = [
-  'funnel_cards', 'funnel_history', 'invoices', 'notifications', 'notification_rules',
+  'funnel_cards', 'funnel_history', 'invoices', 'notifications', 'notification_rules', 'settlements',
 ] as const
 
 const TABLES = [...CORE_TABLES, ...OPTIONAL_TABLES] as const
@@ -144,6 +144,7 @@ export async function loadAppData(): Promise<AppData | null> {
       payables: camelizeRows(data.payables),
       receivables: camelizeRows(data.receivables),
       transactions: camelizeRows(data.transactions),
+      settlements: camelizeRows(data.settlements),
       funnelCards: camelizeRows(data.funnel_cards),
       funnelHistory: camelizeRows(data.funnel_history),
       invoices: mapInvoices(data.invoices),

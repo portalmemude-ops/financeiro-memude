@@ -65,16 +65,25 @@ async function save() {
   errorMsg.value = null
   try {
     const i = form.value
-    if (type.value === 'payable')
+    if (type.value === 'payable') {
       await db.createPayable(i)
-    else if (type.value === 'receivable')
-      await db.createReceivable(i)
-    else if (type.value === 'supplier')
+    }
+    else if (type.value === 'receivable') {
+      await db.saveReceivable({
+        ...i,
+        invoiceRule: 'on_receive',
+        recurrence: 'once',
+      })
+    }
+    else if (type.value === 'supplier') {
       await db.createSupplier(i)
-    else if (type.value === 'employee')
+    }
+    else if (type.value === 'employee') {
       await db.createEmployee(i)
-    else if (type.value === 'client')
+    }
+    else if (type.value === 'client') {
       await db.createClient(i)
+    }
 
     snackText.value = `${titles[type.value]} salvo com sucesso.`
     snackbar.value = true

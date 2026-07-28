@@ -11,14 +11,17 @@ import type {
   CostCenter,
   Development,
   Employee,
+  ExternalInvoiceInput,
   FunnelCard,
   FunnelHistory,
   FunnelStage,
   Invoice,
   NotificationRule,
   Payable,
+  ReceiptInput,
   Receivable,
   Sale,
+  Settlement,
   Supplier,
   Transaction,
 } from '@/types/finance'
@@ -51,6 +54,7 @@ export const useFinanceStore = defineStore('finance', {
     payables: [] as Payable[],
     receivables: [] as Receivable[],
     transactions: [] as Transaction[],
+    settlements: [] as Settlement[],
     developments: [] as Development[],
     sales: [] as Sale[],
     funnelCards: [] as FunnelCard[],
@@ -105,6 +109,16 @@ export const useFinanceStore = defineStore('finance', {
     companyTransactions(state): Transaction[] {
       return state.transactions.filter(x => x.companyId === this.cid)
     },
+    companySettlements(state): Settlement[] {
+      return state.settlements.filter(x => x.companyId === this.cid)
+    },
+    receiptsOf(): (receivableId: string) => Settlement[] {
+      const cid = this.cid
+
+      return (receivableId: string) => this.settlements
+        .filter(s => s.companyId === cid && s.receivableId === receivableId)
+        .sort((a, b) => b.settledAt.localeCompare(a.settledAt))
+    },
     companyDevelopments(state): Development[] {
       return state.developments.filter(x => x.companyId === this.cid)
     },
@@ -141,6 +155,34 @@ export const useFinanceStore = defineStore('finance', {
       const cid = this.cid
 
       return (id?: string) => this.costCenters.find(x => x.id === id && x.companyId === cid)?.name ?? '—'
+    },
+    transactionCategoryId(): (transaction: Transaction) => string | undefined {
+      const cid = this.cid
+
+      return (transaction: Transaction) => {
+        if (transaction.categoryId)
+          return transaction.categoryId
+        if (transaction.receivableId)
+          return this.receivables.find(x => x.id === transaction.receivableId && x.companyId === cid)?.categoryId
+        if (transaction.payableId)
+          return this.payables.find(x => x.id === transaction.payableId && x.companyId === cid)?.categoryId
+
+        return undefined
+      }
+    },
+    transactionCostCenterId(): (transaction: Transaction) => string | undefined {
+      const cid = this.cid
+
+      return (transaction: Transaction) => {
+        if (transaction.costCenterId)
+          return transaction.costCenterId
+        if (transaction.receivableId)
+          return this.receivables.find(x => x.id === transaction.receivableId && x.companyId === cid)?.costCenterId
+        if (transaction.payableId)
+          return this.payables.find(x => x.id === transaction.payableId && x.companyId === cid)?.costCenterId
+
+        return undefined
+      }
     },
     supplierName(): (id?: string) => string {
       const cid = this.cid
@@ -201,6 +243,7 @@ export const useFinanceStore = defineStore('finance', {
       this.payables = (data.payables ?? []) as Payable[]
       this.receivables = (data.receivables ?? []) as Receivable[]
       this.transactions = (data.transactions ?? []) as Transaction[]
+      this.settlements = (data.settlements ?? []) as Settlement[]
       this.funnelCards = (data.funnelCards ?? []) as FunnelCard[]
       this.funnelHistory = (data.funnelHistory ?? []) as FunnelHistory[]
       this.invoices = (data.invoices ?? []) as Invoice[]
@@ -463,10 +506,16 @@ export const useFinanceStore = defineStore('finance', {
           if (!next || next > today || arr.some(r => r.dueDate === next))
             break
 
-          const saved = await useDb().saveReceivable({
+          const nextInvoiceDate = last.invoiceRule === 'scheduled'
+            ? advance(last.invoiceScheduledDate ?? last.dueDate, 'monthly') ?? next
+            : undefined
+
+          const saved = await this.saveReceivable({
             ...structuredClone(toRaw(last)),
             id: undefined,
             dueDate: next,
+            invoiceRule: last.invoiceRule === 'manual' ? 'on_receive' : last.invoiceRule,
+            invoiceScheduledDate: nextInvoiceDate,
             status: 'open',
             receivedAt: undefined,
             receivedAmount: 0,
@@ -475,7 +524,8 @@ export const useFinanceStore = defineStore('finance', {
             createdAt: undefined,
           })
 
-          this.receivables.push(saved)
+          if (!saved)
+            break
           arr.push(saved)
           last = saved
           created++
@@ -521,22 +571,42 @@ export const useFinanceStore = defineStore('finance', {
       }
     },
 
-    async saveReceivable(r: Partial<Receivable>) {
+    async saveReceivable(
+      r: Partial<Receivable>,
+      options: { initialReceipt?: ReceiptInput; externalInvoice?: ExternalInvoiceInput } = {},
+    ) {
       if (!this.canWrite())
         return
-      const saved = await useDb().saveReceivable(r)
+      const isNew = !r.id
+      const saved = await useDb().saveReceivable(r, options)
       const index = this.receivables.findIndex(item => item.id === saved.id)
       if (index >= 0)
         this.receivables[index] = saved
       else
         this.receivables.unshift(saved)
-      if (!r.id && saved.invoiceRule === 'immediate')
+      if (options.initialReceipt) {
+        this.transactions = await useDb().loadTransactions()
+        this.settlements = await useDb().loadSettlements()
+      }
+
+      if (isNew && saved.invoiceRule === 'immediate')
         await this.createInvoiceFromReceivable(saved.id, false)
+      if (isNew && options.initialReceipt && saved.invoiceRule === 'on_receive')
+        await this.createInvoiceFromReceivable(saved.id, false)
+
+      if (saved.invoiceRule === 'manual') {
+        const refreshed = await loadAppData()
+        if (refreshed)
+          this.hydrate(refreshed.finance)
+      }
 
       return saved
     },
 
-    async receiveReceivable(id: string, opts: { amount?: number; proofUrl?: string } = {}) {
+    async receiveReceivable(
+      id: string,
+      opts: Partial<ReceiptInput> & { amount?: number } = {},
+    ) {
       if (!this.canWrite())
         return
       const r = this.receivables.find(x => x.id === id)
@@ -544,10 +614,22 @@ export const useFinanceStore = defineStore('finance', {
         return
       const remaining = r.amount - (r.receivedAmount ?? 0)
       const amount = opts.amount ?? remaining
-      const saved = await useDb().settleReceivable(id, amount, opts.proofUrl)
+
+      const receipt: ReceiptInput = {
+        amount,
+        receivedAt: opts.receivedAt ?? new Date().toISOString(),
+        method: opts.method ?? 'pix',
+        account: opts.account,
+        proofUrl: opts.proofUrl,
+        notes: opts.notes,
+        requestId: opts.requestId ?? crypto.randomUUID(),
+      }
+
+      const saved = await useDb().settleReceivable(id, receipt)
 
       Object.assign(r, saved)
       this.transactions = await useDb().loadTransactions()
+      this.settlements = await useDb().loadSettlements()
 
       // O RPC atualiza também a parcela e o status da comissão.
       if (r.commissionInstallmentId) {
@@ -561,6 +643,31 @@ export const useFinanceStore = defineStore('finance', {
         await this.createInvoiceFromReceivable(r.id, false)
 
       this.logAudit('receive', 'receivable', `Recebimento: ${r.description} — ${formatBRL(amount)}`, r.id)
+
+      return saved
+    },
+
+    async reverseReceivableSettlement(settlementId: string, reason: string) {
+      if (!this.canWrite())
+        return
+      const settlement = this.settlements.find(s => s.id === settlementId)
+      if (!settlement?.receivableId || settlement.type !== 'receipt')
+        return
+
+      const saved = await useDb().reverseReceivableSettlement(settlementId, reason, crypto.randomUUID())
+      const target = this.receivables.find(r => r.id === settlement.receivableId)
+      if (target)
+        Object.assign(target, saved)
+      this.transactions = await useDb().loadTransactions()
+      this.settlements = await useDb().loadSettlements()
+
+      if (saved.commissionInstallmentId) {
+        const refreshed = await loadAppData()
+        if (refreshed)
+          this.hydrate(refreshed.finance)
+      }
+
+      this.logAudit('reverse', 'receivable', `Estorno de recebimento: ${saved.description} — ${formatBRL(settlement.amount)}`, saved.id)
 
       return saved
     },
@@ -659,8 +766,11 @@ export const useFinanceStore = defineStore('finance', {
 
     async createInvoiceFromReceivable(receivableId: string, autoIssue = false) {
       const r = this.receivables.find(x => x.id === receivableId)
-      if (!r)
+      if (!r || ['manual', 'none'].includes(r.invoiceRule))
         return
+      const existing = this.invoices.find(i => i.receivableId === receivableId && i.status !== 'cancelled')
+      if (existing)
+        return existing.id
       const company = useAppStore().currentCompany
       const cfg = company.invoiceConfig
 

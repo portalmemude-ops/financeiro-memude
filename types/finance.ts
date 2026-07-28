@@ -175,8 +175,9 @@ export interface Payable {
   createdAt: string
 }
 
-export type InvoiceRule = 'immediate' | 'on_receive' | 'scheduled' | 'recurring'
+export type InvoiceRule = 'immediate' | 'on_receive' | 'scheduled' | 'recurring' | 'manual' | 'none'
 export type ReceivableStatus = 'open' | 'partial' | 'received' | 'overdue' | 'cancelled'
+export type ReceiptMethod = 'pix' | 'transfer' | 'boleto' | 'card' | 'cash' | 'check' | 'other'
 
 export interface Receivable {
   id: string
@@ -213,8 +214,49 @@ export interface Transaction {
   date: string
   payableId?: string
   receivableId?: string
+  settlementId?: string
+  isReversal?: boolean
+  reversalOf?: string
   description: string
+  account?: string
+  categoryId?: string
+  costCenterId?: string
   createdAt: string
+}
+
+export interface Settlement {
+  id: string
+  companyId: string
+  payableId?: string
+  receivableId?: string
+  type: 'payment' | 'receipt' | 'reversal'
+  amount: number
+  settledAt: string
+  paymentMethod?: ReceiptMethod
+  account?: string
+  proofUrl?: string
+  reversalOf?: string
+  requestId?: string
+  notes?: string
+  createdBy: string
+  createdAt: string
+}
+
+export interface ReceiptInput {
+  amount: number
+  receivedAt: string
+  method: ReceiptMethod
+  account?: string
+  proofUrl?: string
+  notes?: string
+  requestId: string
+}
+
+export interface ExternalInvoiceInput {
+  number: string
+  issuedAt: string
+  documentUrl?: string
+  environment?: NfseEnvironment
 }
 
 // 👉 Comercial / Vendas -------------------------------------------------------
@@ -349,6 +391,7 @@ export interface Invoice {
   id: string
   companyId: string
   receivableId?: string
+  source?: 'system' | 'external'
 
   // Identificação da NFS-e emitida
   invoiceNumber?: string
