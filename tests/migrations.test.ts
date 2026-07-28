@@ -17,6 +17,22 @@ const legacySettlementMigration = readFileSync(
   'utf8',
 )
 
+const safeCrudMigration = readFileSync(
+  new URL(
+    '../supabase/migrations/20260728231500_financial_accounts_safe_crud.sql',
+    import.meta.url,
+  ),
+  'utf8',
+)
+
+const hardenedDeleteMigration = readFileSync(
+  new URL(
+    '../supabase/migrations/20260728232500_harden_financial_account_deletion.sql',
+    import.meta.url,
+  ),
+  'utf8',
+)
+
 assert.match(
   migration,
   /select \* from public\.settle_receivable\([\s\S]+?\)\s+into r;/,
@@ -47,4 +63,40 @@ assert.doesNotMatch(
   'o backfill nao pode duplicar movimentos de caixa',
 )
 
-console.log('Migrations: 5 passaram, 0 falharam.')
+assert.match(
+  safeCrudMigration,
+  /create or replace function public\.delete_payable_entry[\s\S]+?from public\.settlements[\s\S]+?from public\.transactions[\s\S]+?from public\.commission_splits/,
+  'a exclusao de contas a pagar deve proteger baixas, transacoes e comissoes',
+)
+
+assert.match(
+  safeCrudMigration,
+  /create or replace function public\.delete_receivable_entry[\s\S]+?from public\.settlements[\s\S]+?from public\.transactions[\s\S]+?from public\.invoices[\s\S]+?from public\.commission_installments/,
+  'a exclusao de contas a receber deve proteger caixa, fiscal e comissoes',
+)
+
+assert.match(
+  safeCrudMigration,
+  /revoke delete on public\.payables, public\.receivables from authenticated/,
+  'o cliente nao pode contornar as funcoes seguras com DELETE direto',
+)
+
+assert.match(
+  hardenedDeleteMigration,
+  /create trigger guard_payable_delete[\s\S]+?create trigger guard_receivable_delete/,
+  'triggers devem proteger toda exclusao, inclusive chamadas diretas',
+)
+
+assert.match(
+  hardenedDeleteMigration,
+  /create or replace function public\.delete_payable_entry[\s\S]+?security invoker[\s\S]+?create or replace function public\.delete_receivable_entry[\s\S]+?security invoker/,
+  'os RPCs expostos devem executar com as permissoes do usuario',
+)
+
+assert.match(
+  hardenedDeleteMigration,
+  /create policy payables_delete[\s\S]+?private\.can_manage_finance[\s\S]+?create policy receivables_delete[\s\S]+?private\.can_manage_finance/,
+  'a RLS deve limitar exclusoes a perfis financeiros da empresa',
+)
+
+console.log('Migrations: 11 passaram, 0 falharam.')

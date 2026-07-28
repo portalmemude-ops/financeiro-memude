@@ -199,6 +199,72 @@ import DefaultLayoutWithVerticalNav from './components/DefaultLayoutWithVertical
   padding-inline: 1rem !important;
 }
 
+.account-dialog__header {
+  padding-block-end: 0.5rem;
+}
+
+.account-dialog__body {
+  padding-block-start: 0.75rem;
+}
+
+.account-dialog__choice {
+  align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.account-dialog__choice > .v-label {
+  color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.account-dialog__choice-toggle.v-btn-toggle {
+  align-items: stretch;
+  block-size: auto !important;
+  border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+  border-radius: 0.75rem !important;
+  display: flex;
+  gap: 0.5rem;
+  inline-size: fit-content;
+  padding: 0.375rem;
+}
+
+.account-dialog__choice-toggle.v-btn-toggle .v-btn.v-btn {
+  border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity)) !important;
+  border-radius: 0.5rem !important;
+  min-block-size: 2.75rem;
+  padding-inline: 1.25rem !important;
+}
+
+.account-dialog__choice-toggle.v-btn-toggle .v-btn.v-btn--active {
+  border-color: rgb(var(--v-theme-primary)) !important;
+  background: rgb(var(--v-theme-primary));
+  color: rgb(var(--v-theme-on-primary)) !important;
+}
+
+@media (max-width: 599.98px) {
+  .account-dialog__header {
+    padding-block-end: 0.25rem;
+  }
+
+  .account-dialog__body {
+    padding-block-start: 0.625rem;
+  }
+
+  .account-dialog__choice-toggle.v-btn-toggle {
+    inline-size: 100%;
+    overflow-x: visible;
+  }
+
+  .account-dialog__choice-toggle.v-btn-toggle .v-btn.v-btn {
+    flex: 1 1 0;
+    min-inline-size: 0 !important;
+    padding-inline: 0.75rem !important;
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Contraste do tooltip dos gráficos (ApexCharts).
 // O ApexCharts injeta o tooltip FORA do componente Vue (anexado ao

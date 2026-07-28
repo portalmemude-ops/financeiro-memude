@@ -73,6 +73,17 @@ const editing = ref<Partial<Payable>>({})
 const beneficiaryKind = ref<'supplier' | 'employee'>('supplier')
 const installmentMode = ref(false)
 const installmentCount = ref(3)
+const saving = ref(false)
+const actionLoading = ref(false)
+const snackbar = ref(false)
+const snackbarText = ref('')
+const snackbarColor = ref<'success' | 'error' | 'primary'>('success')
+
+function showMessage(text: string, color: 'success' | 'error' | 'primary' = 'success') {
+  snackbarText.value = text
+  snackbarColor.value = color
+  snackbar.value = true
+}
 
 function openNew() {
   editing.value = { recurrence: 'once', dueDate: todayISO(), status: 'open', amount: undefined }
@@ -101,11 +112,21 @@ async function save() {
   else
     data.supplierId = undefined
 
-  if (!data.id && installmentMode.value && installmentCount.value > 1)
-    finance.createInstallmentPayable(data, installmentCount.value)
-  else
-    finance.savePayable(data)
-  dialog.value = false
+  saving.value = true
+  try {
+    if (!data.id && installmentMode.value && installmentCount.value > 1)
+      await finance.createInstallmentPayable(data, installmentCount.value)
+    else
+      await finance.savePayable(data)
+    dialog.value = false
+    showMessage(data.id ? 'Conta atualizada com sucesso.' : 'Conta cadastrada com sucesso.')
+  }
+  catch (error) {
+    showMessage(error instanceof Error ? error.message : 'Não foi possível salvar a conta.', 'error')
+  }
+  finally {
+    saving.value = false
+  }
 }
 
 // 👉 Pagar
@@ -119,10 +140,21 @@ function openPay(p: Payable) {
   payProof.value = ''
   payDialog.value = true
 }
-function doPay() {
-  if (payTarget.value)
-    finance.payPayable(payTarget.value.id, { amount: payAmount.value, proofUrl: payProof.value || undefined })
-  payDialog.value = false
+async function doPay() {
+  if (!payTarget.value)
+    return
+  actionLoading.value = true
+  try {
+    await finance.payPayable(payTarget.value.id, { amount: payAmount.value, proofUrl: payProof.value || undefined })
+    payDialog.value = false
+    showMessage('Pagamento registrado com sucesso.')
+  }
+  catch (error) {
+    showMessage(error instanceof Error ? error.message : 'Não foi possível registrar o pagamento.', 'error')
+  }
+  finally {
+    actionLoading.value = false
+  }
 }
 
 // 👉 Cancelar
@@ -132,23 +164,57 @@ function askCancel(p: Payable) {
   cancelTarget.value = p
   cancelDialog.value = true
 }
+async function doCancel() {
+  if (!cancelTarget.value)
+    return
+  actionLoading.value = true
+  try {
+    await finance.cancelPayable(cancelTarget.value.id)
+    showMessage('Conta cancelada com sucesso.')
+  }
+  catch (error) {
+    showMessage(error instanceof Error ? error.message : 'Não foi possível cancelar a conta.', 'error')
+  }
+  finally {
+    actionLoading.value = false
+    cancelTarget.value = null
+  }
+}
+
+const deleteDialog = ref(false)
+const deleteTarget = ref<Payable | null>(null)
+function askDelete(p: Payable) {
+  deleteTarget.value = p
+  deleteDialog.value = true
+}
+async function doDelete() {
+  if (!deleteTarget.value)
+    return
+  actionLoading.value = true
+  try {
+    await finance.deletePayable(deleteTarget.value.id)
+    showMessage('Conta excluída permanentemente.')
+  }
+  catch (error) {
+    showMessage(error instanceof Error ? error.message : 'Não foi possível excluir a conta.', 'error')
+  }
+  finally {
+    actionLoading.value = false
+    deleteTarget.value = null
+  }
+}
 
 // 👉 Recorrências
-const snackbar = ref(false)
-const snackbarText = ref('')
 async function runRecurrences() {
   try {
     const n = await finance.generateRecurrences()
 
-    snackbarText.value = n > 0
+    showMessage(n > 0
       ? `${n} lançamento(s) recorrente(s) gerado(s).`
-      : 'Nenhuma recorrência pendente.'
+      : 'Nenhuma recorrência pendente.', 'primary')
   }
   catch (error) {
-    snackbarText.value = error instanceof Error ? error.message : 'Não foi possível gerar as recorrências.'
-  }
-  finally {
-    snackbar.value = true
+    showMessage(error instanceof Error ? error.message : 'Não foi possível gerar as recorrências.', 'error')
   }
 }
 </script>
@@ -162,7 +228,7 @@ async function runRecurrences() {
     >
       <template #actions>
         <VBtn
-          v-if="!app.isReadOnly"
+          v-if="app.canManageFinance"
           variant="tonal"
           prepend-icon="ri-refresh-line"
           @click="runRecurrences"
@@ -170,7 +236,7 @@ async function runRecurrences() {
           Gerar recorrências
         </VBtn>
         <VBtn
-          v-if="!app.isReadOnly"
+          v-if="app.canManageFinance"
           prepend-icon="ri-add-line"
           @click="openNew"
         >
@@ -183,7 +249,7 @@ async function runRecurrences() {
       v-model="snackbar"
       :timeout="3000"
       location="top end"
-      color="primary"
+      :color="snackbarColor"
     >
       {{ snackbarText }}
     </VSnackbar>
@@ -334,33 +400,13 @@ async function runRecurrences() {
         <template #item.actions="{ item }">
           <div class="d-flex justify-end">
             <IconBtn
-              v-if="!app.isReadOnly && ['open', 'overdue'].includes(item.status)"
+              v-if="app.canManageFinance && ['open', 'overdue'].includes(item.status)"
               color="success"
               @click="openPay(item)"
             >
               <VIcon icon="ri-check-double-line" />
               <VTooltip activator="parent">
                 Dar baixa
-              </VTooltip>
-            </IconBtn>
-            <IconBtn
-              v-if="!app.isReadOnly && item.status !== 'paid'"
-              aria-label="Editar lançamento"
-              @click="openEdit(item)"
-            >
-              <VIcon icon="ri-pencil-line" />
-              <VTooltip activator="parent">
-                Editar
-              </VTooltip>
-            </IconBtn>
-            <IconBtn
-              v-if="!app.isReadOnly && ['open', 'overdue'].includes(item.status)"
-              aria-label="Cancelar lançamento"
-              @click="askCancel(item)"
-            >
-              <VIcon icon="ri-close-circle-line" />
-              <VTooltip activator="parent">
-                Cancelar
               </VTooltip>
             </IconBtn>
             <IconBtn
@@ -375,6 +421,41 @@ async function runRecurrences() {
                 Ver comprovante
               </VTooltip>
             </IconBtn>
+            <VMenu v-if="app.canManageFinance && !['partial', 'paid'].includes(item.status)">
+              <template #activator="{ props }">
+                <IconBtn
+                  v-bind="props"
+                  aria-label="Mais ações da conta"
+                >
+                  <VIcon icon="ri-more-2-fill" />
+                  <VTooltip activator="parent">
+                    Mais ações
+                  </VTooltip>
+                </IconBtn>
+              </template>
+              <VList density="compact">
+                <VListItem
+                  v-if="!['partial', 'paid'].includes(item.status)"
+                  prepend-icon="ri-pencil-line"
+                  title="Editar"
+                  @click="openEdit(item)"
+                />
+                <VListItem
+                  v-if="['open', 'overdue'].includes(item.status)"
+                  prepend-icon="ri-close-circle-line"
+                  title="Cancelar"
+                  @click="askCancel(item)"
+                />
+                <VDivider />
+                <VListItem
+                  v-if="!item.paidAmount && !['partial', 'paid'].includes(item.status)"
+                  prepend-icon="ri-delete-bin-line"
+                  title="Excluir permanentemente"
+                  class="text-error"
+                  @click="askDelete(item)"
+                />
+              </VList>
+            </VMenu>
           </div>
         </template>
         <template #no-data>
@@ -392,19 +473,23 @@ async function runRecurrences() {
       persistent
     >
       <VCard>
-        <VCardItem>
+        <VCardItem class="account-dialog__header">
           <VCardTitle>{{ editing.id ? 'Editar conta a pagar' : 'Nova conta a pagar' }}</VCardTitle>
         </VCardItem>
-        <VCardText>
+        <VCardText class="account-dialog__body">
           <VForm
             ref="formRef"
             @submit.prevent="save"
           >
             <VRow>
-              <VCol cols="12">
+              <VCol
+                cols="12"
+                class="account-dialog__choice"
+              >
+                <VLabel>Tipo de beneficiário</VLabel>
                 <VBtnToggle
                   v-model="beneficiaryKind"
-                  density="compact"
+                  class="account-dialog__choice-toggle"
                   color="primary"
                   mandatory
                   variant="outlined"
@@ -555,7 +640,11 @@ async function runRecurrences() {
           >
             Cancelar
           </VBtn>
-          <VBtn @click="save">
+          <VBtn
+            :loading="saving"
+            :disabled="saving"
+            @click="save"
+          >
             Salvar
           </VBtn>
         </VCardText>
@@ -599,6 +688,8 @@ async function runRecurrences() {
           </VBtn>
           <VBtn
             color="success"
+            :loading="actionLoading"
+            :disabled="actionLoading"
             @click="doPay"
           >
             Confirmar pagamento
@@ -613,7 +704,16 @@ async function runRecurrences() {
       :message="`Deseja cancelar '${cancelTarget?.description}'?`"
       confirm-text="Cancelar conta"
       confirm-color="error"
-      @confirm="cancelTarget && finance.cancelPayable(cancelTarget.id)"
+      @confirm="doCancel"
+    />
+
+    <ConfirmDialog
+      v-model="deleteDialog"
+      title="Excluir conta permanentemente"
+      :message="`A conta '${deleteTarget?.description}' será removida definitivamente. Esta ação só é permitida quando não há baixa, transação, comissão ou outro vínculo. Deseja continuar?`"
+      confirm-text="Excluir permanentemente"
+      confirm-color="error"
+      @confirm="doDelete"
     />
   </div>
 </template>
