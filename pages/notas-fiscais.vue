@@ -10,6 +10,7 @@ useHead({ title: 'Notas Fiscais (NFS-e)' })
 
 // Verifica se a emissão real (certificado A1 + SEFIN Fortaleza) está ativa.
 onMounted(() => finance.loadNfseStatus())
+
 const nfse = computed(() => finance.nfseStatus)
 const cert = computed(() => nfse.value?.certificate)
 
@@ -54,6 +55,7 @@ function downloadXml(inv: Invoice) {
     buf[i] = bytes.charCodeAt(i)
   const url = URL.createObjectURL(new Blob([buf], { type: 'application/xml' }))
   const a = document.createElement('a')
+
   a.href = url
   a.download = `nfse-${inv.invoiceNumber ?? inv.rpsNumber ?? inv.id}.xml`
   a.click()
@@ -121,7 +123,9 @@ function doCancel() {
       <strong>({{ nfse.ambiente === 'producao' ? 'Produção' : 'Homologação' }})</strong>
       via {{ nfse.provider === 'nacional' ? 'NFS-e Nacional' : 'webservice GINFES' }}.
       <template v-if="cert?.subjectCN">
-        Certificado: {{ cert.subjectCN }}<template v-if="cert.daysToExpire != null"> · vence em {{ cert.daysToExpire }} dia(s)</template>.
+        Certificado: {{ cert.subjectCN }}<template v-if="cert.daysToExpire != null">
+          · vence em {{ cert.daysToExpire }} dia(s)
+        </template>.
       </template>
     </VAlert>
 
@@ -165,7 +169,6 @@ function doCancel() {
       v-else
       class="mb-6"
     />
-
 
     <VRow class="match-height mb-1">
       <VCol
@@ -454,7 +457,7 @@ function doCancel() {
               prepend-icon="ri-external-link-line"
               :href="detail.publicUrl"
               target="_blank"
-              rel="noopener"
+              rel="noopener noreferrer"
               :disabled="!detail.publicUrl"
             >
               Consulta pública

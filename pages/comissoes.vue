@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useFinanceStore } from '@/stores/finance'
 import { useAppStore } from '@/stores/app'
-import { isWithin, type DateWindow } from '@/utils/dateFilter'
+import { type DateWindow, isWithin } from '@/utils/dateFilter'
 import type { Commission } from '@/types/finance'
 
 const finance = useFinanceStore()
@@ -27,6 +27,7 @@ const rows = computed(() => finance.companyCommissions.map(c => {
 
 // 👉 Filtro de período (pela data da venda; afeta KPIs + tabela)
 const periodWindow = ref<DateWindow>({ start: null, end: null })
+
 const filteredRows = computed(() =>
   rows.value.filter(r => isWithin(r.saleDate, periodWindow.value)),
 )

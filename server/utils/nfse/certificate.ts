@@ -1,3 +1,5 @@
+import { Buffer } from 'node:buffer'
+
 // ============================================================================
 // Certificado digital A1 (.pfx / PKCS#12) — carregamento SERVER-SIDE.
 //
@@ -20,21 +22,29 @@ import { readFileSync } from 'node:fs'
 import forge from 'node-forge'
 
 export interface LoadedCertificate {
+
   /** Buffer bruto do .pfx (para o https.Agent / mTLS). */
   pfx: Buffer
   passphrase: string
+
   /** Chave privada em PEM (para assinatura XMLDSig). */
   privateKeyPem: string
+
   /** Certificado (folha) em PEM. */
   certificatePem: string
+
   /** Cadeia completa em PEM (folha + intermediários), se disponível. */
   certificateChainPem: string[]
+
   /** Titular do certificado (CN). */
   subjectCN: string
+
   /** CNPJ/CPF extraído do titular, se presente. */
   holderDocument?: string
+
   /** Início da validade (ISO). */
   notBefore: string
+
   /** Fim da validade (ISO). */
   notAfter: string
 }
@@ -82,6 +92,7 @@ export function loadCertificate(): LoadedCertificate {
     return cached
 
   const parsed = parsePfx(pfx, passphrase)
+
   cached = parsed
   cacheKey = key
 
@@ -93,6 +104,7 @@ function parsePfx(pfx: Buffer, passphrase: string): LoadedCertificate {
   try {
     const der = forge.util.createBuffer(pfx.toString('binary'))
     const asn1 = forge.asn1.fromDer(der)
+
     p12 = forge.pkcs12.pkcs12FromAsn1(asn1, false, passphrase)
   }
   catch (err) {
@@ -101,8 +113,10 @@ function parsePfx(pfx: Buffer, passphrase: string): LoadedCertificate {
 
   // Chave privada
   const keyBags = p12.getBags({ bagType: forge.pki.oids.pkcs8ShroudedKeyBag })[forge.pki.oids.pkcs8ShroudedKeyBag] ?? []
+
   const keyBag = keyBags[0]
     ?? (p12.getBags({ bagType: forge.pki.oids.keyBag })[forge.pki.oids.keyBag] ?? [])[0]
+
   if (!keyBag?.key)
     throw new Error('Certificado A1 sem chave privada legível.')
   const privateKeyPem = forge.pki.privateKeyToPem(keyBag.key)

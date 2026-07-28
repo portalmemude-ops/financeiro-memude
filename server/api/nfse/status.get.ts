@@ -1,48 +1,35 @@
-// ============================================================================
-// GET /api/nfse/status
-// Informa se a emissão real de NFS-e está configurada (certificado + ambiente),
-// SEM expor segredos. Usado pela UI para alternar entre emissão real e o modo
-// simulado (mock), e para exibir alertas de validade do certificado.
-// ============================================================================
 import { getNfseConfig } from '../../utils/nfse/config'
 import { isCertificateConfigured, loadCertificate } from '../../utils/nfse/certificate'
+import { enforceRateLimit, requireAuthenticatedUser } from '../../utils/security'
 
-export default defineEventHandler(() => {
+export default defineEventHandler(async event => {
+  const user = await requireAuthenticatedUser(event)
+
+  enforceRateLimit(event, user.id, 30)
+
   const cfg = getNfseConfig()
   const hasCert = isCertificateConfigured()
-
-  let certificate: {
-    present: boolean
-    subjectCN?: string
-    holderDocument?: string
-    notAfter?: string
-    daysToExpire?: number
-    error?: string
-  } = { present: false }
+  let certificate: { present: boolean; notAfter?: string; daysToExpire?: number } = { present: false }
 
   if (hasCert) {
     try {
-      const c = loadCertificate()
-      const daysToExpire = Math.floor((new Date(c.notAfter).getTime() - Date.now()) / 86400000)
+      const loaded = loadCertificate()
 
       certificate = {
         present: true,
-        subjectCN: c.subjectCN,
-        holderDocument: c.holderDocument,
-        notAfter: c.notAfter,
-        daysToExpire,
+        notAfter: loaded.notAfter,
+        daysToExpire: Math.floor((new Date(loaded.notAfter).getTime() - Date.now()) / 86_400_000),
       }
     }
-    catch (err) {
-      // Certificado presente porém inválido (senha errada, arquivo corrompido).
-      certificate = { present: true, error: (err as Error).message }
+    catch {
+      // Não expõe CN, documento do titular, senha, caminho ou erro do parser.
+      certificate = { present: true }
     }
   }
 
-  const configured = hasCert && certificate.present && !certificate.error
-
   return {
-    configured,
+    enabled: cfg.enabled,
+    configured: cfg.enabled && hasCert && Boolean(certificate.notAfter),
     provider: cfg.provider,
     ambiente: cfg.ambiente,
     municipioIbge: cfg.municipioIbge,

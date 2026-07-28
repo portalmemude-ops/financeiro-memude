@@ -36,9 +36,9 @@ export function evolutionAdapter(cfg: { baseUrl: string; apiKey: string; instanc
 }
 
 /** E-mail via SMTP (Hostgator). Ao ligar, usar nodemailer.createTransport. */
-export function smtpAdapter(_cfg: { host: string; user: string; pass: string }): ChannelAdapter {
+export function smtpAdapter(_: { host: string; user: string; pass: string }): ChannelAdapter {
   return {
-    async send(_n) {
+    async send(__) {
       // const transport = nodemailer.createTransport({ host, auth: { user, pass } })
       // await transport.sendMail({ from, to: n.to, subject: n.title, text: n.message })
       return { ok: true }

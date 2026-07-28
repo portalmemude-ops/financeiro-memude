@@ -3,9 +3,7 @@ import { useAppStore } from './app'
 import type { AuditEntry } from '@/types/finance'
 
 // ============================================================================
-// Log de auditoria (quem/o quê/quando/empresa). No mock vive em memória; ao
-// ligar o backend, trocar `record` por INSERT em `audit_log` (ou trigger no
-// Postgres). Escopado pela empresa atual, como todo o resto.
+// A fonte de verdade é audit_log, preenchida por triggers do PostgreSQL.
 // ============================================================================
 
 export const useAuditStore = defineStore('audit', {
@@ -24,6 +22,39 @@ export const useAuditStore = defineStore('audit', {
   },
 
   actions: {
+    async load() {
+      const app = useAppStore()
+      if (!app.currentCompanyId)
+        return
+      const supabase = useSupabaseClient() as any
+
+      const { data, error } = await supabase
+        .from('audit_log')
+        .select('id, company_id, actor_id, action, entity_type, entity_id, old_data, new_data, created_at')
+        .eq('company_id', app.currentCompanyId)
+        .order('created_at', { ascending: false })
+        .limit(500)
+
+      if (error)
+        throw new Error(error.message)
+      this.entries = (data ?? []).map((row: Record<string, any>) => ({
+        id: String(row.id),
+        companyId: row.company_id,
+        userId: row.actor_id ?? '',
+        userName: row.actor_id === app.currentUserId ? app.currentUser.fullName : 'Usuário do sistema',
+        action: row.action,
+        entityType: row.entity_type,
+        entityId: row.entity_id ?? undefined,
+        description: `${row.action} em ${row.entity_type}`,
+        createdAt: row.created_at,
+      }))
+    },
+
+    reset() {
+      this.entries = []
+    },
+
+    /** Entrada transitória; a confirmação durável vem do trigger no reload. */
     record(action: string, entityType: string, description: string, entityId?: string) {
       const app = useAppStore()
 

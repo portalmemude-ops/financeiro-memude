@@ -529,6 +529,8 @@ const invoiceOf = (receivableId: string) => finance.companyInvoices.find(i => i.
           />
           <FileUpload
             v-model="recvProof"
+            entity-type="receivable"
+            :entity-id="recvTarget?.id ?? ''"
             label="Comprovante do recebimento"
           />
           <VAlert
