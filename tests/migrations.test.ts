@@ -19,7 +19,7 @@ const legacySettlementMigration = readFileSync(
 
 const safeCrudMigration = readFileSync(
   new URL(
-    '../supabase/migrations/20260728231500_financial_accounts_safe_crud.sql',
+    '../supabase/migrations/20260728231840_financial_accounts_safe_crud.sql',
     import.meta.url,
   ),
   'utf8',
@@ -27,7 +27,7 @@ const safeCrudMigration = readFileSync(
 
 const hardenedDeleteMigration = readFileSync(
   new URL(
-    '../supabase/migrations/20260728232500_harden_financial_account_deletion.sql',
+    '../supabase/migrations/20260728232004_harden_financial_account_deletion.sql',
     import.meta.url,
   ),
   'utf8',
