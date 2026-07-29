@@ -33,6 +33,14 @@ const hardenedDeleteMigration = readFileSync(
   'utf8',
 )
 
+const editableSettledMigration = readFileSync(
+  new URL(
+    '../supabase/migrations/20260729003400_editable_settled_financial_accounts.sql',
+    import.meta.url,
+  ),
+  'utf8',
+)
+
 assert.match(
   migration,
   /select \* from public\.settle_receivable\([\s\S]+?\)\s+into r;/,
@@ -88,6 +96,24 @@ assert.match(
 )
 
 assert.match(
+  editableSettledMigration,
+  /create or replace function public\.update_payable_entry[\s\S]+?requested_amount < p\.paid_amount[\s\S]+?update public\.transactions[\s\S]+?where payable_id = p\.id/,
+  'a edição de conta paga deve preservar o caixa e recalcular apenas os metadados',
+)
+
+assert.match(
+  editableSettledMigration,
+  /create or replace function public\.update_receivable_entry[\s\S]+?requested_amount < r\.received_amount[\s\S]+?existing_invoice\.id is not null[\s\S]+?has_commission[\s\S]+?update public\.transactions/,
+  'a edição de conta recebida deve proteger caixa, NFS-e e comissão',
+)
+
+assert.match(
+  editableSettledMigration,
+  /elsif requested_rule = 'manual'[\s\S]+?insert into public\.invoices/,
+  'uma conta antiga sem nota deve aceitar o vínculo de uma NFS-e externa',
+)
+
+assert.match(
   hardenedDeleteMigration,
   /create or replace function public\.delete_payable_entry[\s\S]+?security invoker[\s\S]+?create or replace function public\.delete_receivable_entry[\s\S]+?security invoker/,
   'os RPCs expostos devem executar com as permissoes do usuario',
@@ -99,4 +125,4 @@ assert.match(
   'a RLS deve limitar exclusoes a perfis financeiros da empresa',
 )
 
-console.log('Migrations: 11 passaram, 0 falharam.')
+console.log('Migrations: 14 passaram, 0 falharam.')
