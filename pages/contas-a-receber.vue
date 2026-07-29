@@ -75,6 +75,9 @@ const costCenterOptions = computed(() => finance.companyCostCenters.map(c => ({ 
 const dialog = ref(false)
 const formRef = ref()
 const editing = ref<Partial<Receivable>>({})
+const originalReceivedAmount = ref(0)
+const receiptSituation = ref<'received' | 'unreceived'>('unreceived')
+const reopenReason = ref('')
 const initialSituation = ref<'pending' | 'received'>('pending')
 const initialReceipt = ref<ReceiptInput>(newReceipt())
 const externalInvoice = ref<ExternalInvoiceInput>(newExternalInvoice())
@@ -115,6 +118,9 @@ function showMessage(text: string, color: 'success' | 'error' = 'success') {
 
 function openNew() {
   editing.value = { invoiceRule: 'on_receive', recurrence: 'once', dueDate: todayISO(), status: 'open' }
+  originalReceivedAmount.value = 0
+  receiptSituation.value = 'unreceived'
+  reopenReason.value = ''
   initialSituation.value = 'pending'
   initialReceipt.value = newReceipt()
   externalInvoice.value = newExternalInvoice()
@@ -122,6 +128,9 @@ function openNew() {
 }
 function openEdit(r: Receivable) {
   editing.value = structuredClone(toRaw(r))
+  originalReceivedAmount.value = r.receivedAmount ?? 0
+  receiptSituation.value = originalReceivedAmount.value > 0 ? 'received' : 'unreceived'
+  reopenReason.value = ''
 
   // "overdue" é status DERIVADO — não gravar de volta ao editar
   if (editing.value.status === 'overdue')
@@ -140,6 +149,17 @@ function openEdit(r: Receivable) {
   dialog.value = true
 }
 async function save() {
+  const wasEditing = Boolean(editing.value.id)
+
+  const shouldReopen = wasEditing
+    && originalReceivedAmount.value > 0
+    && receiptSituation.value === 'unreceived'
+
+  if (shouldReopen && !reopenReason.value.trim()) {
+    showMessage('Informe o motivo para marcar a conta como não recebida.', 'error')
+
+    return
+  }
   const { valid } = await formRef.value.validate()
   if (!valid)
     return
@@ -149,20 +169,42 @@ async function save() {
     return
   }
   saving.value = true
+  let accountWasSaved = false
   try {
     if (initialSituation.value === 'received') {
       initialReceipt.value.amount = Number(editing.value.amount ?? 0)
       initialReceipt.value.receivedAt = new Date(initialReceipt.value.receivedAt).toISOString()
     }
-    await finance.saveReceivable(editing.value, {
+
+    const saved = await finance.saveReceivable(editing.value, {
       initialReceipt: !editing.value.id && initialSituation.value === 'received' ? initialReceipt.value : undefined,
       externalInvoice: editing.value.invoiceRule === 'manual' ? externalInvoice.value : undefined,
     })
+
+    if (!saved)
+      throw new Error('Não foi possível salvar a conta.')
+    accountWasSaved = true
+    editing.value = structuredClone(toRaw(saved))
+    if (shouldReopen) {
+      const reopened = await finance.reopenReceivable(saved.id, reopenReason.value.trim())
+      if (!reopened)
+        throw new Error('Não foi possível reabrir o recebimento.')
+      editing.value = structuredClone(toRaw(reopened))
+      originalReceivedAmount.value = 0
+    }
     dialog.value = false
-    showMessage(editing.value.id ? 'Conta atualizada com sucesso.' : 'Conta cadastrada com sucesso.')
+    showMessage(shouldReopen
+      ? 'Conta atualizada, recebimento estornado e saldo do caixa recalculado.'
+      : wasEditing ? 'Conta atualizada com sucesso.' : 'Conta cadastrada com sucesso.')
   }
   catch (error) {
-    showMessage(error instanceof Error ? error.message : 'Não foi possível salvar a conta.', 'error')
+    const detail = error instanceof Error ? error.message : 'Não foi possível salvar a conta.'
+
+    const message = accountWasSaved && shouldReopen
+      ? `Os dados da conta foram salvos, mas não foi possível estornar o recebimento: ${detail}`
+      : detail
+
+    showMessage(message, 'error')
   }
   finally {
     saving.value = false
@@ -575,6 +617,44 @@ async function doReverse() {
             @submit.prevent="save"
           >
             <VRow>
+              <VCol
+                v-if="editing.id && originalReceivedAmount > 0"
+                cols="12"
+                class="account-dialog__choice"
+              >
+                <VLabel>Situação do recebimento</VLabel>
+                <VBtnToggle
+                  v-model="receiptSituation"
+                  class="account-dialog__choice-toggle"
+                  color="primary"
+                  mandatory
+                  variant="outlined"
+                >
+                  <VBtn value="received">
+                    {{ editing.status === 'partial' ? 'Recebido parcialmente' : 'Recebido' }}
+                  </VBtn>
+                  <VBtn value="unreceived">
+                    Não recebido
+                  </VBtn>
+                </VBtnToggle>
+                <VAlert
+                  v-if="receiptSituation === 'unreceived'"
+                  type="warning"
+                  variant="tonal"
+                  density="compact"
+                >
+                  O recebimento de {{ formatBRL(originalReceivedAmount) }} será estornado e voltará ao saldo a receber.
+                  A NFS-e e o histórico contábil serão preservados.
+                </VAlert>
+                <VTextarea
+                  v-if="receiptSituation === 'unreceived'"
+                  v-model="reopenReason"
+                  label="Motivo da reabertura"
+                  placeholder="Ex.: recebimento marcado por engano"
+                  rows="2"
+                  :rules="[requiredRule]"
+                />
+              </VCol>
               <VCol
                 v-if="!editing.id"
                 cols="12"

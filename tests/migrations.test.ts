@@ -41,6 +41,14 @@ const editableSettledMigration = readFileSync(
   'utf8',
 )
 
+const reopenSettledMigration = readFileSync(
+  new URL(
+    '../supabase/migrations/20260729014818_reopen_settled_financial_accounts.sql',
+    import.meta.url,
+  ),
+  'utf8',
+)
+
 assert.match(
   migration,
   /select \* from public\.settle_receivable\([\s\S]+?\)\s+into r;/,
@@ -125,4 +133,28 @@ assert.match(
   'a RLS deve limitar exclusoes a perfis financeiros da empresa',
 )
 
-console.log('Migrations: 14 passaram, 0 falharam.')
+assert.match(
+  reopenSettledMigration,
+  /legacy_payments as materialized[\s\S]+?insert into public\.settlements[\s\S]+?set settlement_id = legacy\.settlement_id/,
+  'pagamentos legados devem receber settlement sem duplicar o caixa',
+)
+
+assert.match(
+  reopenSettledMigration,
+  /create or replace function public\.reverse_payable_settlement[\s\S]+?insert into public\.transactions[\s\S]+?is_reversal[\s\S]+?update public\.payables/,
+  'estorno de pagamento deve gerar contrapartida e recalcular a conta',
+)
+
+assert.match(
+  reopenSettledMigration,
+  /create or replace function public\.reopen_payable[\s\S]+?reverse_payable_settlement[\s\S]+?create or replace function public\.reopen_receivable[\s\S]+?reverse_receivable_settlement/,
+  'reaberturas completas devem neutralizar todas as baixas ativas',
+)
+
+assert.match(
+  reopenSettledMigration,
+  /revoke all on function public\.reopen_payable[\s\S]+?from public, anon[\s\S]+?grant execute on function public\.reopen_receivable[\s\S]+?to authenticated/,
+  'RPCs de reabertura devem ser restritos a usuarios autenticados',
+)
+
+console.log('Migrations: 18 passaram, 0 falharam.')

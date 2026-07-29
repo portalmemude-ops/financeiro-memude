@@ -306,6 +306,19 @@ export function useDb() {
         settle_amount: amount,
         settle_at: new Date().toISOString(),
         proof: proofUrl,
+        request_key: crypto.randomUUID(),
+      })
+
+      if (error)
+        throw new Error(error.message)
+
+      return camelize(data as Record<string, unknown>) as unknown as Payable
+    },
+
+    async reopenPayable(id: string, reason: string) {
+      const { data, error } = await db.rpc('reopen_payable', {
+        target_id: id,
+        reversal_reason: reason,
       })
 
       if (error)
@@ -364,6 +377,18 @@ export function useDb() {
         reversed_at: new Date().toISOString(),
         reversal_reason: reason,
         request_key: requestId,
+      })
+
+      if (error)
+        throw new Error(error.message)
+
+      return camelize(data as Record<string, unknown>) as unknown as Receivable
+    },
+
+    async reopenReceivable(id: string, reason: string) {
+      const { data, error } = await db.rpc('reopen_receivable', {
+        target_id: id,
+        reversal_reason: reason,
       })
 
       if (error)

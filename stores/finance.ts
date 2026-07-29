@@ -554,6 +554,7 @@ export const useFinanceStore = defineStore('finance', {
 
       Object.assign(p, saved)
       this.transactions = await useDb().loadTransactions()
+      this.settlements = await useDb().loadSettlements()
 
       // se esta conta é um repasse de comissão, marca o split vinculado como pago
       const split = this.commissionSplits.find(s => s.payableId === id)
@@ -561,6 +562,29 @@ export const useFinanceStore = defineStore('finance', {
         split.status = 'paid'
 
       this.logAudit('pay', 'payable', `Baixa: ${p.description} — ${formatBRL(amount)}`, p.id)
+
+      return saved
+    },
+
+    async reopenPayable(id: string, reason: string) {
+      if (!this.canWrite())
+        return
+      const target = this.payables.find(p => p.id === id)
+      if (!target || (target.paidAmount ?? 0) <= 0)
+        return target
+      const reversedAmount = target.paidAmount ?? 0
+
+      const saved = await useDb().reopenPayable(id, reason)
+
+      Object.assign(target, saved)
+      this.transactions = await useDb().loadTransactions()
+      this.settlements = await useDb().loadSettlements()
+
+      const split = this.commissionSplits.find(s => s.payableId === id)
+      if (split)
+        split.status = 'pending'
+
+      this.logAudit('reverse', 'payable', `Reabertura de pagamento: ${saved.description} — ${formatBRL(reversedAmount)}`, saved.id)
 
       return saved
     },
@@ -690,6 +714,31 @@ export const useFinanceStore = defineStore('finance', {
       }
 
       this.logAudit('reverse', 'receivable', `Estorno de recebimento: ${saved.description} — ${formatBRL(settlement.amount)}`, saved.id)
+
+      return saved
+    },
+
+    async reopenReceivable(id: string, reason: string) {
+      if (!this.canWrite())
+        return
+      const target = this.receivables.find(r => r.id === id)
+      if (!target || (target.receivedAmount ?? 0) <= 0)
+        return target
+
+      const reversedAmount = target.receivedAmount ?? 0
+      const saved = await useDb().reopenReceivable(id, reason)
+
+      Object.assign(target, saved)
+      this.transactions = await useDb().loadTransactions()
+      this.settlements = await useDb().loadSettlements()
+
+      if (saved.commissionInstallmentId) {
+        const refreshed = await loadAppData()
+        if (refreshed)
+          this.hydrate(refreshed.finance)
+      }
+
+      this.logAudit('reverse', 'receivable', `Reabertura de recebimento: ${saved.description} — ${formatBRL(reversedAmount)}`, saved.id)
 
       return saved
     },
