@@ -1,0 +1,1650 @@
+{
+  "entradas": [
+    {
+      "date": "2026-04-18",
+      "description": "Comissão 3 Vendas Soraya (Vista di Mari 1303, 1213 / MLar Cambeba 705) — Pt1",
+      "clientName": "Vista di Mari",
+      "categoryName": "Comissão",
+      "accountName": "Reno PF",
+      "amount": 5655.57,
+      "notes": ""
+    },
+    {
+      "date": "2026-04-23",
+      "description": "Comissão 3 Vendas Soraya (Vista di Mari 1303, 1213 / MLar Cambeba 705) — Pt2",
+      "clientName": "Vista di Mari",
+      "categoryName": "Comissão",
+      "accountName": "Reno PF",
+      "amount": 4891,
+      "notes": ""
+    },
+    {
+      "date": "2026-04-30",
+      "description": "Aporte Reno",
+      "clientName": "Reno",
+      "categoryName": "Outros",
+      "accountName": "C6 — RE9 Imob",
+      "amount": 5000,
+      "notes": "Aporte sócio"
+    },
+    {
+      "date": "2026-05-05",
+      "description": "Comissão Venda Reno — Vibe Meireles Ap. 2103",
+      "clientName": "Vibe Meireles",
+      "categoryName": "Comissão",
+      "accountName": "C6 — RE9 Imob",
+      "amount": 24006.42,
+      "notes": "Corretor: Reno"
+    },
+    {
+      "date": "2026-05-18",
+      "description": "Bonus Venda Reno — Bella Aldeota (Mateus J.)",
+      "clientName": "Bella Aldeota",
+      "categoryName": "Comissão",
+      "accountName": "C6 — RE9 Imob",
+      "amount": 2990.57,
+      "notes": ""
+    },
+    {
+      "date": "2026-05-18",
+      "description": "Comissão Venda Reno — Bella Aldeota (Mateus J.)",
+      "clientName": "Bella Aldeota",
+      "categoryName": "Comissão",
+      "accountName": "C6 — RE9 Imob",
+      "amount": 10800.53,
+      "notes": ""
+    },
+    {
+      "date": "2026-05-18",
+      "description": "Comissão Venda Reno - Maré - Beatriz",
+      "clientName": "Maré",
+      "categoryName": "Comissão",
+      "accountName": "C6 — RE9 Imob",
+      "amount": 29365.41,
+      "notes": ""
+    },
+    {
+      "date": "2026-06-18",
+      "description": "Comissão Venda Reno - MLar Kennedy - Lia e Jonathan",
+      "clientName": "MLar Kennedy",
+      "categoryName": "Comissão",
+      "accountName": "C6 — RE9 Imob",
+      "amount": 14933.56,
+      "notes": ""
+    },
+    {
+      "date": "2026-06-23",
+      "description": "Comissão Venda Reno - MLar  - Rafael Herminio",
+      "clientName": "Mlar Jacarey",
+      "categoryName": "Comissão",
+      "accountName": "C6 — RE9 Imob",
+      "amount": 13505.8,
+      "notes": ""
+    },
+    {
+      "date": "2026-07-01",
+      "description": "Bonus Venda Reno - MLar Kennedy - Lia e Jonathan",
+      "clientName": "MLar Kennedy",
+      "categoryName": "Comissão",
+      "accountName": "C6 — RE9 Imob",
+      "amount": 2894.1,
+      "notes": ""
+    },
+    {
+      "date": "2026-06-01",
+      "description": "Comissão Venda Reno - Gilson - Beatriz",
+      "clientName": "Maré",
+      "categoryName": "Comissão",
+      "accountName": "C6 — RE9 Imob",
+      "amount": 27351.44,
+      "notes": ""
+    },
+    {
+      "date": "2026-07-13",
+      "description": "Comissão Venda Reno — Bella Aldeota",
+      "clientName": "Bella Aldeota",
+      "categoryName": "Comissão",
+      "accountName": "C6 — RE9 Imob",
+      "amount": 19526.19,
+      "notes": ""
+    },
+    {
+      "date": "2026-07-13",
+      "description": "Comissão Venda Reno — Bella Aldeota (Mateus J.)",
+      "clientName": "Bella Aldeota",
+      "categoryName": "Comissão",
+      "accountName": "C6 — RE9 Imob",
+      "amount": 10800.53,
+      "notes": ""
+    },
+    {
+      "date": "2026-07-13",
+      "description": "Comissão Venda Reno — Maré (Mara)",
+      "clientName": "Maré",
+      "categoryName": "Comissão",
+      "accountName": "C6 — RE9 Imob",
+      "amount": 25038.04,
+      "notes": ""
+    },
+    {
+      "date": "2026-07-20",
+      "description": "Comissão Venda Reno — Bella Aldeota (Jaime)",
+      "clientName": "Bella Aldeota",
+      "categoryName": "Comissão",
+      "accountName": "C6 — RE9 Imob",
+      "amount": 17485.5,
+      "notes": ""
+    },
+    {
+      "date": "2026-07-20",
+      "description": "Investimento Tráfego - PraMorar",
+      "clientName": "Bella Aldeota",
+      "categoryName": "Comissão",
+      "accountName": "C6 — RE9 Imob",
+      "amount": 1900,
+      "notes": ""
+    },
+    {
+      "date": "2026-07-21",
+      "description": "Comissão Viva Vida",
+      "clientName": "Viva Vida Sul",
+      "categoryName": "Comissão",
+      "accountName": "C6 — RE9 Imob",
+      "amount": 5788.2,
+      "notes": ""
+    },
+    {
+      "date": "2026-07-27",
+      "description": "Bella Aldeota - Investimento",
+      "clientName": "Bella Aldeota",
+      "categoryName": "Investimento",
+      "accountName": "C6 — RE9 Imob",
+      "amount": 1929.4,
+      "notes": ""
+    },
+    {
+      "date": "2026-07-27",
+      "description": "Bonus - Gilson",
+      "clientName": "Bella Aldeota",
+      "categoryName": "Bônus",
+      "accountName": "C6 — RE9 Imob",
+      "amount": 9647,
+      "notes": ""
+    }
+  ],
+  "saidas": [
+    {
+      "date": "2026-04-22",
+      "description": "Compra 06 cabecas de carregadores",
+      "beneficiaryName": "Amazon",
+      "categoryName": "Equipamento",
+      "paymentMethod": "Cartão",
+      "amount": 143.58,
+      "proof": "Pago - Comprovante - compra de 06 cabeças de carregadores.jpeg"
+    },
+    {
+      "date": "2026-04-23",
+      "description": "Saldo Meta — Bella Aldeota e Bella Rio",
+      "beneficiaryName": "Meta",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 1000,
+      "proof": "Pago - Saldo Campanha - Bella Aldeota e Bella Rio.jpeg"
+    },
+    {
+      "date": "2026-04-23",
+      "description": "Saldo Meta — BSWave e Maré",
+      "beneficiaryName": "Meta",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 750,
+      "proof": "Pago - Saldo Campanha - BS Wave e Mare.jpeg"
+    },
+    {
+      "date": "2026-04-23",
+      "description": "Saldo Meta — MLar Cambeba e Lago",
+      "beneficiaryName": "Meta",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 750,
+      "proof": "Pago - Saldo Campanha - MLar Cambeba e Lago.jpeg"
+    },
+    {
+      "date": "2026-04-23",
+      "description": "Saldo Google — GAds Internacional",
+      "beneficiaryName": "Google",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 400,
+      "proof": "Pago - Saldo Campanha - GAds Internacional.jpeg"
+    },
+    {
+      "date": "2026-04-23",
+      "description": "Compra 08 cabos carregadores + Régua",
+      "beneficiaryName": "Amazon",
+      "categoryName": "Equipamento",
+      "paymentMethod": "Cartão",
+      "amount": 138.03,
+      "proof": ""
+    },
+    {
+      "date": "2026-04-24",
+      "description": "Compra 10 suportes de celulares",
+      "beneficiaryName": "Mercado Livre",
+      "categoryName": "Equipamento",
+      "paymentMethod": "Cartão",
+      "amount": 41.12,
+      "proof": "10 suportes de celulares.jpeg"
+    },
+    {
+      "date": "2026-04-27",
+      "description": "Saldo Google — GAds Fortaleza RE9 Imob",
+      "beneficiaryName": "Google",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 1000,
+      "proof": "Pago - Saldo Campanha - GAds Fortaleza.png"
+    },
+    {
+      "date": "2026-04-27",
+      "description": "Saldo Meta — MLar Cambeba e Lago",
+      "beneficiaryName": "Meta",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 500,
+      "proof": "Pago - Saldo Campanha - Meta MLar Cambeba e Lago.png"
+    },
+    {
+      "date": "2026-05-02",
+      "description": "Saldo Meta — Atlântico, Orizon e Seano",
+      "beneficiaryName": "Meta",
+      "categoryName": "Marketing",
+      "paymentMethod": "Cartão",
+      "amount": 500,
+      "proof": "Pago - Saldo Meta - AtlanticoSeanoOrizon - Maio26.pdf"
+    },
+    {
+      "date": "2026-05-02",
+      "description": "Saldo Meta — Bella Aldeota e Bella Rio",
+      "beneficiaryName": "Meta",
+      "categoryName": "Marketing",
+      "paymentMethod": "Cartão",
+      "amount": 1000,
+      "proof": "Pago - Saldo Meta - Bella Aldeota e Bella Rio - Maio26.pdf"
+    },
+    {
+      "date": "2026-05-02",
+      "description": "Saldo Meta — BSWave e Maré",
+      "beneficiaryName": "Meta",
+      "categoryName": "Marketing",
+      "paymentMethod": "Cartão",
+      "amount": 400,
+      "proof": "Pago - Saldo Meta - BSWave e Mare - Maio26.pdf"
+    },
+    {
+      "date": "2026-05-02",
+      "description": "Saldo Meta — MLar Cambeba e Lago",
+      "beneficiaryName": "Meta",
+      "categoryName": "Marketing",
+      "paymentMethod": "Cartão",
+      "amount": 400,
+      "proof": "Pago - Saldo Meta - MLar Cambeba e Lago - Maio26.pdf"
+    },
+    {
+      "date": "2026-05-05",
+      "description": "Pagamento Comissão Corretor Reno — Vibe 2103",
+      "beneficiaryName": "Reno",
+      "categoryName": "Comissão",
+      "paymentMethod": "Pix",
+      "amount": 12003.21,
+      "proof": "Pago - Comissão Reno - Vibe Meireles Ap2103.jpeg"
+    },
+    {
+      "date": "2026-05-05",
+      "description": "Pagamento Angélica — Vibe Meireles 2103",
+      "beneficiaryName": "Angélica",
+      "categoryName": "Comissão",
+      "paymentMethod": "Pix",
+      "amount": 500,
+      "proof": "Pago - Comissao1 Angelica Mai26.pdf"
+    },
+    {
+      "date": "2026-05-05",
+      "description": "50% Placas Porta RE9 — CEPlacas",
+      "beneficiaryName": "CE Placas",
+      "categoryName": "Equipamento",
+      "paymentMethod": "Pix",
+      "amount": 375,
+      "proof": "Pago - Placas RE9 pt1.pdf"
+    },
+    {
+      "date": "2026-05-07",
+      "description": "Saldo Meta — Atlântico, Orizon e Seano",
+      "beneficiaryName": "Meta",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 2652.04,
+      "proof": "Pago - Saldo Meta - AtlanticoSeanoOrizon 2 - Maio26.jpeg"
+    },
+    {
+      "date": "2026-05-07",
+      "description": "Saldo Meta — Bella Aldeota e Bella Rio",
+      "beneficiaryName": "Meta",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 2000,
+      "proof": "Pago - Saldo Meta - BellaAldeota e Bella Rio 2 - Maio26.jpeg"
+    },
+    {
+      "date": "2026-05-08",
+      "description": "Curso para Corretores — CFCI",
+      "beneficiaryName": "CFCI",
+      "categoryName": "Formação",
+      "paymentMethod": "Pix",
+      "amount": 485,
+      "proof": "Pago - Curso para Corretores.pdf"
+    },
+    {
+      "date": "2026-05-08",
+      "description": "Saldo Meta — Jsmart e Diagonal",
+      "beneficiaryName": "Meta",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 1139,
+      "proof": "Pago - Saldo Meta - Jsmart e Diagonal.pdf"
+    },
+    {
+      "date": "2026-05-08",
+      "description": "Saldo Meta — MLar Cambeba e Lago",
+      "beneficiaryName": "Meta",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 1139,
+      "proof": "Pago - Saldo Meta — MLar Cambeba e Lago"
+    },
+    {
+      "date": "2026-05-08",
+      "description": "Saldo Meta — BSWave e Maré",
+      "beneficiaryName": "Meta",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 1139,
+      "proof": "Pago - Saldo Meta - MLar Cambeba e Lago - Maio26.pdf"
+    },
+    {
+      "date": "2026-05-14",
+      "description": "Compra de 03 celulares",
+      "beneficiaryName": "Bruno",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 750,
+      "proof": "Pago - Celulares"
+    },
+    {
+      "date": "2026-05-14",
+      "description": "Saldo Meta — MLar Cambeba e Lago",
+      "beneficiaryName": "Meta",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 1139,
+      "proof": "Pago - Saldo Meta - Mlar Lago e Cambeba.pdf"
+    },
+    {
+      "date": "2026-05-15",
+      "description": "Saldo Google — Fortaleza",
+      "beneficiaryName": "Google",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 1000,
+      "proof": "Pago - Saldo Google — Fortaleza.jpeg"
+    },
+    {
+      "date": "2026-05-15",
+      "description": "Saldo Google — Imoveis Praia",
+      "beneficiaryName": "Google",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 600,
+      "proof": "Pago - Saldo Google — Imoveis Praia.jpeg"
+    },
+    {
+      "date": "2026-05-15",
+      "description": "Placas do escritório",
+      "beneficiaryName": "CE Placas",
+      "categoryName": "Equipamento",
+      "paymentMethod": "Pix",
+      "amount": 375,
+      "proof": "Pago - Placas Escritório"
+    },
+    {
+      "date": "2026-05-15",
+      "description": "Saldo Google — Outros Estados",
+      "beneficiaryName": "Google",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 500,
+      "proof": "Pago - Saldo Google — Outro Estados.jpeg"
+    },
+    {
+      "date": "2026-05-18",
+      "description": "Comissão Reno - Bella Aldeota (Mateus)",
+      "beneficiaryName": "Reno",
+      "categoryName": "Vendas",
+      "paymentMethod": "Pix",
+      "amount": 5400.47,
+      "proof": "Pago - Comissão Reno - Bella Aldeota"
+    },
+    {
+      "date": "2026-05-18",
+      "description": "Saldo Meta — BSWave e Maré",
+      "beneficiaryName": "Meta",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 1139,
+      "proof": "Pago - Nota Fiscal - Saldo Meta — BSWave e Maré - 18052026.pdf"
+    },
+    {
+      "date": "2026-05-18",
+      "description": "Comissão Angelica - Bella Aldeota (Mateus)",
+      "beneficiaryName": "Angélica",
+      "categoryName": "Vendas",
+      "paymentMethod": "Pix",
+      "amount": 500,
+      "proof": "Pago - Nota Fiscal - Comissão Bella Aldeota - Mateus.pdf"
+    },
+    {
+      "date": "2026-05-18",
+      "description": "Bônus Reno - Bella Aldeota (Mateus)",
+      "beneficiaryName": "Reno",
+      "categoryName": "Vendas",
+      "paymentMethod": "Pix",
+      "amount": 1495.28,
+      "proof": "Pago - Bônus  Bella Aldeota -  Reno"
+    },
+    {
+      "date": "2026-05-20",
+      "description": "Saldo Meta - MLar Cambeba e Lago",
+      "beneficiaryName": "Meta",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 1139,
+      "proof": "Pago - Nota Fiscal - Mlar Lago e Cambeba.pdf"
+    },
+    {
+      "date": "2026-05-22",
+      "description": "Saldo Meta - La Vie e Inc Parquelandia",
+      "beneficiaryName": "Meta",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 800,
+      "proof": "Pago - Saldo Meta - La Vie e Inc Parquelandia"
+    },
+    {
+      "date": "2026-05-22",
+      "description": "Comissão Angelica - Maré - Beatriz",
+      "beneficiaryName": "Angélica",
+      "categoryName": "Vendas",
+      "paymentMethod": "Pix",
+      "amount": 500,
+      "proof": "Pago - Nota Fiscal - Comissão Angélica.pdf"
+    },
+    {
+      "date": "2026-05-24",
+      "description": "Comissão Felipe- Maré - Beatriz",
+      "beneficiaryName": "Felipe",
+      "categoryName": "Vendas",
+      "paymentMethod": "Pix",
+      "amount": 250,
+      "proof": "Pago- Nota Fiscal - Comissão Felipe.pdf"
+    },
+    {
+      "date": "2026-05-24",
+      "description": "Comissão Pedro- Maré - Beatriz",
+      "beneficiaryName": "Pedro",
+      "categoryName": "Vendas",
+      "paymentMethod": "Pix",
+      "amount": 250,
+      "proof": "Nota Fiscal - Comissão Pedro.PDF"
+    },
+    {
+      "date": "2026-05-27",
+      "description": "Saldo Meta - Atlântico/Orizon/Seano",
+      "beneficiaryName": "Meta",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 1000,
+      "proof": "Pago - Saldo Meta - Atlântico/Orizon/Seano - 27/05"
+    },
+    {
+      "date": "2026-05-27",
+      "description": "Saldo Meta - Mlar Cambeba / Lago",
+      "beneficiaryName": "Meta",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 1000,
+      "proof": "Pago - Saldo Meta - Mlar lago/cambeba - 27/05"
+    },
+    {
+      "date": "2026-05-27",
+      "description": "Saldo Google - Re9 Imob Fortaleza",
+      "beneficiaryName": "Google",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 1000,
+      "proof": "Pago - Saldo Googld - Re9 Imob Fortaleza - 27/05"
+    },
+    {
+      "date": "2026-05-27",
+      "description": "Salário Angélica",
+      "beneficiaryName": "Angélica",
+      "categoryName": "Funcionária",
+      "paymentMethod": "Pix",
+      "amount": 2500,
+      "proof": "Pago - Nota Fiscal - Salário - Angélica.pdf"
+    },
+    {
+      "date": "2026-05-29",
+      "description": "Saldo Meta - Atlântico/Orizon/Seano",
+      "beneficiaryName": "Meta",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 1000,
+      "proof": "Pago - Saldo Meta - AtlanticoSeanoOrizon 3 - Maio26.jpeg"
+    },
+    {
+      "date": "2026-05-29",
+      "description": "Saldo Meta - BSWave e Maré",
+      "beneficiaryName": "Meta",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 500,
+      "proof": "Pago - Saldo Meta - BSWave e Mare - Maio26 2.jpeg"
+    },
+    {
+      "date": "2026-06-01",
+      "description": "Comissão Reno - Bella Aldeota (Mateus)",
+      "beneficiaryName": "Reno",
+      "categoryName": "Vendas",
+      "paymentMethod": "Pix",
+      "amount": 13623.4,
+      "proof": "Pago - Comissão Reno.jpeg"
+    },
+    {
+      "date": "2026-06-02",
+      "description": "Saldo Meta - Atlântico/Orizon/Seano",
+      "beneficiaryName": "Meta",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 1139,
+      "proof": "Pago - Atlântico  Orizon  Seano  Inc Cambeba.pdf"
+    },
+    {
+      "date": "2026-06-02",
+      "description": "Saldo Meta — BSWave e Maré",
+      "beneficiaryName": "Meta",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 570,
+      "proof": "Pago - BS Wave  Maré.pdf"
+    },
+    {
+      "date": "2026-06-02",
+      "description": "Saldo Meta - Mlar Cambeba / Lago",
+      "beneficiaryName": "Meta",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 570,
+      "proof": "Pago - MLar Cambeba  MLar Lago.pdf"
+    },
+    {
+      "date": "2026-06-04",
+      "description": "Saldo Google - RE9 Imob - Imóveis Praia",
+      "beneficiaryName": "Google",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 500,
+      "proof": "Pgto Google - RE9Imob Imoveis Praia - Jun26.pdf"
+    },
+    {
+      "date": "2026-06-04",
+      "description": "Saldo Google - RE9 Imob - Internacional",
+      "beneficiaryName": "Google",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 500,
+      "proof": "Pgto Google - RE9Imob Internacional - Jun26.pdf"
+    },
+    {
+      "date": "2026-06-04",
+      "description": "Saldo Meta - Atlântico / Orizon / Seano / IncCambeba",
+      "beneficiaryName": "Meta",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 500,
+      "proof": "Pgto Meta - Atlantico, Orizon, Seano, Inc Cambeba.pdf"
+    },
+    {
+      "date": "2026-06-04",
+      "description": "Saldo Meta - Bella Aldeota / Bella Rio / BS Rubi",
+      "beneficiaryName": "Meta",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 1000,
+      "proof": "Pgto Meta - Bella Aldeota, Bella Rio, BS Rubi.pdf"
+    },
+    {
+      "date": "2026-06-04",
+      "description": "Saldo Meta - BSWave / Maré / BC Cumbuco / VistaCoqueiral",
+      "beneficiaryName": "Meta",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 500,
+      "proof": "Pgto Meta - BS Wave, Maré, BC Cumbuco, Vista Coqueiral.pdf"
+    },
+    {
+      "date": "2026-06-04",
+      "description": "Saldo Meta - Mlar Cambeba / Lago",
+      "beneficiaryName": "Meta",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 500,
+      "proof": "Pgto Meta - MLar Cameba, MLar Lago.pdf"
+    },
+    {
+      "date": "2026-06-04",
+      "description": "Saldo Meta - La Vie / Inc Parquelandia",
+      "beneficiaryName": "Meta",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 300,
+      "proof": "Pgto Meta - La Vie, Inc Parquelandia.pdf"
+    },
+    {
+      "date": "2026-06-04",
+      "description": "Saldo Google - RE9 Imob - Fortaleza",
+      "beneficiaryName": "Google",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 1000,
+      "proof": "Pgto Google - RE9Imob Fortaleza - Jun26.pdf"
+    },
+    {
+      "date": "2026-06-10",
+      "description": "Comissão Contabilidade",
+      "beneficiaryName": "Souza",
+      "categoryName": "Contabilidade",
+      "paymentMethod": "Pix",
+      "amount": 300,
+      "proof": "Pago - Contabilidade.jpeg"
+    },
+    {
+      "date": "2026-06-11",
+      "description": "Imposto Maio/26",
+      "beneficiaryName": "Receita Federal",
+      "categoryName": "Financeiro",
+      "paymentMethod": "Pix",
+      "amount": 4700.39,
+      "proof": "Pago - Impostos.jpeg"
+    },
+    {
+      "date": "2026-06-18",
+      "description": "Salário Angélica",
+      "beneficiaryName": "Angélica",
+      "categoryName": "Funcionário",
+      "paymentMethod": "Pix",
+      "amount": 2500,
+      "proof": "Pago - Salário Angélica.jpeg"
+    },
+    {
+      "date": "2026-06-18",
+      "description": "Pgto Google RE9 Imob - Fortaleza",
+      "beneficiaryName": "Google",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 1000,
+      "proof": "Pago - Salário Angélica.jpeg"
+    },
+    {
+      "date": "2026-06-18",
+      "description": "Pgto Google RE9 Imob - Imóveis Praia",
+      "beneficiaryName": "Google",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 400,
+      "proof": "Pago - Google RE9 Imob - Imóveis Praia.jpeg"
+    },
+    {
+      "date": "2026-06-18",
+      "description": "Pgto Google RE9 Imob - Outros Estados",
+      "beneficiaryName": "Google",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 500,
+      "proof": "Pago - Google RE9 Imob - Outros Estados.jpeg"
+    },
+    {
+      "date": "2026-06-18",
+      "description": "Pgto Google RE9 Imob - Internacional",
+      "beneficiaryName": "Google",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 300,
+      "proof": "Pago - Google RE9 Imob - Internacional.jpeg"
+    },
+    {
+      "date": "2026-06-18",
+      "description": "Comissão Reno - MLar Kennedy (Lia e Jonathan)",
+      "beneficiaryName": "Reno",
+      "categoryName": "Vendas",
+      "paymentMethod": "Pix",
+      "amount": 7466.78,
+      "proof": "Pago - Comissao Reno MLar Kennedy Lia e Jonathan.jpeg"
+    },
+    {
+      "date": "2026-06-19",
+      "description": "Saldo Meta - Atlântico  Orizon  Seano  Inc Cambeba",
+      "beneficiaryName": "Meta",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 1000,
+      "proof": "Pago -Saldo Meta - Atlântico  Orizon  Seano  Inc Cambeba.jpeg"
+    },
+    {
+      "date": "2026-06-19",
+      "description": "Comissão Angélica",
+      "beneficiaryName": "Angélica",
+      "categoryName": "Vendas",
+      "paymentMethod": "Pix",
+      "amount": 500,
+      "proof": "Comissão Angélica.jpeg"
+    },
+    {
+      "date": "2026-06-19",
+      "description": "Comissão Felipe",
+      "beneficiaryName": "Felipe",
+      "categoryName": "Vendas",
+      "paymentMethod": "Pix",
+      "amount": 250,
+      "proof": "Comissão Felipe.jpeg"
+    },
+    {
+      "date": "2026-06-19",
+      "description": "Saldo Meta - Bella Aldeota Bella Rio  BS Rubi",
+      "beneficiaryName": "Meta",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 1000,
+      "proof": "Pago - Saldo Meta - Bella Aldeota Bella Rio  BS Rubi.jpeg"
+    },
+    {
+      "date": "2026-06-19",
+      "description": "Saldo Meta - BSWave  Maré  BC Cumbuco  Vista Coqueiral",
+      "beneficiaryName": "Meta",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 1000,
+      "proof": "Saldo Meta - BSWave  Maré  BC Cumbuco  Vista Coqueiral.jpeg"
+    },
+    {
+      "date": "2026-06-19",
+      "description": "Saldo Meta - MLar Cambeba  MLar Lago",
+      "beneficiaryName": "Meta",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 1000,
+      "proof": "Saldo Meta - MLar Cambeba  MLar Lago.jpeg"
+    },
+    {
+      "date": "2026-06-19",
+      "description": "Saldo Meta - La Vie  Inc Parquelândia",
+      "beneficiaryName": "Meta",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 1000,
+      "proof": "Saldo Meta - La Vie  Inc Parquelândia.jpeg"
+    },
+    {
+      "date": "2026-06-22",
+      "description": "Comissão Pedro",
+      "beneficiaryName": "Pedro",
+      "categoryName": "Vendas",
+      "paymentMethod": "Pix",
+      "amount": 250,
+      "proof": "Comissão Pedro.jpeg"
+    },
+    {
+      "date": "2026-06-22",
+      "description": "Pgto Saldo Google - RE9 Imob - Interior",
+      "beneficiaryName": "Google",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 50,
+      "proof": "Pgto Saldo Google - RE9 Imob - Interior.jpeg"
+    },
+    {
+      "date": "2026-06-23",
+      "description": "Saldo Google - RE9 Imob - Interior",
+      "beneficiaryName": "Google",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 500,
+      "proof": "Saldo Google - RE9 Imob - Interior.jpeg"
+    },
+    {
+      "date": "2026-06-23",
+      "description": "Saldo Google - RE9 Imob - Fortaleza",
+      "beneficiaryName": "Google",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 1000,
+      "proof": "Saldo Google - RE9 Imob - Fortaleza.jpeg"
+    },
+    {
+      "date": "2026-06-29",
+      "description": "Comissão Angélica",
+      "beneficiaryName": "Angélica",
+      "categoryName": "Vendas",
+      "paymentMethod": "Pix",
+      "amount": 500,
+      "proof": "Pago - Comissão Angélica.jpeg"
+    },
+    {
+      "date": "2026-06-29",
+      "description": "Creci Assis",
+      "beneficiaryName": "Assis",
+      "categoryName": "Vendas",
+      "paymentMethod": "Pix",
+      "amount": 689,
+      "proof": "Pago - Creci Assis.jpeg"
+    },
+    {
+      "date": "2026-06-29",
+      "description": "Comissão Reno",
+      "beneficiaryName": "Reno",
+      "categoryName": "Vendas",
+      "paymentMethod": "Pix",
+      "amount": 6752.9,
+      "proof": "Pago - Comissão Reno - 29062026.jpeg"
+    },
+    {
+      "date": "2026-06-29",
+      "description": "Saldo Meta - Atlântico, Seano, Orizon e Inc Cambeba",
+      "beneficiaryName": "Meta",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 1000,
+      "proof": "Pago - Saldo Meta - Atlântico, Seano, Orizon e Inc Cambeba.jpeg"
+    },
+    {
+      "date": "2026-06-30",
+      "description": "Saldo Google - Re9 Imob - Outros Estados",
+      "beneficiaryName": "Meta",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 400,
+      "proof": "Saldo Google - RE9 Imob - Outros Estados.jpeg"
+    },
+    {
+      "date": "2026-06-30",
+      "description": "Saldo Google - Re9 Imob - Interior",
+      "beneficiaryName": "Meta",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 300,
+      "proof": "Saldo Google - RE9 Imob - Interior (1).jpeg"
+    },
+    {
+      "date": "2026-06-30",
+      "description": "Saldo Google - Re9 Imob - Imoveis Praia",
+      "beneficiaryName": "Meta",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 400,
+      "proof": "Saldo Google - RE9 Imob - Imóveis Praia.jpeg"
+    },
+    {
+      "date": "2026-06-30",
+      "description": "Saldo Google - RE9 Imob - Fortaleza",
+      "beneficiaryName": "Meta",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 1000,
+      "proof": "Saldo Google - RE9 Imob - Fortaleza (1).jpeg"
+    },
+    {
+      "date": "2026-06-30",
+      "description": "Saldo Google - Re9 Imob - Internacional",
+      "beneficiaryName": "Meta",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 300,
+      "proof": "Saldo Google - RE9 Imob - Internacional.jpeg"
+    },
+    {
+      "date": "2026-07-01",
+      "description": "Bônus Reno",
+      "beneficiaryName": "Reno",
+      "categoryName": "Vendas",
+      "paymentMethod": "Pix",
+      "amount": 1492.05,
+      "proof": "Pago - Bônus Reno.jpeg"
+    },
+    {
+      "date": "2026-07-01",
+      "description": "Captação Assis",
+      "beneficiaryName": "Assis",
+      "categoryName": "Captação",
+      "paymentMethod": "Pix",
+      "amount": 100,
+      "proof": "Pago - Captação Assis.jpeg"
+    },
+    {
+      "date": "2026-07-01",
+      "description": "Comissão Angélica",
+      "beneficiaryName": "Angélica",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 500,
+      "proof": "Pago - Comissão Angélica - 01072026.jpeg"
+    },
+    {
+      "date": "2026-07-01",
+      "description": "Comissão Reno",
+      "beneficiaryName": "Reno",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 13675.72,
+      "proof": "Pago - Comissão Reno - 01072026.jpeg"
+    },
+    {
+      "date": "2026-07-02",
+      "description": "Pagamento dos Chips",
+      "beneficiaryName": "Reno",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 1500,
+      "proof": "Pago - Chips.jpeg"
+    },
+    {
+      "date": "2026-07-07",
+      "description": "Imposto Junho/26",
+      "beneficiaryName": "Receita Federal",
+      "categoryName": "Financeiro",
+      "paymentMethod": "Pix",
+      "amount": 6331.53,
+      "proof": "Pago - Impostos Junho.pdf"
+    },
+    {
+      "date": "2026-07-13",
+      "description": "Saldo Google - RE9 Imob - Fortaleza",
+      "beneficiaryName": "Meta",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 1000,
+      "proof": "Saldo Google - RE9 Imob - Fortaleza - 1000.jpeg"
+    },
+    {
+      "date": "2026-07-13",
+      "description": "Saldo Google - RE9 Imob - Imóveis Praia",
+      "beneficiaryName": "Meta",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 500,
+      "proof": "Saldo Google - RE9 Imob - Imóveis Praia - 500.jpeg"
+    },
+    {
+      "date": "2026-07-13",
+      "description": "Saldo Google - RE9 Imob - Internacional",
+      "beneficiaryName": "Meta",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 400,
+      "proof": "Saldo Google - RE9 Imob - Internacional - 400.jpeg"
+    },
+    {
+      "date": "2026-07-13",
+      "description": "Saldo Google - RE9 Imob - Outros Estados",
+      "beneficiaryName": "Meta",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 400,
+      "proof": "Saldo Google - RE9 Imob - Outros Estados - 400.jpeg"
+    },
+    {
+      "date": "2026-07-14",
+      "description": "Adiantamento Quinzenal",
+      "beneficiaryName": "Angélica",
+      "categoryName": "Funcionário",
+      "paymentMethod": "Pix",
+      "amount": 1250,
+      "proof": "Pago - Adiantamento Quinzenal.jpeg"
+    },
+    {
+      "date": "2026-07-14",
+      "description": "Comissão Reno",
+      "beneficiaryName": "Reno",
+      "categoryName": "Vendas",
+      "paymentMethod": "Pix",
+      "amount": 15163.36,
+      "proof": "Pago - Comissão Reno 15k.jpeg"
+    },
+    {
+      "date": "2026-07-20",
+      "description": "Comissão Reno",
+      "beneficiaryName": "Reno",
+      "categoryName": "Vendas",
+      "paymentMethod": "Pix",
+      "amount": 12977.11,
+      "proof": "Pago - Comissão Reno 12k.jpegg"
+    },
+    {
+      "date": "2026-07-20",
+      "description": "Comissão Angélica",
+      "beneficiaryName": "Angélica",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 500,
+      "proof": "Pago - Comissão Angélica 1.jpeg"
+    },
+    {
+      "date": "2026-07-20",
+      "description": "Serviço Financeiro",
+      "beneficiaryName": "Nummis",
+      "categoryName": "Financeiro",
+      "paymentMethod": "Pix",
+      "amount": 1500,
+      "proof": "Pago - Pagamento para Nummis.jpeg"
+    },
+    {
+      "date": "2026-07-20",
+      "description": "Comissão Reno",
+      "beneficiaryName": "Reno",
+      "categoryName": "Vendas",
+      "paymentMethod": "Pix",
+      "amount": 4371.37,
+      "proof": "Pago - Comissão Reno 4k.jpeg"
+    },
+    {
+      "date": "2026-07-20",
+      "description": "Comissão Angélica",
+      "beneficiaryName": "Angélica",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 500,
+      "proof": "Pago - Comissão Angélica 2.jpeg"
+    },
+    {
+      "date": "2026-07-20",
+      "description": "Comissão Contabilidade",
+      "beneficiaryName": "Contador",
+      "categoryName": "Contabilidade",
+      "paymentMethod": "Pix",
+      "amount": 300,
+      "proof": "Pago - Comissão Contabilidade.jpeg"
+    },
+    {
+      "date": "2026-07-20",
+      "description": "Saldo Meta - Bella Aldeota, Bella Rio, Oasy e Myrage",
+      "beneficiaryName": "Meta",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 2000,
+      "proof": "Pago - Saldo Meta - Bella Aldeota, Bella Rio, Oasy e Myrage.jpeg"
+    },
+    {
+      "date": "2026-07-20",
+      "description": "Saldo Meta - Mlar Cambeba, Lago e Inc",
+      "beneficiaryName": "Meta",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 1500,
+      "proof": "Pago - Saldo Meta - Mlar Cambeba, Lago e Inc.jpeg"
+    },
+    {
+      "date": "2026-07-20",
+      "description": "Saldo Google - Re9 Imob Fortaleza",
+      "beneficiaryName": "Google",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 1000,
+      "proof": "Pago - Saldo Google - Re9 Imob Fortaleza.jpeg"
+    },
+    {
+      "date": "2026-07-20",
+      "description": "Saldo Google - Re9 Imob Interior",
+      "beneficiaryName": "Google",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 300,
+      "proof": "Pago - Saldo Google - Re9 Imob Interior.jpeg"
+    },
+    {
+      "date": "2026-07-20",
+      "description": "Saldo Google - Re9 Imob Outros Estados",
+      "beneficiaryName": "Google",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 400,
+      "proof": "Pago - Saldo Google - Re9 Imob Outros Estados.jpeg"
+    },
+    {
+      "date": "2026-07-28",
+      "description": "Pagamento OLX",
+      "beneficiaryName": "Reno",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 275.9,
+      "proof": "Pago - OLX.jpeg"
+    },
+    {
+      "date": "2026-07-29",
+      "description": "Saldo Google 500 - RE9 Imob - Outros Estados",
+      "beneficiaryName": "Google",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 500,
+      "proof": "Pago - Saldo Google 500 - RE9 Imob - Outros Estados.jpeg"
+    },
+    {
+      "date": "2026-07-29",
+      "description": "Saldo Meta 2000 - Bella Aldeota, Rio, Oasy e Myrage",
+      "beneficiaryName": "Meta",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 2000,
+      "proof": "Pago - Saldo Meta 2000 - Bella Aldeota, Rio, Oasy e Myrage.jpeg"
+    },
+    {
+      "date": "2026-07-29",
+      "description": "Saldo Meta 1000 - MLar Cambeba, Lago e Inc Cambeba",
+      "beneficiaryName": "Meta",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 1000,
+      "proof": "Pago - Saldo Meta 1000 - MLar Cambeba, Lago e Inc Cambeba.jpeg"
+    },
+    {
+      "date": "2026-07-29",
+      "description": "Saldo Meta 2000 - Maré, BS Wave e Vista Coqueiral",
+      "beneficiaryName": "Meta",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 2000,
+      "proof": "Pago - Saldo Meta 2000 - Maré, BS Wave e Vista Coqueiral.jpeg"
+    },
+    {
+      "date": "2026-07-29",
+      "description": "Saldo Meta 1000 - La Vie e Inc Parquelândia",
+      "beneficiaryName": "Meta",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 1000,
+      "proof": "Pago - Saldo Meta 1000 - La Vie e Inc Parquelândia.jpeg"
+    },
+    {
+      "date": "2026-07-29",
+      "description": "Saldo Google 2000 - RE9 Imob - Fortaleza",
+      "beneficiaryName": "Google",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 2000,
+      "proof": "Pago - Saldo Google 2000 - RE9 Imob - Fortaleza.jpegg"
+    },
+    {
+      "date": "2026-07-29",
+      "description": "Saldo Google 1000 - RE9 Imob - Imóveis Praia",
+      "beneficiaryName": "Google",
+      "categoryName": "Marketing",
+      "paymentMethod": "Pix",
+      "amount": 1000,
+      "proof": "Pago - Saldo Google 1000 - RE9 Imob - Imóveis Praia.jpeg"
+    }
+  ],
+  "receivables": [
+    {
+      "description": "Comissão Soraya — Vista di Mari 1303",
+      "clientName": "Nonato Gabriel Figueira",
+      "amount": 2961.23,
+      "dueDate": "2026-04-18",
+      "status": "received",
+      "receivedAt": "2026-04-18",
+      "notes": "Corretor: Soraya"
+    },
+    {
+      "description": "Comissão Soraya — Vista di Mari 1213",
+      "clientName": "Clemilton Lima de Souza",
+      "amount": 3260.96,
+      "dueDate": "2026-04-23",
+      "status": "received",
+      "receivedAt": "2026-04-23",
+      "notes": "Corretor: Soraya"
+    },
+    {
+      "description": "Comissão André — MLar Kennedy Bônus R$5.000",
+      "clientName": "Lucirene Souza",
+      "amount": 2237.75,
+      "dueDate": "2026-06-30",
+      "status": "open",
+      "receivedAt": null,
+      "notes": "Corretor: André"
+    },
+    {
+      "description": "Comissão André — MLar Kennedy 1106",
+      "clientName": "Lucirene Souza",
+      "amount": 6648.8,
+      "dueDate": "2026-01-29",
+      "status": "received",
+      "receivedAt": "2026-01-29",
+      "notes": "Corretor: André"
+    },
+    {
+      "description": "Comissão André — Bônus",
+      "clientName": "Lucirene Souza",
+      "amount": 2500,
+      "dueDate": "2026-08-01",
+      "status": "open",
+      "receivedAt": null,
+      "notes": "Corretor: André"
+    },
+    {
+      "description": "Comissão André — MLar Cambeba 1104",
+      "clientName": "Luana",
+      "amount": 6262.2,
+      "dueDate": "2026-06-30",
+      "status": "open",
+      "receivedAt": null,
+      "notes": "Corretor: André"
+    },
+    {
+      "description": "Comissão André — MLar Cambeba 905",
+      "clientName": "Vinicius",
+      "amount": 6219.34,
+      "dueDate": "2026-06-30",
+      "status": "open",
+      "receivedAt": null,
+      "notes": "Corretor: André"
+    },
+    {
+      "description": "Comissão Lucas — MLar Cambeba 705",
+      "clientName": "Juliana Pontes",
+      "amount": 4324.38,
+      "dueDate": "2026-08-01",
+      "status": "received",
+      "receivedAt": "2026-08-01",
+      "notes": "Corretor: Lucas. Conferir: data de receb. é futura (01/08) — checar se já entrou ou é erro de digitação"
+    },
+    {
+      "description": "Comissão Reno — MLar Jacarey 808",
+      "clientName": "Rafael Hermínio",
+      "amount": 6752.9,
+      "dueDate": "2026-06-30",
+      "status": "received",
+      "receivedAt": "2026-06-30",
+      "notes": "Corretor: Reno"
+    },
+    {
+      "description": "Comissão Reno — Bella Aldeota 601",
+      "clientName": "Rafael Ditolvo",
+      "amount": 9763.1,
+      "dueDate": "2026-07-07",
+      "status": "received",
+      "receivedAt": "2026-07-07",
+      "notes": "Corretor: Reno"
+    },
+    {
+      "description": "Comissão Reno — Bella Aldeota 1306",
+      "clientName": "Marcio Anderson",
+      "amount": 16971.18,
+      "dueDate": "2026-07-31",
+      "status": "open",
+      "receivedAt": null,
+      "notes": "Corretor: Reno"
+    },
+    {
+      "description": "Comissão Reno — Maré/Marquise",
+      "clientName": "Beatriz Dias",
+      "amount": 13623.4,
+      "dueDate": "2026-05-15",
+      "status": "received",
+      "receivedAt": "2026-05-15",
+      "notes": "Corretor: Reno"
+    },
+    {
+      "description": "Comissão Reno — Vibe Meireles 2103",
+      "clientName": "Sávio Santanta",
+      "amount": 11137.22,
+      "dueDate": "2026-05-05",
+      "status": "received",
+      "receivedAt": "2026-05-05",
+      "notes": "Corretor: Reno"
+    },
+    {
+      "description": "Comissão Reno — Bella Aldeota (Mateus)",
+      "clientName": "Mateus Jereissati",
+      "amount": 10800.53,
+      "dueDate": "2026-05-31",
+      "status": "received",
+      "receivedAt": "2026-05-31",
+      "notes": "Corretor: Reno"
+    },
+    {
+      "description": "Comissão Reno — Bella Aldeota (Mateus)",
+      "clientName": "Mateus Jereissati",
+      "amount": 10800.53,
+      "dueDate": "2026-07-14",
+      "status": "received",
+      "receivedAt": "2026-07-14",
+      "notes": "Corretor: Reno"
+    },
+    {
+      "description": "Comissão Reno — Bella Aldeota Bônus (Mateus)",
+      "clientName": "Mateus Jereissati",
+      "amount": 1495,
+      "dueDate": "2026-05-31",
+      "status": "received",
+      "receivedAt": "2026-05-31",
+      "notes": "Corretor: Reno"
+    },
+    {
+      "description": "Comissão Reno — MLar Kennedy",
+      "clientName": "Lia de Sousa Alexandre e Jonathan Silva Santos",
+      "amount": 7466.78,
+      "dueDate": "2026-06-19",
+      "status": "received",
+      "receivedAt": "2026-06-19",
+      "notes": "Corretor: Reno"
+    },
+    {
+      "description": "Comissão Reno — Maré/Marquise",
+      "clientName": "Gilson Ferreira de Andrade",
+      "amount": 13675.72,
+      "dueDate": "2026-06-30",
+      "status": "received",
+      "receivedAt": "2026-06-30",
+      "notes": "Corretor: Reno"
+    },
+    {
+      "description": "Comissão Reno — Bella Aldeota 603",
+      "clientName": "José Jaime do Nascimento",
+      "amount": 8742.75,
+      "dueDate": "2026-07-14",
+      "status": "received",
+      "receivedAt": "2026-07-14",
+      "notes": "Corretor: Reno"
+    },
+    {
+      "description": "Comissão Reno — Enjoy 1201",
+      "clientName": "Mara Tailane Moreira da Silva",
+      "amount": 11462.65,
+      "dueDate": "2026-08-26",
+      "status": "open",
+      "receivedAt": null,
+      "notes": "Corretor: Reno"
+    }
+  ],
+  "payables": [
+    {
+      "description": "Repasse — Vista di Mari 1303",
+      "supplierName": "Soraya",
+      "categoryName": "Comissão",
+      "amount": 5923.32,
+      "dueDate": "2026-04-18",
+      "paymentMethod": "Pix",
+      "status": "paid",
+      "paidAt": "2026-04-18",
+      "notes": ""
+    },
+    {
+      "description": "Repasse — Vista di Mari 1213",
+      "supplierName": "Soraya",
+      "categoryName": "Comissão",
+      "amount": 6521.86,
+      "dueDate": "2026-04-23",
+      "paymentMethod": "Pix",
+      "status": "paid",
+      "paidAt": "2026-04-23",
+      "notes": ""
+    },
+    {
+      "description": "Repasse — MLar Kennedy 1106",
+      "supplierName": "André",
+      "categoryName": "Comissão",
+      "amount": 6648.8,
+      "dueDate": "2026-01-29",
+      "paymentMethod": "Pix",
+      "status": "paid",
+      "paidAt": "2026-01-29",
+      "notes": ""
+    },
+    {
+      "description": "Repasse — Bônus",
+      "supplierName": "André",
+      "categoryName": "Comissão",
+      "amount": 2237.75,
+      "dueDate": "2026-08-01",
+      "paymentMethod": "Pix",
+      "status": "open",
+      "paidAt": null,
+      "notes": ""
+    },
+    {
+      "description": "Repasse — MLar Cambeba 1104",
+      "supplierName": "André",
+      "categoryName": "Comissão",
+      "amount": 6262.2,
+      "dueDate": "2026-06-30",
+      "paymentMethod": "Pix",
+      "status": "open",
+      "paidAt": null,
+      "notes": ""
+    },
+    {
+      "description": "Repasse — MLar Cambeba 905",
+      "supplierName": "André",
+      "categoryName": "Comissão",
+      "amount": 6219.34,
+      "dueDate": "2026-06-30",
+      "paymentMethod": "Pix",
+      "status": "open",
+      "paidAt": null,
+      "notes": ""
+    },
+    {
+      "description": "Repasse — MLar Cambeba 705",
+      "supplierName": "Lucas",
+      "categoryName": "Comissão",
+      "amount": 6486.58,
+      "dueDate": "2026-08-01",
+      "paymentMethod": "Pix",
+      "status": "paid",
+      "paidAt": "2026-08-01",
+      "notes": "Conferir: data de pgto é futura (01/08) — checar se já saiu ou é erro de digitação"
+    },
+    {
+      "description": "Repasse — MLar Jacarey 808",
+      "supplierName": "Reno",
+      "categoryName": "Comissão",
+      "amount": 6752.9,
+      "dueDate": "2026-06-30",
+      "paymentMethod": "Pix",
+      "status": "paid",
+      "paidAt": "2026-06-30",
+      "notes": ""
+    },
+    {
+      "description": "Repasse — Bella Aldeota 601",
+      "supplierName": "Reno",
+      "categoryName": "Comissão",
+      "amount": 9763.1,
+      "dueDate": "2026-07-07",
+      "paymentMethod": "Pix",
+      "status": "paid",
+      "paidAt": "2026-07-07",
+      "notes": ""
+    },
+    {
+      "description": "Repasse — Bella Aldeota 1306",
+      "supplierName": "Reno",
+      "categoryName": "Comissão",
+      "amount": 8485.59,
+      "dueDate": "2026-08-31",
+      "paymentMethod": "Pix",
+      "status": "open",
+      "paidAt": null,
+      "notes": ""
+    },
+    {
+      "description": "Repasse — Bella Aldeota 1307",
+      "supplierName": "Angélica",
+      "categoryName": "Comissão",
+      "amount": 500,
+      "dueDate": "2026-08-31",
+      "paymentMethod": "Pix",
+      "status": "open",
+      "paidAt": null,
+      "notes": ""
+    },
+    {
+      "description": "Repasse — Maré/Marquise (Beatriz)",
+      "supplierName": "Reno",
+      "categoryName": "Comissão",
+      "amount": 13623.4,
+      "dueDate": "2026-05-15",
+      "paymentMethod": "Pix",
+      "status": "paid",
+      "paidAt": "2026-05-15",
+      "notes": ""
+    },
+    {
+      "description": "Repasse — Vibe Meireles 2103",
+      "supplierName": "Reno",
+      "categoryName": "Comissão",
+      "amount": 11137.22,
+      "dueDate": "2026-05-05",
+      "paymentMethod": "Pix",
+      "status": "paid",
+      "paidAt": "2026-05-05",
+      "notes": ""
+    },
+    {
+      "description": "Repasse — Bella Aldeota (Mateus)",
+      "supplierName": "Reno",
+      "categoryName": "Comissão",
+      "amount": 10800.53,
+      "dueDate": "2026-05-31",
+      "paymentMethod": "Pix",
+      "status": "paid",
+      "paidAt": "2026-05-31",
+      "notes": "Parcela 1/2"
+    },
+    {
+      "description": "Repasse — Bella Aldeota (Mateus)",
+      "supplierName": "Reno",
+      "categoryName": "Comissão",
+      "amount": 10800.53,
+      "dueDate": "2026-07-14",
+      "paymentMethod": "Pix",
+      "status": "paid",
+      "paidAt": "2026-07-14",
+      "notes": "Parcela 2/2"
+    },
+    {
+      "description": "Repasse — Bella Aldeota Bônus (Mateus)",
+      "supplierName": "Reno",
+      "categoryName": "Comissão",
+      "amount": 1495,
+      "dueDate": "2026-05-31",
+      "paymentMethod": "Pix",
+      "status": "paid",
+      "paidAt": "2026-05-31",
+      "notes": ""
+    },
+    {
+      "description": "Repasse — MLar Kennedy",
+      "supplierName": "Reno",
+      "categoryName": "Comissão",
+      "amount": 7466.78,
+      "dueDate": "2026-06-19",
+      "paymentMethod": "Pix",
+      "status": "paid",
+      "paidAt": "2026-06-19",
+      "notes": ""
+    },
+    {
+      "description": "Repasse — Maré/Marquise (Gilson)",
+      "supplierName": "Reno",
+      "categoryName": "Comissão",
+      "amount": 13675.72,
+      "dueDate": "2026-06-30",
+      "paymentMethod": "Pix",
+      "status": "paid",
+      "paidAt": "2026-06-30",
+      "notes": ""
+    },
+    {
+      "description": "Repasse — Bella Aldeota 603 (José Jaime)",
+      "supplierName": "Reno",
+      "categoryName": "Comissão",
+      "amount": 8742.75,
+      "dueDate": "2026-07-14",
+      "paymentMethod": "Pix",
+      "status": "paid",
+      "paidAt": "2026-07-14",
+      "notes": ""
+    },
+    {
+      "description": "Repasse — Enjoy 1201 (Mara Tailane)",
+      "supplierName": "Soraya",
+      "categoryName": "Comissão",
+      "amount": 11462.65,
+      "dueDate": "2026-08-26",
+      "paymentMethod": "Pix",
+      "status": "open",
+      "paidAt": null,
+      "notes": ""
+    },
+    {
+      "description": "Repasse — Enjoy 1201 (Mara Tailane)",
+      "supplierName": "Angélica",
+      "categoryName": "Comissão",
+      "amount": 500,
+      "dueDate": "2026-08-26",
+      "paymentMethod": "Pix",
+      "status": "open",
+      "paidAt": null,
+      "notes": ""
+    }
+  ],
+  "custosFixos": [
+    {
+      "description": "VPS Hostinger",
+      "monthlyAmount": 94.91,
+      "dueDay": 1,
+      "categoryName": "Infraestrutura Web",
+      "notes": "Mensalidade servidor"
+    },
+    {
+      "description": "Pagamento Mensal Angélica",
+      "monthlyAmount": 2500,
+      "dueDay": 5,
+      "categoryName": "Pessoal",
+      "notes": "Funcionária administrativa"
+    },
+    {
+      "description": "Mensalidade Zaia",
+      "monthlyAmount": 250,
+      "dueDay": 1,
+      "categoryName": "Software",
+      "notes": "Plataforma Zaia"
+    }
+  ],
+  "totals": {
+    "entradas": 233509.26,
+    "saidas": 185491.23999999996,
+    "receivablesAll": 157106.41999999998,
+    "receivablesPending": 45653.12,
+    "payablesAll": 155506.02,
+    "payablesPending": 35667.53,
+    "custosFixos": 2844.91
+  }
+}
