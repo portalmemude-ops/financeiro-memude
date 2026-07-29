@@ -80,6 +80,9 @@ const payableAttachment = ref<{ upload: (entityId: string) => Promise<string | u
 const editing = ref<Partial<Payable>>({})
 const proofLink = ref('')
 const attachmentReference = ref('')
+const originalPaidAmount = ref(0)
+const paymentSituation = ref<'paid' | 'unpaid'>('unpaid')
+const reopenReason = ref('')
 const beneficiaryKind = ref<'supplier' | 'employee'>('supplier')
 const installmentMode = ref(false)
 const installmentCount = ref(3)
@@ -99,6 +102,9 @@ function openNew() {
   editing.value = { recurrence: 'once', dueDate: todayISO(), status: 'open', amount: undefined }
   proofLink.value = ''
   attachmentReference.value = ''
+  originalPaidAmount.value = 0
+  paymentSituation.value = 'unpaid'
+  reopenReason.value = ''
   beneficiaryKind.value = 'supplier'
   installmentMode.value = false
   installmentCount.value = 3
@@ -108,6 +114,9 @@ function openEdit(p: Payable) {
   editing.value = structuredClone(toRaw(p))
   proofLink.value = p.proofUrl?.startsWith('http') ? p.proofUrl : ''
   attachmentReference.value = p.proofUrl?.startsWith('http') ? '' : (p.proofUrl || '')
+  originalPaidAmount.value = p.paidAmount ?? 0
+  paymentSituation.value = originalPaidAmount.value > 0 ? 'paid' : 'unpaid'
+  reopenReason.value = ''
 
   // "overdue" é um status DERIVADO (nunca persistido) — não gravar de volta
   if (editing.value.status === 'overdue')
@@ -117,6 +126,15 @@ function openEdit(p: Payable) {
   dialog.value = true
 }
 async function save() {
+  const shouldReopen = Boolean(editing.value.id)
+    && originalPaidAmount.value > 0
+    && paymentSituation.value === 'unpaid'
+
+  if (shouldReopen && !reopenReason.value.trim()) {
+    showMessage('Informe o motivo para marcar a conta como não paga.', 'error')
+
+    return
+  }
   const { valid } = await formRef.value.validate()
   if (!valid)
     return
@@ -129,6 +147,7 @@ async function save() {
     data.supplierId = undefined
 
   saving.value = true
+  let accountWasSaved = false
   try {
     if (!data.id && installmentMode.value && installmentCount.value > 1) {
       if (payableAttachment.value?.hasPendingFile())
@@ -139,6 +158,7 @@ async function save() {
       const saved = await finance.savePayable(data)
       if (!saved)
         throw new Error('Não foi possível salvar a conta.')
+      accountWasSaved = true
 
       // Persist the ID before uploading so a retry updates instead of duplicating.
       editing.value = structuredClone(toRaw(saved))
@@ -149,15 +169,28 @@ async function save() {
           await finance.savePayable({ ...saved, proofUrl: reference })
         }
       }
+      if (shouldReopen) {
+        const reopened = await finance.reopenPayable(saved.id, reopenReason.value.trim())
+        if (!reopened)
+          throw new Error('Não foi possível reabrir o pagamento.')
+        editing.value = structuredClone(toRaw(reopened))
+        originalPaidAmount.value = 0
+      }
     }
     dialog.value = false
-    showMessage(data.id ? 'Conta atualizada com sucesso.' : 'Conta cadastrada com sucesso.')
+    showMessage(shouldReopen
+      ? 'Conta atualizada, pagamento estornado e saldo do caixa recalculado.'
+      : data.id ? 'Conta atualizada com sucesso.' : 'Conta cadastrada com sucesso.')
   }
   catch (error) {
     const detail = error instanceof Error ? error.message : 'Não foi possível concluir a operação.'
-    const accountWasSaved = Boolean(editing.value.id) && payableAttachment.value?.hasPendingFile()
+    const attachmentFailed = accountWasSaved && payableAttachment.value?.hasPendingFile()
 
-    showMessage(accountWasSaved ? `A conta foi salva, mas o anexo falhou: ${detail}` : detail, 'error')
+    const message = accountWasSaved && shouldReopen
+      ? `Os dados da conta foram salvos, mas não foi possível estornar o pagamento: ${detail}`
+      : attachmentFailed ? `A conta foi salva, mas o anexo falhou: ${detail}` : detail
+
+    showMessage(message, 'error')
   }
   finally {
     saving.value = false
@@ -171,7 +204,7 @@ const payAmount = ref<number>(0)
 const payProof = ref('')
 function openPay(p: Payable) {
   payTarget.value = p
-  payAmount.value = p.amount
+  payAmount.value = p.amount - (p.paidAmount ?? 0)
   payProof.value = ''
   payDialog.value = true
 }
@@ -515,6 +548,44 @@ async function runRecurrences() {
             @submit.prevent="save"
           >
             <VRow>
+              <VCol
+                v-if="editing.id && originalPaidAmount > 0"
+                cols="12"
+                class="account-dialog__choice"
+              >
+                <VLabel>Situação do pagamento</VLabel>
+                <VBtnToggle
+                  v-model="paymentSituation"
+                  class="account-dialog__choice-toggle"
+                  color="primary"
+                  mandatory
+                  variant="outlined"
+                >
+                  <VBtn value="paid">
+                    {{ editing.status === 'partial' ? 'Pago parcialmente' : 'Pago' }}
+                  </VBtn>
+                  <VBtn value="unpaid">
+                    Não pago
+                  </VBtn>
+                </VBtnToggle>
+                <VAlert
+                  v-if="paymentSituation === 'unpaid'"
+                  type="warning"
+                  variant="tonal"
+                  density="compact"
+                >
+                  A baixa de {{ formatBRL(originalPaidAmount) }} será estornada e o valor retornará ao saldo em aberto.
+                  O histórico contábil será preservado.
+                </VAlert>
+                <VTextarea
+                  v-if="paymentSituation === 'unpaid'"
+                  v-model="reopenReason"
+                  label="Motivo da reabertura"
+                  placeholder="Ex.: pagamento marcado por engano"
+                  rows="2"
+                  :rules="[requiredRule]"
+                />
+              </VCol>
               <VCol
                 cols="12"
                 class="account-dialog__choice"
