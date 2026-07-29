@@ -28,7 +28,7 @@ module.exports = {
     'regex',
     'regexp',
   ],
-  ignorePatterns: ['plugins/iconify/*.js', 'node_modules', 'dist', '*.d.ts', 'vendor', '*.json'],
+  ignorePatterns: ['plugins/iconify/*.js', 'scripts/**', 'node_modules', 'dist', '*.d.ts', 'vendor', '*.json'],
   rules: {
     'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
