@@ -516,41 +516,39 @@ async function doReverse() {
                 Estornar último recebimento
               </VTooltip>
             </IconBtn>
-            <VMenu v-if="app.canManageFinance && !item.receivedAmount && !['partial', 'received'].includes(item.status)">
-              <template #activator="{ props }">
-                <IconBtn
-                  v-bind="props"
-                  aria-label="Mais ações da conta"
-                >
-                  <VIcon icon="ri-more-2-fill" />
-                  <VTooltip activator="parent">
-                    Mais ações
-                  </VTooltip>
-                </IconBtn>
-              </template>
-              <VList density="compact">
-                <VListItem
-                  v-if="item.status !== 'cancelled'"
-                  prepend-icon="ri-pencil-line"
-                  title="Editar"
-                  @click="openEdit(item)"
-                />
-                <VListItem
-                  v-if="isReceivablePending(item)"
-                  prepend-icon="ri-close-circle-line"
-                  title="Cancelar"
-                  @click="askCancel(item)"
-                />
-                <VDivider v-if="item.status !== 'cancelled'" />
-                <VListItem
-                  v-if="!invoiceOf(item.id) && !item.saleId && !item.commissionInstallmentId"
-                  prepend-icon="ri-delete-bin-line"
-                  title="Excluir permanentemente"
-                  class="text-error"
-                  @click="askDelete(item)"
-                />
-              </VList>
-            </VMenu>
+            <IconBtn
+              v-if="app.canManageFinance"
+              color="primary"
+              aria-label="Editar conta"
+              @click="openEdit(item)"
+            >
+              <VIcon icon="ri-pencil-line" />
+              <VTooltip activator="parent">
+                Editar conta
+              </VTooltip>
+            </IconBtn>
+            <IconBtn
+              v-if="app.canManageFinance && isReceivablePending(item)"
+              color="warning"
+              aria-label="Cancelar conta"
+              @click="askCancel(item)"
+            >
+              <VIcon icon="ri-close-circle-line" />
+              <VTooltip activator="parent">
+                Cancelar conta
+              </VTooltip>
+            </IconBtn>
+            <IconBtn
+              v-if="app.canManageFinance"
+              color="error"
+              aria-label="Excluir conta permanentemente"
+              @click="askDelete(item)"
+            >
+              <VIcon icon="ri-delete-bin-line" />
+              <VTooltip activator="parent">
+                Excluir permanentemente
+              </VTooltip>
+            </IconBtn>
           </div>
         </template>
         <template #no-data>

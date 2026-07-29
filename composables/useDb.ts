@@ -191,7 +191,7 @@ export function useDb() {
     },
 
     async savePayable(input: Partial<Payable>) {
-      const { data, error } = await db.rpc('save_payable_entry', {
+      const { data, error } = await db.rpc(input.id ? 'update_payable_entry' : 'save_payable_entry', {
         target_id: input.id ?? null,
         payload: {
           companyId: companyId(),
@@ -264,29 +264,35 @@ export function useDb() {
       input: Partial<Receivable>,
       options: { initialReceipt?: ReceiptInput; externalInvoice?: ExternalInvoiceInput } = {},
     ) {
-      const { data, error } = await db.rpc('save_receivable_entry', {
+      const payload = {
+        companyId: companyId(),
+        description: input.description,
+        amount: input.amount,
+        dueDate: input.dueDate,
+        competenceDate: input.competenceDate,
+        clientName: input.clientName,
+        clientDocument: input.clientDocument,
+        categoryId: input.categoryId,
+        costCenterId: input.costCenterId,
+        invoiceRule: input.invoiceRule ?? 'on_receive',
+        invoiceScheduledDate: input.invoiceScheduledDate,
+        invoiceRecurrenceDay: input.invoiceRecurrenceDay,
+        recurrence: input.recurrence ?? 'once',
+        notes: input.notes,
+        saleId: input.saleId,
+        commissionInstallmentId: input.commissionInstallmentId,
+      }
+
+      const args: Record<string, unknown> = {
         target_id: input.id ?? null,
-        payload: {
-          companyId: companyId(),
-          description: input.description,
-          amount: input.amount,
-          dueDate: input.dueDate,
-          competenceDate: input.competenceDate,
-          clientName: input.clientName,
-          clientDocument: input.clientDocument,
-          categoryId: input.categoryId,
-          costCenterId: input.costCenterId,
-          invoiceRule: input.invoiceRule ?? 'on_receive',
-          invoiceScheduledDate: input.invoiceScheduledDate,
-          invoiceRecurrenceDay: input.invoiceRecurrenceDay,
-          recurrence: input.recurrence ?? 'once',
-          notes: input.notes,
-          saleId: input.saleId,
-          commissionInstallmentId: input.commissionInstallmentId,
-        },
-        initial_receipt: options.initialReceipt ?? null,
+        payload,
         external_invoice: options.externalInvoice ?? null,
-      })
+      }
+
+      if (!input.id)
+        args.initial_receipt = options.initialReceipt ?? null
+
+      const { data, error } = await db.rpc(input.id ? 'update_receivable_entry' : 'save_receivable_entry', args)
 
       if (error)
         throw new Error(error.message)
