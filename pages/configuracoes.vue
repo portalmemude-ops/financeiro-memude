@@ -4,10 +4,73 @@ import type { Company } from '@/types/finance'
 
 const app = useAppStore()
 const db = useDb()
+const canManageStorage = computed(() => ['super_admin', 'admin'].includes(app.currentRole))
 
 useHead({ title: 'Configurações' })
 
-const tab = ref('company')
+const route = useRoute()
+const tab = ref(route.query.tab?.toString() || 'company')
+
+const storage = ref({
+  activeProvider: 'internal',
+  googleConnected: false,
+  googleConfigured: false,
+  googleAccountEmail: null as string | null,
+  connectedAt: null as string | null,
+})
+
+const storageLoading = ref(false)
+const storageMessage = ref(route.query.storage === 'connected' ? 'Google Drive conectado e ativado com sucesso.' : '')
+const storageError = ref(route.query.storageError?.toString() || '')
+
+async function loadStorage() {
+  storageLoading.value = true
+  try {
+    storage.value = await $fetch('/api/storage/settings', { query: { companyId: app.currentCompanyId } })
+  }
+  catch (error) {
+    storageError.value = error instanceof Error ? error.message : 'Não foi possível carregar a configuração.'
+  }
+  finally {
+    storageLoading.value = false
+  }
+}
+
+async function setStorageProvider(activeProvider: 'internal' | 'google_drive') {
+  storageLoading.value = true
+  storageError.value = ''
+  try {
+    await $fetch('/api/storage/settings', { method: 'POST', body: { companyId: app.currentCompanyId, activeProvider } })
+    storageMessage.value = activeProvider === 'internal' ? 'Armazenamento interno ativado.' : 'Google Drive ativado.'
+    await loadStorage()
+  }
+  catch (error) {
+    storageError.value = error instanceof Error ? error.message : 'Não foi possível alterar o provedor.'
+  }
+  finally {
+    storageLoading.value = false
+  }
+}
+
+function connectGoogleDrive() {
+  window.location.assign(`/api/storage/google/connect?companyId=${encodeURIComponent(app.currentCompanyId)}`)
+}
+
+async function disconnectGoogleDrive() {
+  storageLoading.value = true
+  storageError.value = ''
+  try {
+    await $fetch('/api/storage/google/disconnect', { method: 'POST', body: { companyId: app.currentCompanyId } })
+    storageMessage.value = 'Google Drive desconectado. O armazenamento interno voltou a ser usado.'
+    await loadStorage()
+  }
+  catch (error) {
+    storageError.value = error instanceof Error ? error.message : 'Não foi possível desconectar.'
+  }
+  finally {
+    storageLoading.value = false
+  }
+}
 
 // 👉 cópia local editável da empresa atual; re-sincroniza ao trocar de empresa
 const form = ref<Company>(structuredClone(toRaw(app.currentCompany)))
@@ -16,8 +79,11 @@ watch(
   () => app.currentCompany.id,
   () => {
     form.value = structuredClone(toRaw(app.currentCompany))
+    loadStorage()
   },
 )
+
+onMounted(loadStorage)
 
 const taxRegimeOptions = computed(() =>
   Object.entries(taxRegimeLabels).map(([value, title]) => ({ title, value })),
@@ -166,6 +232,12 @@ async function sendInvite() {
             start
             icon="ri-file-text-line"
           /> NFS-e
+        </VTab>
+        <VTab value="storage">
+          <VIcon
+            start
+            icon="ri-hard-drive-3-line"
+          /> Arquivos
         </VTab>
         <VTab value="access">
           <VIcon
@@ -358,6 +430,137 @@ async function sendInvite() {
                 persistent-hint
               />
             </VForm>
+          </VWindowItem>
+
+          <!-- Aba: Armazenamento de arquivos -->
+          <VWindowItem value="storage">
+            <VAlert
+              v-if="storageMessage || storageError"
+              :type="storageError ? 'error' : 'success'"
+              variant="tonal"
+              class="mb-6"
+              :text="storageError || storageMessage"
+              closable
+            />
+            <VRow>
+              <VCol
+                cols="12"
+                md="6"
+              >
+                <VCard
+                  variant="outlined"
+                  height="100%"
+                  :color="storage.activeProvider === 'internal' ? 'primary' : undefined"
+                >
+                  <VCardTitle class="d-flex align-center gap-2">
+                    <VIcon icon="ri-shield-check-line" />
+                    Armazenamento interno
+                  </VCardTitle>
+                  <VCardText>
+                    Bucket privado e persistente da aplicação. Os arquivos não ficam públicos e continuam disponíveis após redeploys.
+                    <VChip
+                      v-if="storage.activeProvider === 'internal'"
+                      color="success"
+                      size="small"
+                      class="d-flex mt-4"
+                    >
+                      Ativo
+                    </VChip>
+                  </VCardText>
+                  <VCardActions>
+                    <VBtn
+                      :disabled="!canManageStorage || storage.activeProvider === 'internal'"
+                      :loading="storageLoading"
+                      @click="setStorageProvider('internal')"
+                    >
+                      Usar armazenamento interno
+                    </VBtn>
+                  </VCardActions>
+                </VCard>
+              </VCol>
+              <VCol
+                cols="12"
+                md="6"
+              >
+                <VCard
+                  variant="outlined"
+                  height="100%"
+                  :color="storage.activeProvider === 'google_drive' ? 'primary' : undefined"
+                >
+                  <VCardTitle class="d-flex align-center gap-2">
+                    <VIcon icon="ri-google-fill" />
+                    Google Drive
+                  </VCardTitle>
+                  <VCardText>
+                    Hospeda novos anexos em uma pasta privada “RE9 Finanças” da conta conectada.
+                    <div
+                      v-if="storage.googleConnected"
+                      class="mt-4"
+                    >
+                      <div class="font-weight-medium">
+                        {{ storage.googleAccountEmail }}
+                      </div>
+                      <div class="text-caption text-medium-emphasis">
+                        Conectado em {{ storage.connectedAt ? formatDate(storage.connectedAt) : '—' }}
+                      </div>
+                    </div>
+                    <VAlert
+                      v-else-if="!storage.googleConfigured"
+                      type="warning"
+                      variant="tonal"
+                      density="compact"
+                      class="mt-4"
+                      text="Configure as credenciais Google Drive nas variáveis de ambiente do servidor."
+                    />
+                    <VChip
+                      v-if="storage.activeProvider === 'google_drive'"
+                      color="success"
+                      size="small"
+                      class="d-flex mt-4"
+                    >
+                      Ativo
+                    </VChip>
+                  </VCardText>
+                  <VCardActions class="flex-wrap">
+                    <VBtn
+                      v-if="!storage.googleConnected"
+                      :disabled="!canManageStorage || !storage.googleConfigured"
+                      prepend-icon="ri-link"
+                      @click="connectGoogleDrive"
+                    >
+                      Conectar Google Drive
+                    </VBtn>
+                    <template v-else>
+                      <VBtn
+                        :disabled="!canManageStorage || storage.activeProvider === 'google_drive'"
+                        :loading="storageLoading"
+                        @click="setStorageProvider('google_drive')"
+                      >
+                        Usar Google Drive
+                      </VBtn>
+                      <VBtn
+                        variant="text"
+                        color="error"
+                        :disabled="!canManageStorage"
+                        :loading="storageLoading"
+                        @click="disconnectGoogleDrive"
+                      >
+                        Desconectar
+                      </VBtn>
+                    </template>
+                  </VCardActions>
+                </VCard>
+              </VCol>
+            </VRow>
+            <VAlert
+              type="info"
+              variant="tonal"
+              class="mt-6"
+              text="A alteração afeta apenas novos arquivos. Anexos existentes continuam acessíveis no provedor em que foram salvos. Limite: 10 MB por arquivo; formatos PDF, PNG e JPEG."
+            />
+            <div class="text-caption text-medium-emphasis mt-2">
+              Para preservar o acesso, uma conta Google com anexos armazenados não pode ser desconectada; nesse caso, apenas ative o armazenamento interno.
+            </div>
           </VWindowItem>
 
           <!-- Aba: Perfis & Acesso -->

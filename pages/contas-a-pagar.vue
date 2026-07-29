@@ -66,10 +66,20 @@ const supplierOptions = computed(() => finance.companySuppliers.filter(s => s.is
 const employeeOptions = computed(() => finance.companyEmployees.map(e => ({ title: e.fullName, value: e.id })))
 const recurrenceOptions = Object.entries(recurrenceLabels).map(([value, title]) => ({ title, value }))
 
+const attachmentHref = (value?: string) => {
+  if (!value || value.startsWith('http') || value.startsWith('/'))
+    return value
+
+  return `/api/storage/legacy/download?companyId=${encodeURIComponent(app.currentCompanyId)}&path=${encodeURIComponent(value)}`
+}
+
 // 👉 Dialog form
 const dialog = ref(false)
 const formRef = ref()
+const payableAttachment = ref<{ upload: (entityId: string) => Promise<string | undefined>; hasPendingFile: () => boolean }>()
 const editing = ref<Partial<Payable>>({})
+const proofLink = ref('')
+const attachmentReference = ref('')
 const beneficiaryKind = ref<'supplier' | 'employee'>('supplier')
 const installmentMode = ref(false)
 const installmentCount = ref(3)
@@ -87,6 +97,8 @@ function showMessage(text: string, color: 'success' | 'error' | 'primary' = 'suc
 
 function openNew() {
   editing.value = { recurrence: 'once', dueDate: todayISO(), status: 'open', amount: undefined }
+  proofLink.value = ''
+  attachmentReference.value = ''
   beneficiaryKind.value = 'supplier'
   installmentMode.value = false
   installmentCount.value = 3
@@ -94,6 +106,8 @@ function openNew() {
 }
 function openEdit(p: Payable) {
   editing.value = structuredClone(toRaw(p))
+  proofLink.value = p.proofUrl?.startsWith('http') ? p.proofUrl : ''
+  attachmentReference.value = p.proofUrl?.startsWith('http') ? '' : (p.proofUrl || '')
 
   // "overdue" é um status DERIVADO (nunca persistido) — não gravar de volta
   if (editing.value.status === 'overdue')
@@ -107,6 +121,8 @@ async function save() {
   if (!valid)
     return
   const data = { ...editing.value }
+
+  data.proofUrl = proofLink.value || attachmentReference.value || undefined
   if (beneficiaryKind.value === 'supplier')
     data.employeeId = undefined
   else
@@ -114,15 +130,34 @@ async function save() {
 
   saving.value = true
   try {
-    if (!data.id && installmentMode.value && installmentCount.value > 1)
+    if (!data.id && installmentMode.value && installmentCount.value > 1) {
+      if (payableAttachment.value?.hasPendingFile())
+        throw new Error('Para anexar um arquivo diretamente, cadastre a conta sem parcelamento e depois edite cada parcela.')
       await finance.createInstallmentPayable(data, installmentCount.value)
-    else
-      await finance.savePayable(data)
+    }
+    else {
+      const saved = await finance.savePayable(data)
+      if (!saved)
+        throw new Error('Não foi possível salvar a conta.')
+
+      // Persist the ID before uploading so a retry updates instead of duplicating.
+      editing.value = structuredClone(toRaw(saved))
+      if (payableAttachment.value?.hasPendingFile()) {
+        const reference = await payableAttachment.value.upload(saved.id)
+        if (reference) {
+          attachmentReference.value = reference
+          await finance.savePayable({ ...saved, proofUrl: reference })
+        }
+      }
+    }
     dialog.value = false
     showMessage(data.id ? 'Conta atualizada com sucesso.' : 'Conta cadastrada com sucesso.')
   }
   catch (error) {
-    showMessage(error instanceof Error ? error.message : 'Não foi possível salvar a conta.', 'error')
+    const detail = error instanceof Error ? error.message : 'Não foi possível concluir a operação.'
+    const accountWasSaved = Boolean(editing.value.id) && payableAttachment.value?.hasPendingFile()
+
+    showMessage(accountWasSaved ? `A conta foi salva, mas o anexo falhou: ${detail}` : detail, 'error')
   }
   finally {
     saving.value = false
@@ -411,7 +446,7 @@ async function runRecurrences() {
             </IconBtn>
             <IconBtn
               v-if="item.proofUrl"
-              :href="item.proofUrl"
+              :href="attachmentHref(item.proofUrl)"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Ver comprovante"
@@ -599,10 +634,23 @@ async function runRecurrences() {
                 md="6"
               >
                 <VTextField
-                  v-model="editing.proofUrl"
-                  label="Anexo (URL boleto/nota)"
+                  v-model="proofLink"
+                  label="Link externo (opcional)"
                   placeholder="https://..."
                 />
+              </VCol>
+              <VCol cols="12">
+                <FileUpload
+                  ref="payableAttachment"
+                  v-model="attachmentReference"
+                  entity-type="payable"
+                  :entity-id="editing.id"
+                  :auto-upload="false"
+                  label="Anexar boleto, nota ou comprovante"
+                />
+                <div class="text-caption text-medium-emphasis mt-n2">
+                  PDF, PNG ou JPEG, até 10 MB. O provedor ativo em Configurações será utilizado.
+                </div>
               </VCol>
               <VCol
                 v-if="!editing.id"
