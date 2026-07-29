@@ -718,10 +718,9 @@ async function runRecurrences() {
                   :entity-id="editing.id"
                   :auto-upload="false"
                   label="Anexar boleto, nota ou comprovante"
+                  hint="PDF, PNG ou JPEG, até 10 MB. O provedor ativo em Configurações será utilizado."
+                  persistent-hint
                 />
-                <div class="text-caption text-medium-emphasis mt-n2">
-                  PDF, PNG ou JPEG, até 10 MB. O provedor ativo em Configurações será utilizado.
-                </div>
               </VCol>
               <VCol
                 v-if="!editing.id"

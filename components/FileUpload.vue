@@ -8,11 +8,15 @@ const props = withDefaults(defineProps<{
   entityType: 'payable' | 'receivable' | 'invoice' | 'supplier' | 'employee'
   entityId?: string
   autoUpload?: boolean
+  hint?: string
+  persistentHint?: boolean
 }>(), {
   label: 'Anexo (comprovante)',
   accept: 'image/png,image/jpeg,application/pdf',
   entityId: '',
   autoUpload: true,
+  hint: '',
+  persistentHint: false,
 })
 
 const emit = defineEmits<{ 'update:modelValue': [string | undefined] }>()
@@ -119,6 +123,8 @@ defineExpose({ upload, hasPendingFile: () => Boolean(selectedFile()) })
       :label="label"
       :accept="accept"
       :loading="loading"
+      :hint="hint"
+      :persistent-hint="persistentHint"
       prepend-icon="ri-attachment-2"
       density="compact"
       show-size
