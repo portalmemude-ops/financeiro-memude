@@ -151,39 +151,41 @@ const chartSeries = computed(() => [
       </VCol>
     </VRow>
 
-    <!-- Alertas -->
-    <VRow class="mt-1">
-      <VCol
+    <!-- Alertas (Sempre em 1 linha única, adaptável) -->
+    <div class="d-flex flex-nowrap ga-4 mt-4 mb-6 overflow-x-auto">
+      <div
         v-for="(a, i) in alerts"
         :key="i"
-        cols="12"
-        md="6"
-        lg="4"
+        class="flex-grow-1 flex-shrink-1"
+        style="flex-basis: 0; min-width: 0;"
       >
         <VCard
           :color="a.color"
           variant="tonal"
+          class="h-100"
+          :title="`${a.title} - ${a.message}`"
         >
-          <VCardText class="d-flex align-center gap-x-3">
+          <VCardText class="d-flex align-center gap-x-3 py-3 px-4">
             <VAvatar
               :color="a.color"
               variant="elevated"
               size="40"
+              class="flex-shrink-0"
             >
               <VIcon :icon="a.icon" />
             </VAvatar>
-            <div>
-              <div class="font-weight-medium text-high-emphasis">
+            <div class="overflow-hidden">
+              <div class="font-weight-medium text-high-emphasis text-truncate">
                 {{ a.title }}
               </div>
-              <div class="text-body-2">
+              <div class="text-body-2 text-medium-emphasis text-truncate">
                 {{ a.message }}
               </div>
             </div>
           </VCardText>
         </VCard>
-      </VCol>
-    </VRow>
+      </div>
+    </div>
 
     <VRow class="mt-1">
       <!-- Fluxo de caixa -->
