@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import NavItems from '@/layouts/components/NavItems.vue'
-import logo from '@images/logo.svg?raw'
+import brandLogoUrl from '@images/brand-full.svg?url'
 import VerticalNavLayout from '@layouts/components/VerticalNavLayout.vue'
 
 // Components
@@ -50,17 +50,13 @@ import QuickAddMenu from '@/layouts/components/QuickAddMenu.vue'
       <NuxtLink
         to="/"
         class="app-logo app-title-wrapper"
+        aria-label="Ir para o dashboard do Portal MeMude"
       >
-        <!-- eslint-disable vue/no-v-html -->
-        <div
-          class="d-flex"
-          v-html="logo"
-        />
-        <!-- eslint-enable -->
-
-        <h1 class="font-weight-medium leading-normal text-xl text-uppercase">
-          MeMude Financeiro
-        </h1>
+        <img
+          :src="brandLogoUrl"
+          class="app-logo__brand"
+          alt="Portal MeMude"
+        >
       </NuxtLink>
 
       <IconBtn
@@ -99,17 +95,23 @@ import QuickAddMenu from '@/layouts/components/QuickAddMenu.vue'
 .app-logo {
   display: flex;
   align-items: center;
-  column-gap: 0.75rem;
+  min-inline-size: 0;
+}
 
-  .app-logo-title {
-    font-size: 1.25rem;
-    font-weight: 500;
-    line-height: 1.75rem;
-    text-transform: uppercase;
-  }
+.app-logo__brand {
+  display: block;
+  block-size: 3.25rem;
+  inline-size: auto;
+  max-inline-size: 10rem;
+  object-fit: contain;
+  object-position: left center;
 }
 
 @media (max-width: 599.98px) {
+  .app-logo__brand {
+    block-size: 2.875rem;
+  }
+
   .mobile-navbar {
     gap: 0.125rem;
     inline-size: 100%;
