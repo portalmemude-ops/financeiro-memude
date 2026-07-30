@@ -1,21 +1,29 @@
 services:
   app:
     image: ghcr.io/portalmemude-ops/financeiro-memude:latest
-    expose:
+    pull_policy: always
+    ports:
       - "3000"
+    init: true
     labels:
       - traefik.enable=true
-      - traefik.http.routers.memude-financeiro.rule=Host(`financas.memudecore.com.br`)
-      - traefik.http.routers.memude-financeiro.entrypoints=websecure
-      - traefik.http.routers.memude-financeiro.tls.certresolver=letsencrypt
-      - traefik.http.services.memude-financeiro.loadbalancer.server.port=3000
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME:-memude-financeiro}.rule=Host(`financas.memudecore.com.br`)
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME:-memude-financeiro}.entrypoints=websecure
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME:-memude-financeiro}.tls.certresolver=letsencrypt
+      - traefik.http.services.${COMPOSE_PROJECT_NAME:-memude-financeiro}.loadbalancer.server.port=3000
     environment:
-      NODE_ENV: production
-      HOST: 0.0.0.0
-      PORT: 3000
-      NITRO_PORT: 3000
-      NUXT_PUBLIC_SUPABASE_URL: ${NUXT_PUBLIC_SUPABASE_URL}
-      NUXT_PUBLIC_SUPABASE_KEY: ${NUXT_PUBLIC_SUPABASE_KEY}
-      NUXT_SUPABASE_SECRET_KEY: ${NUXT_SUPABASE_SECRET_KEY:-}
-      NUXT_PUBLIC_CORE_APP_URL: https://core.memudecore.com.br
+      NODE_ENV: "production"
+      HOST: "0.0.0.0"
+      PORT: "3000"
+      NITRO_PORT: "3000"
+      TZ: "America/Fortaleza"
+      NUXT_PUBLIC_SUPABASE_URL: "${NUXT_PUBLIC_SUPABASE_URL:?Defina NUXT_PUBLIC_SUPABASE_URL no Dokploy}"
+      NUXT_PUBLIC_SUPABASE_KEY: "${NUXT_PUBLIC_SUPABASE_KEY:?Defina NUXT_PUBLIC_SUPABASE_KEY no Dokploy}"
+      NUXT_SUPABASE_SECRET_KEY: "${NUXT_SUPABASE_SECRET_KEY:?Defina NUXT_SUPABASE_SECRET_KEY no Dokploy}"
+      NUXT_PUBLIC_CORE_APP_URL: "https://core.memudecore.com.br"
+      NFSE_ENABLED: "0"
+      NFSE_AMBIENTE: "homologacao"
+    security_opt:
+      - no-new-privileges:true
+    stop_grace_period: 30s
     restart: unless-stopped
