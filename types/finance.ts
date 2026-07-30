@@ -1,0 +1,503 @@
+// ============================================================================
+// MeMude Financeiro — modelo de dados da aplicação e da integração com o Core.
+// ============================================================================
+
+// 👉 Multi-tenant / Core ------------------------------------------------------
+
+export type CompanyType = 'real_estate' | 'agency'
+export type TaxRegime = 'simples_nacional' | 'lucro_presumido' | 'lucro_real'
+
+export interface Company {
+  id: string
+  name: string
+  tradeName: string
+  type: CompanyType
+  cnpj: string
+  stateRegistration?: string
+  municipalRegistration?: string
+  mainCnae?: string
+  taxRegime: TaxRegime
+  creci?: string
+  city: string
+  state: string
+  cityIbge?: string // código IBGE do município do prestador (Fortaleza = 2304400)
+  addressLine?: string
+  neighborhood?: string
+  postalCode?: string
+  phone?: string
+  mobilePhone?: string
+  address?: FiscalAddress // endereço fiscal do prestador (usado no XML da NFS-e)
+  logoColor: string
+  certificateExpiry?: string
+  invoiceConfig: {
+    defaultCnae: string
+    defaultIssRate: number
+    defaultServiceDescription: string
+    defaultLc116Item?: string // item da LC 116 padrão para os serviços da empresa
+    defaultCtiss?: string // Código de Tributação do ISS de Fortaleza padrão
+    issRetidoDefault?: boolean // ISS retido por padrão
+    rpsSeries?: string // série do RPS (padrão '1')
+  }
+}
+
+export type Role =
+  | 'super_admin'
+  | 'admin'
+  | 'financial'
+  | 'broker'
+  | 'accountant'
+  | 'viewer'
+
+export interface UserProfile {
+  id: string
+  fullName: string
+  email: string
+  phone?: string
+  avatarColor: string
+  roles: { companyId: string; role: Role }[]
+}
+
+export interface AuditEntry {
+  id: string
+  companyId: string
+  userId: string
+  userName: string
+  action: string
+  entityType: string
+  entityId?: string
+  description: string
+  createdAt: string
+}
+
+// 👉 Financeiro ---------------------------------------------------------------
+
+export type AccountType = 'revenue' | 'expense' | 'asset' | 'liability'
+
+export interface ChartAccount {
+  id: string
+  companyId: string
+  parentId: string | null
+  code: string
+  name: string
+  type: AccountType
+  isActive: boolean
+}
+
+export interface CostCenter {
+  id: string
+  companyId: string
+  name: string
+  description?: string
+  isActive: boolean
+}
+
+export type DocumentType = 'cpf' | 'cnpj'
+
+export interface BankInfo {
+  bank?: string
+  agency?: string
+  account?: string
+  pix?: string
+}
+
+export interface Client {
+  id: string
+  companyId: string
+  name: string
+  document?: string
+  email?: string
+  phone?: string
+  address?: string
+  city?: string
+  state?: string
+  notes?: string
+  isActive: boolean
+  createdAt: string
+  source?: 'manual' | 'memude_core'
+  coreLeadId?: string
+  sourceUpdatedAt?: string
+}
+
+export interface Supplier {
+  id: string
+  companyId: string
+  documentType: DocumentType
+  documentNumber: string
+  legalName: string
+  tradeName?: string
+  email?: string
+  phone?: string
+  bankInfo: BankInfo
+  categoryId?: string
+  notes?: string
+  isActive: boolean
+  createdAt: string
+}
+
+export type EmploymentType = 'clt' | 'pj' | 'freelancer' | 'commission_only' | 'intern'
+export type EmployeeStatus = 'active' | 'inactive' | 'terminated'
+
+export interface Employee {
+  id: string
+  companyId: string
+  userId?: string
+  fullName: string
+  cpf: string
+  email?: string
+  phone?: string
+  employmentType: EmploymentType
+  pjCnpj?: string
+  baseSalary?: number
+  bankInfo: BankInfo
+  hireDate?: string
+  terminationDate?: string
+  status: EmployeeStatus
+  createdAt: string
+  source?: 'manual' | 'memude_core'
+  coreCorretorId?: string
+  sourceUpdatedAt?: string
+}
+
+export type Recurrence = 'once' | 'weekly' | 'monthly' | 'quarterly' | 'yearly' | 'installment'
+export type PayableStatus = 'open' | 'partial' | 'paid' | 'overdue' | 'cancelled'
+
+export interface Payable {
+  id: string
+  companyId: string
+  supplierId?: string
+  employeeId?: string
+  description: string
+  amount: number
+  dueDate: string
+  competenceDate?: string
+  categoryId?: string
+  costCenterId?: string
+  recurrence: Recurrence
+  installmentNumber?: number
+  totalInstallments?: number
+  parentPayableId?: string
+  status: PayableStatus
+  paidAt?: string
+  paidAmount?: number
+  proofUrl?: string
+  notes?: string
+  createdAt: string
+}
+
+export type InvoiceRule = 'immediate' | 'on_receive' | 'scheduled' | 'recurring' | 'manual' | 'none'
+export type ReceivableStatus = 'open' | 'partial' | 'received' | 'overdue' | 'cancelled'
+export type ReceiptMethod = 'pix' | 'transfer' | 'boleto' | 'card' | 'cash' | 'check' | 'other'
+
+export interface Receivable {
+  id: string
+  companyId: string
+  clientName?: string
+  clientDocument?: string
+  saleId?: string
+  commissionInstallmentId?: string
+  description: string
+  amount: number
+  dueDate: string
+  competenceDate?: string
+  categoryId?: string
+  costCenterId?: string
+  invoiceRule: InvoiceRule
+  invoiceScheduledDate?: string
+  invoiceRecurrenceDay?: number
+  recurrence: 'once' | 'monthly'
+  status: ReceivableStatus
+  receivedAt?: string
+  receivedAmount?: number
+  proofUrl?: string
+  notes?: string
+  createdAt: string
+}
+
+export type TransactionType = 'income' | 'expense'
+
+export interface Transaction {
+  id: string
+  companyId: string
+  type: TransactionType
+  amount: number
+  date: string
+  payableId?: string
+  receivableId?: string
+  settlementId?: string
+  isReversal?: boolean
+  reversalOf?: string
+  description: string
+  account?: string
+  categoryId?: string
+  costCenterId?: string
+  createdAt: string
+}
+
+export interface Settlement {
+  id: string
+  companyId: string
+  payableId?: string
+  receivableId?: string
+  type: 'payment' | 'receipt' | 'reversal'
+  amount: number
+  settledAt: string
+  paymentMethod?: ReceiptMethod
+  account?: string
+  proofUrl?: string
+  reversalOf?: string
+  requestId?: string
+  notes?: string
+  createdBy: string
+  createdAt: string
+}
+
+export interface ReceiptInput {
+  amount: number
+  receivedAt: string
+  method: ReceiptMethod
+  account?: string
+  proofUrl?: string
+  notes?: string
+  requestId: string
+}
+
+export interface ExternalInvoiceInput {
+  number: string
+  issuedAt: string
+  documentUrl?: string
+  environment?: NfseEnvironment
+}
+
+// 👉 Comercial / Vendas -------------------------------------------------------
+
+export type DevelopmentType = 'launch' | 'resale'
+
+export interface Development {
+  id: string
+  companyId: string
+  name: string
+  developer: string
+  address?: string
+  type: DevelopmentType
+  commissionPercentage: number
+  brokerSplitPercentage: number
+  notes?: string
+  isActive: boolean
+  createdAt: string
+  source?: 'manual' | 'memude_core'
+  coreEmpreendimentoId?: string
+  sourceUpdatedAt?: string
+}
+
+export type SaleStatus = 'in_progress' | 'completed' | 'cancelled'
+export type PaymentMethod = 'cash' | 'financing' | 'installments_developer'
+
+export interface Sale {
+  id: string
+  companyId: string
+  developmentId: string
+  unit?: string
+  saleValue: number
+  buyerName: string
+  buyerDocument?: string
+  buyerContact?: string
+  paymentMethod: PaymentMethod
+  brokerId: string
+  saleDate: string
+  status: SaleStatus
+  notes?: string
+  createdAt: string
+  source?: 'manual' | 'memude_core'
+  coreVendaId?: string
+  coreLeadId?: string
+  sourceUpdatedAt?: string
+  syncHash?: string
+}
+
+export type FunnelStage = 'lead' | 'visit' | 'proposal' | 'contract' | 'deed'
+
+export interface FunnelCard {
+  id: string
+  companyId: string
+  developmentId?: string
+  brokerId?: string
+  contactName: string
+  contactPhone?: string
+  contactEmail?: string
+  estimatedValue?: number
+  currentStage: FunnelStage
+  saleId?: string
+  notes?: string
+  stageEnteredAt: string
+  createdAt: string
+}
+
+export interface FunnelHistory {
+  id: string
+  cardId: string
+  fromStage: FunnelStage | null
+  toStage: FunnelStage
+  changedAt: string
+}
+
+export type CommissionReceiptType =
+  | 'launch_passthrough'
+  | 'resale_consolidated'
+  | 'resale_split'
+
+export type CommissionStatus = 'pending' | 'partial' | 'received' | 'cancelled'
+
+export interface Commission {
+  id: string
+  companyId: string
+  saleId: string
+  totalAmount: number
+  receiptType: CommissionReceiptType
+  status: CommissionStatus
+  notes?: string
+  createdAt: string
+  source?: 'manual' | 'memude_core'
+  coreVendaId?: string
+  sourceUpdatedAt?: string
+}
+
+export type InstallmentStatus = 'pending' | 'received' | 'overdue' | 'cancelled'
+
+export interface CommissionInstallment {
+  id: string
+  commissionId: string
+  installmentNumber: number
+  amount: number
+  expectedDate: string
+  receivedDate?: string
+  status: InstallmentStatus
+  receivableId?: string
+}
+
+export type BeneficiaryType = 'brokerage' | 'broker' | 'manager' | 'captador'
+export type SplitStatus = 'pending' | 'paid' | 'not_applicable'
+
+export interface CommissionSplit {
+  id: string
+  commissionId: string
+  beneficiaryType: BeneficiaryType
+  beneficiaryId?: string
+  percentage: number
+  amount: number
+  payableId?: string
+  status: SplitStatus
+}
+
+// 👉 Notas Fiscais (NFS-e) ----------------------------------------------------
+
+export type InvoiceStatus = 'pending' | 'processing' | 'issued' | 'cancelled' | 'error'
+
+/** Ambiente de emissão fiscal (SEFIN). */
+export type NfseEnvironment = 'homologacao' | 'producao'
+
+/** Endereço (usado no tomador da NFS-e; opcional). */
+export interface FiscalAddress {
+  street?: string
+  number?: string
+  complement?: string
+  neighborhood?: string
+  cityName?: string
+  cityIbge?: string // código IBGE do município (ex.: Fortaleza = 2304400)
+  state?: string // UF
+  zipCode?: string // CEP (só dígitos)
+}
+
+export interface Invoice {
+  id: string
+  companyId: string
+  receivableId?: string
+  source?: 'system' | 'external'
+
+  // Identificação da NFS-e emitida
+  invoiceNumber?: string
+  series?: string
+  verificationCode?: string
+
+  // RPS (Recibo Provisório de Serviços) que origina a NFS-e
+  rpsNumber?: string
+  rpsSeries?: string
+  rpsType?: number // 1 = RPS
+
+  // Dados fiscais do serviço
+  cnae: string
+  lc116Item?: string // item da Lista de Serviços (LC 116/2003), ex.: '10.05'
+  ctiss?: string // Código de Tributação do ISS do Município (Fortaleza)
+  cnaeCode?: string // CNAE sem máscara
+  issRate: number
+  issRetido?: boolean // ISS retido na fonte pelo tomador
+  serviceDescription: string
+  amount: number
+  deductionsAmount?: number // deduções da base de cálculo
+  issAmount?: number // valor do ISS calculado
+  netAmount?: number // valor líquido
+
+  // Município de incidência (IBGE) e competência
+  municipioIbge?: string
+  competencia?: string // AAAA-MM da competência
+
+  // Tomador
+  takerName: string
+  takerDocument: string
+  takerEmail?: string
+  takerAddress?: FiscalAddress
+
+  // Protocolo / retorno da SEFIN
+  protocol?: string
+  environment?: NfseEnvironment
+
+  // Artefatos
+  xmlBase64?: string // XML autorizado (retorno)
+  pdfUrl?: string // link/URL do DANFSE
+  publicUrl?: string // link de consulta pública da NFS-e
+
+  status: InvoiceStatus
+  errorMessage?: string
+  cancelReason?: string
+  issuedAt?: string
+  cancelledAt?: string
+  createdAt: string
+}
+
+// 👉 Notificações -------------------------------------------------------------
+
+export type NotificationChannel = 'dashboard' | 'whatsapp' | 'email'
+export type NotificationStatus = 'pending' | 'sent' | 'read' | 'failed'
+
+export type NotificationType =
+  | 'payable_due'
+  | 'payable_due_today'
+  | 'commission_late'
+  | 'cashflow_alert'
+  | 'invoice_issued'
+  | 'invoice_error'
+  | 'sale_registered'
+  | 'commission_received'
+
+export interface AppNotification {
+  id: string
+  companyId: string
+  userId?: string
+  type: NotificationType
+  title: string
+  message: string
+  channel: NotificationChannel
+  status: NotificationStatus
+  severity: 'success' | 'warning' | 'error' | 'info'
+  createdAt: string
+  readAt?: string
+}
+
+export interface NotificationRule {
+  id: string
+  companyId: string
+  type: NotificationType
+  label: string
+  isActive: boolean
+  channels: NotificationChannel[]
+  advanceDays?: number
+}

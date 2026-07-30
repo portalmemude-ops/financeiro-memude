@@ -1,0 +1,21 @@
+services:
+  app:
+    image: ghcr.io/portalmemude-ops/memude-financeiro:latest
+    expose:
+      - "3000"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.memude-financeiro.rule=Host(`financas.memudecore.com.br`)
+      - traefik.http.routers.memude-financeiro.entrypoints=websecure
+      - traefik.http.routers.memude-financeiro.tls.certresolver=letsencrypt
+      - traefik.http.services.memude-financeiro.loadbalancer.server.port=3000
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 3000
+      NITRO_PORT: 3000
+      NUXT_PUBLIC_SUPABASE_URL: ${NUXT_PUBLIC_SUPABASE_URL}
+      NUXT_PUBLIC_SUPABASE_KEY: ${NUXT_PUBLIC_SUPABASE_KEY}
+      NUXT_SUPABASE_SECRET_KEY: ${NUXT_SUPABASE_SECRET_KEY:-}
+      NUXT_PUBLIC_CORE_APP_URL: https://core.memudecore.com.br
+    restart: unless-stopped
