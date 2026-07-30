@@ -3,7 +3,7 @@
 ## Arquitetura
 
 - Aplicação: Nuxt 3 SSR em container Node 22.
-- Imagem: `ghcr.io/portalmemude-ops/memude-financeiro:latest`.
+- Imagem: `ghcr.io/portalmemude-ops/financeiro-memude:latest`.
 - Produção: `https://financas.memudecore.com.br`.
 - Supabase Financeiro: `syeidxevgupqziwirwdz` (`sa-east-1`).
 - Supabase Core: `oxybasvtphosdmlmrfnb`.
@@ -47,4 +47,3 @@ Alterações em `corretores`, `empreendimentos`, `leads` e `vendas` no Core
 disparam `pg_net` de forma assíncrona. A função `core-sync` reconcilia os dados
 pela chave externa, portanto pode ser repetida sem duplicação. Cadastros de
 origem `manual` não são sobrescritos.
-

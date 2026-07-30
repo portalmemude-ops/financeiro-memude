@@ -4,7 +4,7 @@
 #
 # Não precisa de segredo/PAT: usa o GITHUB_TOKEN automático do Actions, que tem
 # permissão de publicar pacotes (packages: write). A imagem sai em:
-#   ghcr.io/portalmemude-ops/memude-financeiro:latest
+#   ghcr.io/portalmemude-ops/financeiro-memude:latest
 # =============================================================================
 name: Publish image (GHCR)
 

@@ -30,7 +30,7 @@ Nunca versione chaves secretas ou certificados.
 ## Produção
 
 - domínio: `https://financas.memudecore.com.br`;
-- imagem: `ghcr.io/portalmemude-ops/memude-financeiro`;
+- imagem: `ghcr.io/portalmemude-ops/financeiro-memude`;
 - runtime: Node.js 22 / Nitro;
 - orquestração: Dokploy com Traefik;
 - health check: `GET /api/health`.
