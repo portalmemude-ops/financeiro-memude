@@ -49,6 +49,14 @@ assert(
 )
 assert('ajuste de saldo de uma perna só altera o caixa', transactionEffect({ type: 'income', amount: 54545.64, isTransfer: true }) === 54545.64)
 
+// 👉 Aporte de sócio: entra no caixa, não é faturamento.
+assert('aporte não conta como faturamento', transactionIncome({ type: 'income', amount: 5000, inResult: false }) === 0)
+assert('aporte entra no caixa', transactionEffect({ type: 'income', amount: 5000, inResult: false }) === 5000)
+assert('despesa fora do resultado não entra no DRE', transactionExpense({ type: 'expense', amount: 800, inResult: false }) === 0)
+assert('lançamento marcado como do resultado continua contando', transactionIncome({ type: 'income', amount: 5000, inResult: true }) === 5000)
+assert('lançamento antigo sem a marca continua contando', transactionIncome({ type: 'income', amount: 5000 }) === 5000)
+assert('transferência ignora a marca de resultado', transactionIncome({ type: 'income', amount: 300, isTransfer: true, inResult: true }) === 0)
+
 console.log(`\nFinance ledger: ${passed} passaram, ${failed} falharam.`)
 if (failed > 0)
   process.exit(1)

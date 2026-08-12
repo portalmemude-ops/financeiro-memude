@@ -187,6 +187,7 @@ export function useDb() {
         type: input.type,
         parent_id: input.parentId,
         is_active: input.isActive,
+        counts_in_result: input.countsInResult !== false,
       }) as Promise<ChartAccount>
     },
 

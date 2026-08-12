@@ -81,6 +81,12 @@ export interface ChartAccount {
   name: string
   type: AccountType
   isActive: boolean
+
+  /**
+   * false = os lançamentos desta conta entram no caixa mas ficam fora do
+   * faturamento e do resultado. Use para aporte de sócio e capital em geral.
+   */
+  countsInResult?: boolean
 }
 
 export interface CostCenter {
@@ -232,6 +238,13 @@ export interface Transaction {
 
   /** Agrupa as duas pernas (origem/destino) de uma mesma transferência. */
   transferId?: string
+
+  /**
+   * false = movimenta o caixa mas não é faturamento nem despesa da operação
+   * (aporte de sócio, capital, transferência). Calculado pelo banco a partir da
+   * conta do plano; ausente em lançamentos antigos, que contam no resultado.
+   */
+  inResult?: boolean
   description: string
   account?: string
   categoryId?: string
