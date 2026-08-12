@@ -6,6 +6,8 @@ Pinia e Supabase.
 ## Escopo
 
 - contas a pagar e receber, liquidações, estornos e fluxo de caixa;
+- saldo por conta bancária, transferências entre contas e ajustes de saldo
+  (transferência entra no saldo das contas e fica fora do DRE);
 - plano de contas, centros de custo e fornecedores;
 - vendas, empreendimentos, clientes, corretores e comissões;
 - sincronização idempotente com o MeMude Core;

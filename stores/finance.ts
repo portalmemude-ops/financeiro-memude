@@ -768,6 +768,44 @@ export const useFinanceStore = defineStore('finance', {
       return id
     },
 
+    // ---- transferências entre contas ----------------------------------------
+
+    /**
+     * Registra uma transferência entre contas (ou um ajuste de saldo, quando
+     * só um dos lados é informado). Não entra no DRE — apenas no saldo.
+     */
+    async registerAccountTransfer(input: {
+      fromAccount?: string
+      toAccount?: string
+      amount: number
+      date: string
+      notes?: string
+    }) {
+      if (!useAppStore().canManageFinance)
+        return
+      const transferId = await useDb().registerAccountTransfer(input)
+
+      this.transactions = await useDb().loadTransactions()
+
+      const description = input.fromAccount && input.toAccount
+        ? `Transferência ${input.fromAccount} → ${input.toAccount}`
+        : `Ajuste de saldo em ${input.toAccount || input.fromAccount}`
+
+      this.logAudit('transfer', 'transaction', `${description} — ${formatBRL(input.amount)}`, transferId)
+
+      return transferId
+    },
+
+    async deleteAccountTransfer(transferId: string) {
+      if (!useAppStore().canManageFinance)
+        return
+      await useDb().deleteAccountTransfer(transferId)
+      this.transactions = await useDb().loadTransactions()
+      this.logAudit('delete', 'transaction', 'Transferência entre contas excluída', transferId)
+
+      return transferId
+    },
+
     // ---- comercial -----------------------------------------------------------
 
     async saveDevelopment(dv: Partial<Development>) {

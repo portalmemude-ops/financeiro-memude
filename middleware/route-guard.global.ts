@@ -20,6 +20,7 @@ const brokerBlocked = new Set([
   '/contas-a-pagar',
   '/contas-a-receber',
   '/fluxo-de-caixa',
+  '/contas-bancarias',
   '/plano-de-contas',
   '/centros-de-custo',
   '/fornecedores',

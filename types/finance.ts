@@ -226,6 +226,12 @@ export interface Transaction {
   settlementId?: string
   isReversal?: boolean
   reversalOf?: string
+
+  /** Transferência entre contas da empresa: entra no saldo, fica fora do DRE. */
+  isTransfer?: boolean
+
+  /** Agrupa as duas pernas (origem/destino) de uma mesma transferência. */
+  transferId?: string
   description: string
   account?: string
   categoryId?: string
