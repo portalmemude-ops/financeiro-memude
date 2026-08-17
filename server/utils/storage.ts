@@ -1,8 +1,7 @@
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'node:crypto'
 import { Buffer } from 'node:buffer'
 import type { H3Event } from 'h3'
-// eslint-disable-next-line import/extensions
-import { serverSupabaseServiceRole } from '#supabase/server'
+import { serviceRoleClient } from './service-client'
 
 export const ATTACHMENT_BUCKET = 'financial-attachments'
 export const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024
@@ -121,7 +120,7 @@ export async function findOrCreateDriveFolder(accessToken: string, name: string,
 }
 
 export async function getStorageSettings(event: H3Event, companyId: string) {
-  const service = serverSupabaseServiceRole(event) as any
+  const service = serviceRoleClient(event) as any
   const { data, error } = await service.from('company_storage_settings').select('*').eq('company_id', companyId).maybeSingle()
   if (error)
     throw createError({ statusCode: 500, message: 'Não foi possível carregar a configuração de armazenamento.' })

@@ -1,7 +1,6 @@
 import { requireAuthenticatedUser } from '../../../utils/security'
 import { driveRequest, encryptSecret, findOrCreateDriveFolder, googleConfig, sha256 } from '../../../utils/storage'
-// eslint-disable-next-line import/extensions
-import { serverSupabaseServiceRole } from '#supabase/server'
+import { serviceRoleClient } from '../../../utils/service-client'
 
 export default defineEventHandler(async event => {
   const query = getQuery(event)
@@ -14,7 +13,7 @@ export default defineEventHandler(async event => {
     return fail('Resposta de autorização incompleta.')
 
   const user = await requireAuthenticatedUser(event)
-  const service = serverSupabaseServiceRole(event) as any
+  const service = serviceRoleClient(event) as any
 
   const { data: oauthState } = await service.from('storage_oauth_states')
     .delete().eq('state_hash', sha256(state)).select('*').maybeSingle()

@@ -1,15 +1,14 @@
 import { randomBytes } from 'node:crypto'
 import { requireCompanyRole } from '../../../utils/security'
 import { googleConfig, sha256 } from '../../../utils/storage'
-// eslint-disable-next-line import/extensions
-import { serverSupabaseServiceRole } from '#supabase/server'
+import { serviceRoleClient } from '../../../utils/service-client'
 
 export default defineEventHandler(async event => {
   const companyId = getQuery(event).companyId?.toString()
   if (!companyId)
     throw createError({ statusCode: 400, message: 'Empresa não informada.' })
   const { user } = await requireCompanyRole(event, companyId, ['super_admin', 'admin'])
-  const service = serverSupabaseServiceRole(event) as any
+  const service = serviceRoleClient(event) as any
   const state = randomBytes(32).toString('base64url')
 
   const { error } = await service.from('storage_oauth_states').insert({
