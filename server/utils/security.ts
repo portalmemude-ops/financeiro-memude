@@ -7,12 +7,23 @@ export type CompanyRole = 'super_admin' | 'admin' | 'financial' | 'broker' | 'ac
 
 const rateLimitBuckets = new Map<string, { count: number; resetAt: number }>()
 
+/**
+ * Identidade do usuário logado, com o id sempre preenchido.
+ *
+ * Com as chaves novas do Supabase (publishable/secret + JWT assimétrico), o
+ * `serverSupabaseUser` devolve os claims do token, onde o identificador vem em
+ * `sub` e não em `id`. Ler `user.id` direto resultava em `undefined`, que ia
+ * parar na consulta como `user_id=eq.undefined`: o PostgREST respondia 400 e o
+ * app traduzia num 500 sem explicação — foi o que quebrou o envio de anexos.
+ */
 export async function requireAuthenticatedUser(event: H3Event) {
-  const user = await serverSupabaseUser(event)
-  if (!user)
+  const claims = await serverSupabaseUser(event) as (Record<string, unknown> & { id?: string; sub?: string }) | null
+  const id = claims?.id || claims?.sub
+
+  if (!claims || !id)
     throw createError({ statusCode: 401, statusMessage: 'Não autenticado', message: 'Faça login para continuar.' })
 
-  return user
+  return { ...claims, id }
 }
 
 export async function requireCompanyRole(event: H3Event, companyId: string, allowedRoles: CompanyRole[]) {
@@ -27,7 +38,7 @@ export async function requireCompanyRole(event: H3Event, companyId: string, allo
     .maybeSingle()
 
   if (membershipError)
-    throw createError({ statusCode: 500, message: 'Não foi possível validar a autorização.' })
+    throw createError({ statusCode: 500, message: `Não foi possível validar a autorização: ${membershipError.message}` })
   if (!membership || !allowedRoles.includes(membership.role as CompanyRole))
     throw createError({ statusCode: 403, statusMessage: 'Acesso negado', message: 'Seu perfil não permite esta operação.' })
 
