@@ -57,6 +57,20 @@ function validate(single?: File) {
   return true
 }
 
+/**
+ * O $fetch embrulha a falha e sua `message` vira só `[POST] "/api/...": 500`,
+ * escondendo o motivo real que o servidor devolveu em `data.message`. Sem isso
+ * o usuário via um código de erro e nada mais.
+ */
+function uploadErrorMessage(caught: unknown): string {
+  const fromServer = (caught as { data?: { message?: string; statusMessage?: string } })?.data
+
+  return fromServer?.message
+    || fromServer?.statusMessage
+    || (caught instanceof Error ? caught.message : '')
+    || 'Não foi possível enviar o anexo.'
+}
+
 async function upload(entityId = props.entityId) {
   const single = selectedFile()
   if (!single)
@@ -83,7 +97,7 @@ async function upload(entityId = props.entityId) {
     return result.reference
   }
   catch (caught) {
-    error.value = caught instanceof Error ? caught.message : 'Não foi possível enviar o anexo.'
+    error.value = uploadErrorMessage(caught)
     throw caught
   }
   finally {

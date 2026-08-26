@@ -140,6 +140,17 @@ function doToggle() {
                   >
                     {{ account.isActive ? 'Ativo' : 'Inativo' }}
                   </VChip>
+                  <VChip
+                    v-if="account.countsInResult === false"
+                    color="info"
+                    size="x-small"
+                    label
+                  >
+                    Fora do faturamento
+                    <VTooltip activator="parent">
+                      Movimenta o caixa, mas não entra no faturamento nem no resultado
+                    </VTooltip>
+                  </VChip>
                 </div>
               </template>
 
@@ -244,6 +255,18 @@ function doToggle() {
                   v-model="editing.isActive"
                   label="Conta ativa"
                   color="success"
+                />
+              </VCol>
+              <VCol cols="12">
+                <VSwitch
+                  :model-value="editing.countsInResult !== false"
+                  label="Entra no faturamento e no resultado"
+                  color="success"
+                  :hint="editing.countsInResult === false
+                    ? 'Os lançamentos desta conta entram no caixa, mas ficam fora do faturamento, do DRE e dos relatórios de resultado. Use para aporte de sócio e capital.'
+                    : 'Desligue para contas que movimentam o caixa mas não são receita nem despesa da operação — como aporte de sócio.'"
+                  persistent-hint
+                  @update:model-value="v => editing.countsInResult = v"
                 />
               </VCol>
             </VRow>

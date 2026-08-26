@@ -82,6 +82,18 @@ export const documentRule: ValidationRule = v => {
   return 'Informe um CPF (11 dígitos) ou CNPJ (14 dígitos)'
 }
 
+/**
+ * Documento opcional: aceita vazio, mas se preenchido tem de ser válido.
+ * Existem fornecedores e clientes cujo CNPJ ainda não temos em mãos.
+ */
+export const optionalDocumentRule: ValidationRule = v => {
+  const digits = String(v ?? '').replace(/\D/g, '')
+  if (!digits)
+    return true
+
+  return documentRule(v)
+}
+
 /** Valida especificamente CPF. */
 export const cpfRule: ValidationRule = v =>
   isValidCPF(String(v ?? '')) || 'CPF inválido'

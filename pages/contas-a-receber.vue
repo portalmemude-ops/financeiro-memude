@@ -117,7 +117,9 @@ function showMessage(text: string, color: 'success' | 'error' = 'success') {
 }
 
 function openNew() {
-  editing.value = { invoiceRule: 'on_receive', recurrence: 'once', dueDate: todayISO(), status: 'open' }
+  // Nota fiscal é opcional: nem todo recebimento gera NFS-e (aporte de sócio,
+  // reembolso, repasse). Quem precisa de nota escolhe a regra no formulário.
+  editing.value = { invoiceRule: 'none', recurrence: 'once', dueDate: todayISO(), status: 'open' }
   originalReceivedAmount.value = 0
   receiptSituation.value = 'unreceived'
   reopenReason.value = ''
@@ -768,8 +770,10 @@ async function doReverse() {
               >
                 <VSelect
                   v-model="editing.invoiceRule"
-                  label="Regra de emissão NFS-e"
+                  label="Emissão de NFS-e (opcional)"
                   :items="ruleItems"
+                  hint="Deixe em “Não emitir” quando o recebimento não gera nota"
+                  persistent-hint
                 />
               </VCol>
               <VCol

@@ -54,6 +54,13 @@ const unread = computed(() => financeStore.unreadNotificationCount)
     />
     <VerticalNavLink
       :item="{
+        title: 'Contas e Saldos',
+        icon: 'ri-bank-line',
+        to: '/contas-bancarias',
+      }"
+    />
+    <VerticalNavLink
+      :item="{
         title: 'Plano de Contas',
         icon: 'ri-list-check-2',
         to: '/plano-de-contas',

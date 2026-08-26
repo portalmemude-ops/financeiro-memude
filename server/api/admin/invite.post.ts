@@ -1,8 +1,7 @@
 import { z } from 'zod'
 import { parseBody } from '../../utils/nfse/schemas'
 import { enforceRateLimit, requireAuthenticatedUser, requireCompanyRole } from '../../utils/security'
-// eslint-disable-next-line import/extensions
-import { serverSupabaseServiceRole } from '#supabase/server'
+import { serviceRoleClient } from '../../utils/service-client'
 
 const inviteSchema = z.object({
   companyId: z.uuid(),
@@ -22,7 +21,7 @@ export default defineEventHandler(async event => {
   if (role === 'admin' && body.role === 'admin')
     throw createError({ statusCode: 403, message: 'Somente superadministradores podem convidar outro administrador.' })
 
-  const serviceRole = serverSupabaseServiceRole(event)
+  const serviceRole = serviceRoleClient(event)
   const redirectTo = `${getRequestURL(event).origin}/aceitar-convite`
   const normalizedEmail = body.email.trim().toLowerCase()
 

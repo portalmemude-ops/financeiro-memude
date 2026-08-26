@@ -263,8 +263,10 @@ function doToggle() {
               >
                 <VTextField
                   v-model="editing.documentNumber"
-                  label="Documento"
-                  :rules="editing.id ? [requiredRule] : [requiredRule, documentRule]"
+                  label="Documento (opcional)"
+                  :rules="[optionalDocumentRule]"
+                  hint="Deixe em branco se ainda não tiver o CNPJ/CPF"
+                  persistent-hint
                 />
               </VCol>
               <VCol

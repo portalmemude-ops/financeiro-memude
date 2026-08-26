@@ -32,6 +32,10 @@ const actionMeta: Record<string, { label: string; color: string }> = {
   cancel: { label: 'Cancelamento', color: 'error' },
   emit_invoice: { label: 'Emissão NFS-e', color: 'primary' },
   cancel_invoice: { label: 'Cancelamento NFS-e', color: 'error' },
+  transfer: { label: 'Transferência', color: 'info' },
+  reverse: { label: 'Estorno', color: 'warning' },
+  update: { label: 'Edição', color: 'secondary' },
+  delete: { label: 'Exclusão', color: 'error' },
 }
 
 const entityLabels: Record<string, string> = {
@@ -39,6 +43,7 @@ const entityLabels: Record<string, string> = {
   receivable: 'Conta a receber',
   invoice: 'NFS-e',
   sale: 'Venda',
+  transaction: 'Lançamento de caixa',
 }
 
 const typeOptions = computed(() =>

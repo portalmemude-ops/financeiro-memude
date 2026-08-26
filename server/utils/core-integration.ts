@@ -3,8 +3,7 @@ import { Buffer } from 'node:buffer'
 import type { H3Event } from 'h3'
 import { type SupabaseClient, createClient } from '@supabase/supabase-js'
 import { requireCompanyRole } from './security'
-// eslint-disable-next-line import/extensions
-import { serverSupabaseServiceRole } from '#supabase/server'
+import { serviceRoleClient } from './service-client'
 
 export const PORTAL_MEMUDE_COMPANY_ID = '5f82f8ea-a7dd-4e8f-b3a4-6b418740d0c6'
 const PAGE_SIZE = 500
@@ -303,7 +302,7 @@ async function syncSales(core: CoreSource, finance: SupabaseClient) {
 
 export async function syncCore(event: H3Event) {
   const core = coreClient(event)
-  const finance = serverSupabaseServiceRole(event) as unknown as SupabaseClient
+  const finance = serviceRoleClient(event) as unknown as SupabaseClient
   const started = new Date().toISOString()
   const resources: Resource[] = ['corretores', 'empreendimentos', 'leads', 'vendas']
   for (const resource of resources)

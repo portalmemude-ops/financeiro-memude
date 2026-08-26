@@ -1,7 +1,6 @@
 import { createHash, randomUUID } from 'node:crypto'
 import { PORTAL_MEMUDE_COMPANY_ID, syncCore, verifyCoreWebhook } from '../../../utils/core-integration'
-// eslint-disable-next-line import/extensions
-import { serverSupabaseServiceRole } from '#supabase/server'
+import { serviceRoleClient } from '../../../utils/service-client'
 
 export default defineEventHandler(async event => {
   const rawBody = await readRawBody(event, 'utf8')
@@ -12,7 +11,7 @@ export default defineEventHandler(async event => {
   const eventId = typeof payload.event_id === 'string' ? payload.event_id : randomUUID()
   const entityType = typeof payload.entity_type === 'string' ? payload.entity_type : 'unknown'
   const entityId = typeof payload.entity_id === 'string' ? payload.entity_id : null
-  const finance = serverSupabaseServiceRole(event)
+  const finance = serviceRoleClient(event)
 
   const { error } = await finance.from('integration_events').insert({
     company_id: PORTAL_MEMUDE_COMPANY_ID,

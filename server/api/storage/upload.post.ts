@@ -78,8 +78,12 @@ export default defineEventHandler(async event => {
     const extension = file.filename.split('.').pop()?.toLowerCase().replace(/[^a-z0-9]/g, '') || 'bin'
     const objectPath = `${companyId}/${String(entityType)}/${entityId}/${common.id}.${extension}`
     const { error: uploadError } = await service.storage.from(ATTACHMENT_BUCKET).upload(objectPath, file.data, { contentType: file.type, upsert: false })
-    if (uploadError)
-      throw createError({ statusCode: 500, message: 'Não foi possível armazenar o arquivo.' })
+    if (uploadError) {
+      throw createError({
+        statusCode: 500,
+        message: `Não foi possível armazenar o arquivo: ${uploadError.message}`,
+      })
+    }
 
     uploadedInternalPath = objectPath
     metadata = { ...common, provider: 'internal', bucket_id: ATTACHMENT_BUCKET, object_path: objectPath }

@@ -1,11 +1,10 @@
 import { requireCompanyRole } from '../../../../utils/security'
 import { decryptSecret, driveRequest, getStorageSettings, googleToken } from '../../../../utils/storage'
-// eslint-disable-next-line import/extensions
-import { serverSupabaseServiceRole } from '#supabase/server'
+import { serviceRoleClient } from '../../../../utils/service-client'
 
 export default defineEventHandler(async event => {
   const id = getRouterParam(event, 'id')
-  const service = serverSupabaseServiceRole(event) as any
+  const service = serviceRoleClient(event) as any
   const { data: attachment } = await service.from('attachments').select('*').eq('id', id).maybeSingle()
   if (!attachment)
     throw createError({ statusCode: 404, message: 'Anexo não encontrado.' })

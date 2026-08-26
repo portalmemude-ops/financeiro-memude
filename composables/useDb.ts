@@ -187,6 +187,7 @@ export function useDb() {
         type: input.type,
         parent_id: input.parentId,
         is_active: input.isActive,
+        counts_in_result: input.countsInResult !== false,
       }) as Promise<ChartAccount>
     },
 
@@ -343,6 +344,40 @@ export function useDb() {
         throw new Error(error.message)
 
       return camelize(data as Record<string, unknown>) as unknown as Receivable
+    },
+
+    /**
+     * Move dinheiro entre contas da empresa. Sem `fromAccount` é uma entrada de
+     * ajuste; sem `toAccount`, uma saída de ajuste. Nunca afeta o resultado.
+     */
+    async registerAccountTransfer(input: {
+      fromAccount?: string
+      toAccount?: string
+      amount: number
+      date: string
+      notes?: string
+    }) {
+      const { data, error } = await db.rpc('register_account_transfer', {
+        target_company: companyId(),
+        from_account: input.fromAccount || null,
+        to_account: input.toAccount || null,
+        transfer_amount: input.amount,
+        transfer_date: input.date,
+        transfer_notes: input.notes || null,
+      })
+
+      if (error)
+        throw new Error(error.message)
+
+      return data as string
+    },
+
+    async deleteAccountTransfer(transferId: string) {
+      const { data, error } = await db.rpc('delete_account_transfer', { target_transfer: transferId })
+      if (error)
+        throw new Error(error.message)
+
+      return data as string
     },
 
     async loadTransactions() {
