@@ -8,7 +8,7 @@ export function isReceivablePending(receivable: Pick<Receivable, 'status'>): boo
   return ['open', 'partial', 'overdue'].includes(receivable.status)
 }
 
-export function transactionEffect(transaction: Pick<Transaction, 'type' | 'amount' | 'isReversal'>): number {
+export function transactionEffect(transaction: Pick<Transaction, 'type' | 'amount' | 'isReversal' | 'isTransfer' | 'inResult'>): number {
   const direction = transaction.type === 'income' ? 1 : -1
 
   return Number(transaction.amount) * direction * (transaction.isReversal ? -1 : 1)

@@ -17,7 +17,7 @@ const rateLimitBuckets = new Map<string, { count: number; resetAt: number }>()
  * app traduzia num 500 sem explicação — foi o que quebrou o envio de anexos.
  */
 export async function requireAuthenticatedUser(event: H3Event) {
-  const claims = await serverSupabaseUser(event) as (Record<string, unknown> & { id?: string; sub?: string }) | null
+  const claims = await serverSupabaseUser(event) as unknown as (Record<string, unknown> & { id?: string; sub?: string }) | null
   const id = claims?.id || claims?.sub
 
   if (!claims || !id)

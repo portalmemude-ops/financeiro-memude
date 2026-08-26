@@ -38,6 +38,14 @@ const dialog = ref(false)
 const formRef = ref()
 const editing = ref<Partial<ChartAccount>>({})
 
+// Interruptor do formulario: conta nova ja nasce dentro do resultado.
+const countsInResult = computed({
+  get: () => editing.value.countsInResult !== false,
+  set: (value: boolean) => {
+    editing.value.countsInResult = value
+  },
+})
+
 const parentOptions = computed(() =>
   finance.companyChartAccounts
     .filter(a => a.id !== editing.value.id)
@@ -259,14 +267,13 @@ function doToggle() {
               </VCol>
               <VCol cols="12">
                 <VSwitch
-                  :model-value="editing.countsInResult !== false"
+                  v-model="countsInResult"
                   label="Entra no faturamento e no resultado"
                   color="success"
-                  :hint="editing.countsInResult === false
-                    ? 'Os lançamentos desta conta entram no caixa, mas ficam fora do faturamento, do DRE e dos relatórios de resultado. Use para aporte de sócio e capital.'
-                    : 'Desligue para contas que movimentam o caixa mas não são receita nem despesa da operação — como aporte de sócio.'"
+                  :hint="countsInResult
+                    ? 'Desligue para contas que movimentam o caixa mas não são receita nem despesa da operação — como aporte de sócio.'
+                    : 'Os lançamentos desta conta entram no caixa, mas ficam fora do faturamento, do DRE e dos relatórios de resultado.'"
                   persistent-hint
-                  @update:model-value="v => editing.countsInResult = v"
                 />
               </VCol>
             </VRow>
