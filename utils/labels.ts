@@ -111,6 +111,18 @@ export const invoiceRuleLabels: Record<string, string> = {
   none: 'Não emitir NFS-e',
 }
 
+/**
+ * Formas de pagamento oferecidas ao lançar uma conta a pagar. "Transferência"
+ * consta porque é o que os lançamentos históricos usam; sem ela não haveria
+ * como registrar corretamente uma folha ou um aluguel pagos por TED.
+ */
+export const payableMethodLabels: Record<string, string> = {
+  pix: 'Pix',
+  boleto: 'Boleto',
+  card: 'Cartão de crédito',
+  transfer: 'Transferência',
+}
+
 export const receiptMethodLabels: Record<string, string> = {
   pix: 'Pix',
   transfer: 'Transferência',

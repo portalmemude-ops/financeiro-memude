@@ -65,6 +65,12 @@ const costCenterOptions = computed(() => finance.companyCostCenters.map(c => ({ 
 const supplierOptions = computed(() => finance.companySuppliers.filter(s => s.isActive).map(s => ({ title: s.tradeName || s.legalName, value: s.id })))
 const employeeOptions = computed(() => finance.companyEmployees.map(e => ({ title: e.fullName, value: e.id })))
 const recurrenceOptions = Object.entries(recurrenceLabels).map(([value, title]) => ({ title, value }))
+const methodOptions = Object.entries(payableMethodLabels).map(([value, title]) => ({ title, value }))
+
+// Contas já usadas no histórico; o campo aceita digitar uma nova.
+const accountOptions = computed(() =>
+  [...new Set(finance.companyPayables.map(p => (p.account ?? '').trim()).filter(Boolean))].sort(),
+)
 
 const attachmentHref = (value?: string) => {
   if (!value || value.startsWith('http') || value.startsWith('/'))
@@ -99,7 +105,14 @@ function showMessage(text: string, color: 'success' | 'error' | 'primary' = 'suc
 }
 
 function openNew() {
-  editing.value = { recurrence: 'once', dueDate: todayISO(), status: 'open', amount: undefined }
+  editing.value = {
+    recurrence: 'once',
+    dueDate: todayISO(),
+    status: 'open',
+    amount: undefined,
+    account: accountOptions.value[0] ?? 'Conta MeMude',
+    paymentMethod: 'pix',
+  }
   proofLink.value = ''
   attachmentReference.value = ''
   originalPaidAmount.value = 0
@@ -698,6 +711,30 @@ async function runRecurrences() {
                   v-model="editing.recurrence"
                   label="Recorrência"
                   :items="recurrenceOptions"
+                />
+              </VCol>
+              <VCol
+                cols="12"
+                md="6"
+              >
+                <VCombobox
+                  v-model="editing.account"
+                  label="Conta"
+                  :items="accountOptions"
+                  clearable
+                  hint="De qual conta sai o dinheiro. Pode digitar uma nova."
+                  persistent-hint
+                />
+              </VCol>
+              <VCol
+                cols="12"
+                md="6"
+              >
+                <VSelect
+                  v-model="editing.paymentMethod"
+                  label="Forma de pagamento"
+                  :items="methodOptions"
+                  clearable
                 />
               </VCol>
               <VCol

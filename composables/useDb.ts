@@ -206,6 +206,8 @@ export function useDb() {
           supplierId: input.supplierId,
           employeeId: input.employeeId,
           recurrence: input.recurrence ?? 'once',
+          account: input.account,
+          paymentMethod: input.paymentMethod,
           installmentNumber: input.installmentNumber,
           totalInstallments: input.totalInstallments,
           parentPayableId: input.parentPayableId,
