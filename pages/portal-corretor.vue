@@ -10,12 +10,12 @@ useHead({ title: 'Portal do corretor' })
 // 👉 Corretor atual: pelo userId logado (só colaboradores comissionados são
 // corretores); se não houver, permite escolher um.
 const ownBroker = computed(() =>
-  finance.companyEmployees.find(e => e.userId === app.currentUserId && e.employmentType === 'commission_only'),
+  finance.companyEmployees.find(e => e.userId === app.currentUserId && isBrokerEmployee(e)),
 )
 
 const commissionBrokers = computed(() =>
   finance.companyEmployees
-    .filter(e => e.employmentType === 'commission_only')
+    .filter(e => isBrokerEmployee(e))
     .map(e => ({ title: e.fullName, value: e.id })),
 )
 

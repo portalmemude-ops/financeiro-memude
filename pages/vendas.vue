@@ -11,7 +11,7 @@ useHead({ title: 'Vendas' })
 
 // corretor logado — o perfil corretor vê SOMENTE as próprias vendas (spec §3.13)
 const ownBrokerId = computed(() =>
-  finance.companyEmployees.find(e => e.userId === app.currentUserId && e.employmentType === 'commission_only')?.id,
+  finance.companyEmployees.find(e => e.userId === app.currentUserId && isBrokerEmployee(e))?.id,
 )
 
 const visibleSales = computed(() =>
@@ -58,7 +58,7 @@ const developmentOptions = computed(() =>
 
 const brokerOptions = computed(() =>
   finance.companyEmployees
-    .filter(e => e.employmentType === 'commission_only' && e.status === 'active')
+    .filter(e => isBrokerEmployee(e) && e.status === 'active')
     .map(e => ({ title: e.fullName, value: e.id })),
 )
 

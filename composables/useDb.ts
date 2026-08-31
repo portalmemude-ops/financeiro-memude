@@ -156,6 +156,7 @@ export function useDb() {
         phone: input.phone,
         document: input.cpf,
         user_id: input.userId,
+        role_title: input.roleTitle,
       }, employeeFromRow) as Promise<Employee>
     },
 

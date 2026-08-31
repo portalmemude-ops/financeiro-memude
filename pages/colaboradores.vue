@@ -46,6 +46,7 @@ const headers = [
   { title: 'Colaborador', key: 'fullName' },
   { title: 'CPF', key: 'cpf' },
   { title: 'Vínculo', key: 'employmentType' },
+  { title: 'Cargo', key: 'roleTitle' },
   { title: 'Salário / Valor', key: 'baseSalary' },
   { title: 'Status', key: 'status' },
   { title: '', key: 'actions', sortable: false, align: 'end' as const },
@@ -304,6 +305,18 @@ async function save() {
                   v-model="editing.employmentType"
                   label="Vínculo"
                   :items="employmentTypeOptions"
+                />
+              </VCol>
+              <VCol
+                cols="12"
+                md="6"
+              >
+                <VTextField
+                  v-model="editing.roleTitle"
+                  label="Cargo"
+                  placeholder="Ex.: Corretor, Assistente administrativo"
+                  hint="Quem tiver “Corretor” no cargo pode ser escolhido nas vendas e no funil, qualquer que seja o vínculo"
+                  persistent-hint
                 />
               </VCol>
               <VCol

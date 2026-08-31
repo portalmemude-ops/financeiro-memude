@@ -9,11 +9,11 @@ const app = useAppStore()
 useHead({ title: 'Funil de Vendas' })
 
 const brokerFilter = ref<string | null>(null)
-const brokerOptions = computed(() => finance.companyEmployees.filter(e => e.employmentType === 'commission_only').map(e => ({ title: e.fullName, value: e.id })))
+const brokerOptions = computed(() => finance.companyEmployees.filter(e => isBrokerEmployee(e)).map(e => ({ title: e.fullName, value: e.id })))
 
 // corretor logado (se o perfil atual for corretor) — escopa o funil ao próprio dono
 const ownBrokerId = computed(() =>
-  finance.companyEmployees.find(e => e.userId === app.currentUserId && e.employmentType === 'commission_only')?.id,
+  finance.companyEmployees.find(e => e.userId === app.currentUserId && isBrokerEmployee(e))?.id,
 )
 
 const canEditCard = (card: FunnelCard) => !app.isReadOnly && (!app.isBroker || card.brokerId === ownBrokerId.value)

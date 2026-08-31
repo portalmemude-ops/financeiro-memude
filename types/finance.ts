@@ -152,6 +152,9 @@ export interface Employee {
   email?: string
   phone?: string
   employmentType: EmploymentType
+
+  /** Cargo declarado. Contém "Corretor" para quem atua na venda. */
+  roleTitle?: string
   pjCnpj?: string
   baseSalary?: number
   bankInfo: BankInfo
