@@ -188,6 +188,12 @@ export interface Payable {
   status: PayableStatus
   paidAt?: string
   paidAmount?: number
+
+  /** Conta de onde sai o dinheiro. Texto livre; hoje a empresa usa uma só. */
+  account?: string
+
+  /** pix | transfer | boleto | card | cash | check | other */
+  paymentMethod?: string
   proofUrl?: string
   notes?: string
   createdAt: string
