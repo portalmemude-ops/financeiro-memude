@@ -23,6 +23,7 @@ const emit = defineEmits<{
   'update:modelValue': [string | undefined]
   'deleted': []
 }>()
+
 const app = useAppStore()
 const file = ref<File | File[] | null>(null)
 const loading = ref(false)
