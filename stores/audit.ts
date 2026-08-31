@@ -45,7 +45,9 @@ export const useAuditStore = defineStore('audit', {
         action: row.action,
         entityType: row.entity_type,
         entityId: row.entity_id ?? undefined,
-        description: `${row.action} em ${row.entity_type}`,
+        // Quem grava o evento pode explicar o que houve em `summary`; sem isso,
+        // resta a descrição genérica montada a partir da ação e da entidade.
+        description: row.new_data?.summary || row.old_data?.summary || `${row.action} em ${row.entity_type}`,
         createdAt: row.created_at,
       }))
     },

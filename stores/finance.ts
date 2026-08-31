@@ -768,6 +768,19 @@ export const useFinanceStore = defineStore('finance', {
       return id
     },
 
+    /**
+     * Reflete no estado local a exclusão de um anexo que o servidor já removeu,
+     * evitando que a listagem continue oferecendo um link que não abre mais.
+     */
+    clearAttachmentReference(entityType: 'payable' | 'receivable', id: string) {
+      const target = entityType === 'payable'
+        ? this.payables.find(p => p.id === id)
+        : this.receivables.find(r => r.id === id)
+
+      if (target)
+        target.proofUrl = undefined
+    },
+
     // ---- transferências entre contas ----------------------------------------
 
     /**

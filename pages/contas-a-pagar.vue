@@ -720,6 +720,7 @@ async function runRecurrences() {
                   label="Anexar boleto, nota ou comprovante"
                   hint="PDF, PNG ou JPEG, até 10 MB. O provedor ativo em Configurações será utilizado."
                   persistent-hint
+                  @deleted="editing.id && finance.clearAttachmentReference('payable', editing.id)"
                 />
               </VCol>
               <VCol

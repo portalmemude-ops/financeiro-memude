@@ -19,7 +19,10 @@ const props = withDefaults(defineProps<{
   persistentHint: false,
 })
 
-const emit = defineEmits<{ 'update:modelValue': [string | undefined] }>()
+const emit = defineEmits<{
+  'update:modelValue': [string | undefined]
+  'deleted': []
+}>()
 const app = useAppStore()
 const file = ref<File | File[] | null>(null)
 const loading = ref(false)
@@ -34,6 +37,42 @@ const currentHref = computed(() => {
 
   return `/api/storage/legacy/download?companyId=${encodeURIComponent(app.currentCompanyId)}&path=${encodeURIComponent(props.modelValue)}`
 })
+
+/**
+ * Só dá para excluir anexo enviado por dentro do sistema, que tem registro
+ * próprio. Link externo colado à mão e caminho antigo não têm o que apagar.
+ */
+const attachmentId = computed(() => {
+  const match = /^\/api\/storage\/attachments\/([0-9a-f-]{36})\/download$/.exec(props.modelValue ?? '')
+
+  return match?.[1] ?? ''
+})
+
+const canDelete = computed(() =>
+  Boolean(attachmentId.value) && ['super_admin', 'admin'].includes(app.currentRole),
+)
+
+const deleting = ref(false)
+const confirmDelete = ref(false)
+
+async function removeAttachment() {
+  if (!attachmentId.value)
+    return
+  deleting.value = true
+  error.value = ''
+  try {
+    await $fetch(`/api/storage/attachments/${attachmentId.value}`, { method: 'DELETE' })
+    emit('update:modelValue', '')
+    emit('deleted')
+    confirmDelete.value = false
+  }
+  catch (caught) {
+    error.value = uploadErrorMessage(caught)
+  }
+  finally {
+    deleting.value = false
+  }
+}
 
 function selectedFile() {
   return Array.isArray(file.value) ? file.value[0] : file.value
@@ -152,14 +191,38 @@ defineExpose({ upload, hasPendingFile: () => Boolean(selectedFile()) })
       class="mb-2"
       :text="error"
     />
-    <a
+    <div
       v-if="currentHref"
-      :href="currentHref"
-      target="_blank"
-      rel="noopener noreferrer"
-      class="text-caption text-primary"
+      class="d-flex align-center gap-3"
     >
-      Ver anexo atual
-    </a>
+      <a
+        :href="currentHref"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="text-caption text-primary"
+      >
+        Ver anexo atual
+      </a>
+      <VBtn
+        v-if="canDelete"
+        size="x-small"
+        variant="text"
+        color="error"
+        prepend-icon="ri-delete-bin-line"
+        :loading="deleting"
+        @click="confirmDelete = true"
+      >
+        Excluir anexo
+      </VBtn>
+    </div>
+
+    <ConfirmDialog
+      v-model="confirmDelete"
+      title="Excluir anexo"
+      message="O arquivo será apagado em definitivo e desvinculado desta conta. Boletos e comprovantes são documentos de respaldo fiscal — esta ação não pode ser desfeita. Deseja continuar?"
+      confirm-text="Excluir"
+      confirm-color="error"
+      @confirm="removeAttachment"
+    />
   </div>
 </template>
