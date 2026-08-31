@@ -26,6 +26,23 @@ import type {
   Transaction,
 } from '@/types/finance'
 
+/** Situação da integração NFS-e, conforme respondida por `/api/nfse/status`. */
+interface NfseStatus {
+  enabled?: boolean
+  configured: boolean
+  provider: string
+  ambiente: string
+  municipioIbge?: string
+  certificate?: {
+    present: boolean
+    subjectCN?: string
+    holderDocument?: string
+    notAfter?: string
+    daysToExpire?: number
+    error?: string
+  }
+}
+
 function deriveStatuses<T extends Payable | Receivable>(items: T[]): T[] {
   return items.map(item => {
     const late = daysUntil(item.dueDate) < 0
@@ -68,14 +85,7 @@ export const useFinanceStore = defineStore('finance', {
 
     // Status da integração NFS-e (carregado do servidor sob demanda). null =
     // ainda não verificado; configured=false → emissão roda no modo simulado.
-    nfseStatus: null as null | {
-      enabled?: boolean
-      configured: boolean
-      provider: string
-      ambiente: string
-      municipioIbge?: string
-      certificate?: { present: boolean; subjectCN?: string; holderDocument?: string; notAfter?: string; daysToExpire?: number; error?: string }
-    },
+    nfseStatus: null as NfseStatus | null,
   }),
 
   getters: {
@@ -953,7 +963,13 @@ export const useFinanceStore = defineStore('finance', {
       if (this.nfseStatus && !force)
         return this.nfseStatus
       try {
-        this.nfseStatus = await $fetch('/api/nfse/status')
+        // O endereço vai como `string` de propósito: deixar o Nuxt inferir a
+        // rota pelo literal faz o TypeScript comparar o catálogo inteiro de
+        // rotas e estourar o limite de profundidade (TS2321) conforme a API
+        // cresce. Declarar o retorno mantém a checagem onde ela importa.
+        const url: string = '/api/nfse/status'
+
+        this.nfseStatus = await $fetch<NfseStatus>(url)
       }
       catch {
         this.nfseStatus = { configured: false, provider: 'ginfes', ambiente: 'homologacao' }
