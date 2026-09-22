@@ -49,6 +49,14 @@ const reopenSettledMigration = readFileSync(
   'utf8',
 )
 
+const coreSaleDeletionMigration = readFileSync(
+  new URL(
+    '../supabase/migrations/20260922223630_delete_core_sale_mirror.sql',
+    import.meta.url,
+  ),
+  'utf8',
+)
+
 assert.match(
   migration,
   /select \* from public\.settle_receivable\([\s\S]+?\)\s+into r;/,
@@ -157,4 +165,28 @@ assert.match(
   'RPCs de reabertura devem ser restritos a usuarios autenticados',
 )
 
-console.log('Migrations: 18 passaram, 0 falharam.')
+assert.match(
+  coreSaleDeletionMigration,
+  /where r\.sale_id = sale_value\.id[\s\S]+?possui Conta a Receber vinculada/,
+  'a exclusão do espelho deve bloquear qualquer Conta a Receber vinculada',
+)
+
+assert.match(
+  coreSaleDeletionMigration,
+  /c\.source <> 'memude_core'[\s\S]+?comissao manual ou de outra origem/,
+  'a exclusão do espelho deve preservar comissões manuais',
+)
+
+assert.match(
+  coreSaleDeletionMigration,
+  /commission_installments[\s\S]+?commission_splits[\s\S]+?delete from public\.commissions[\s\S]+?source = 'memude_core'/,
+  'parcelas e repasses devem bloquear a exclusão antes de remover a comissão sincronizada',
+)
+
+assert.doesNotMatch(
+  coreSaleDeletionMigration,
+  /delete from public\.receivables|delete from public\.payables|delete from public\.transactions|delete from public\.settlements/,
+  'a exclusão de venda nunca pode apagar o razão financeiro',
+)
+
+console.log('Migrations: 22 passaram, 0 falharam.')
