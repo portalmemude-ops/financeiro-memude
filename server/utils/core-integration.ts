@@ -2,6 +2,7 @@ import { createHash, createHmac, timingSafeEqual } from 'node:crypto'
 import { Buffer } from 'node:buffer'
 import type { H3Event } from 'h3'
 import { type SupabaseClient, createClient } from '@supabase/supabase-js'
+import { coreCommissionStatus, coreSaleBuyer } from '../../utils/coreSaleMapping'
 import { requireCompanyRole } from './security'
 import { serviceRoleClient } from './service-client'
 
@@ -69,7 +70,10 @@ interface CoreSale {
   updated_at: string | null
 }
 
-function coreClient(event: H3Event) {
+async function coreClient(event: H3Event) {
+  const { data, error } = await serviceRoleClient(event).rpc('get_core_sync_config')
+  if (!error && data?.secret)
+    return { apiUrl: data.url, apiSecret: data.secret }
   const config = useRuntimeConfig(event)
   if (config.coreApiUrl && config.coreApiSecret)
     return { apiUrl: config.coreApiUrl, apiSecret: config.coreApiSecret }
@@ -91,13 +95,18 @@ async function fetchAll<T>(source: CoreSource, table: Resource, select: string):
   for (let from = 0; ; from += PAGE_SIZE) {
     let page: T[]
     if (isApiSource(source)) {
+      const body = JSON.stringify({ resource: table, offset: from })
+      const timestamp = Math.floor(Date.now() / 1000).toString()
+
       const response = await fetch(source.apiUrl, {
         method: 'POST',
         headers: {
           'content-type': 'application/json',
-          'x-finance-export-secret': source.apiSecret,
+          'x-memude-timestamp': timestamp,
+          'x-memude-signature': `sha256=${createHmac('sha256', source.apiSecret).update(`${timestamp}.${body}`).digest('hex')}`,
         },
-        body: JSON.stringify({ resource: table, offset: from }),
+        body,
+        signal: AbortSignal.timeout(30_000),
       })
 
       const payload = await response.json() as { data?: T[]; error?: string }
@@ -106,7 +115,7 @@ async function fetchAll<T>(source: CoreSource, table: Resource, select: string):
       page = payload.data ?? []
     }
     else {
-      const { data, error } = await source.from(table).select(select).range(from, from + PAGE_SIZE - 1)
+      const { data, error } = await source.from(table).select(select).order('id').range(from, from + PAGE_SIZE - 1)
       if (error)
         throw new Error(`Falha ao consultar ${table} no Core: ${error.message}`)
       page = (data ?? []) as T[]
@@ -121,8 +130,6 @@ async function fetchAll<T>(source: CoreSource, table: Resource, select: string):
 function saleStatus(status: string) {
   if (['cancelada', 'cancelado', 'canceled', 'cancelled'].includes(status))
     return 'cancelled'
-  if (['pendente', 'pending'].includes(status))
-    return 'pending'
 
   return 'completed'
 }
@@ -229,29 +236,40 @@ async function syncClients(core: CoreSource, finance: SupabaseClient) {
   return rows.length
 }
 
-async function idMap(finance: SupabaseClient, table: 'employees' | 'developments', externalColumn: string) {
-  const { data, error } = await finance.from(table).select(`id,${externalColumn}`).eq('company_id', PORTAL_MEMUDE_COMPANY_ID)
-  if (error)
-    throw new Error(`Falha ao resolver referências de ${table}: ${error.message}`)
-  const rows = (data ?? []) as unknown as Array<Record<string, unknown>>
+async function idMap(finance: SupabaseClient, table: 'employees' | 'developments' | 'sales', externalColumn: string) {
+  const result = new Map<string, string>()
+  for (let offset = 0; ; offset += PAGE_SIZE) {
+    const { data, error } = await finance.from(table).select(`id,${externalColumn}`)
+      .eq('company_id', PORTAL_MEMUDE_COMPANY_ID).order('id').range(offset, offset + PAGE_SIZE - 1)
 
-  return new Map(rows.map(row => [String(row[externalColumn]), String(row.id)]))
+    if (error)
+      throw new Error(`Falha ao resolver refer�ncias de ${table}: ${error.message}`)
+    const rows = (data ?? []) as unknown as Array<Record<string, unknown>>
+    for (const row of rows)
+      result.set(String(row[externalColumn]), String(row.id))
+    if (rows.length < PAGE_SIZE)
+      return result
+  }
 }
 
 async function syncSales(core: CoreSource, finance: SupabaseClient) {
   const rows = await fetchAll<CoreSale>(
     core,
     'vendas',
-    'id,lead_id,empreendimento_id,corretor_id,valor_imovel,comissao_percentual,valor_comissao_bruta,valor_corretor,valor_memude,status,data_venda,data_pagamento,observacoes,updated_at',
+    'id,lead_id,empreendimento_id,corretor_id,valor_imovel,comissao_percentual,imposto_percentual,valor_comissao_bruta,valor_imposto,valor_comissao_liquida,is_venda_direta,comprovantes,valor_corretor,valor_memude,status,data_venda,data_pagamento,observacoes,updated_at',
   )
 
   const developments = await idMap(finance, 'developments', 'core_empreendimento_id')
   const employees = await idMap(finance, 'employees', 'core_corretor_id')
+  const buyers = await fetchAll<CoreLead>(core, 'leads', 'id,nome,telefone,email')
+  const buyerMap = new Map(buyers.map(row => [row.id, row]))
 
   const payload = rows.map(row => ({
     company_id: PORTAL_MEMUDE_COMPANY_ID,
     core_venda_id: row.id,
     core_lead_id: row.lead_id,
+    ...coreSaleBuyer(buyerMap.get(row.lead_id)),
+    core_payload: row,
     development_id: developments.get(row.empreendimento_id) ?? null,
     broker_id: row.corretor_id ? employees.get(row.corretor_id) ?? null : null,
     sale_value: row.valor_imovel,
@@ -269,15 +287,7 @@ async function syncSales(core: CoreSource, finance: SupabaseClient) {
       throw new Error(`Falha ao sincronizar vendas: ${error.message}`)
   }
 
-  const { data: localSales, error: salesError } = await finance
-    .from('sales')
-    .select('id,core_venda_id')
-    .eq('company_id', PORTAL_MEMUDE_COMPANY_ID)
-    .not('core_venda_id', 'is', null)
-
-  if (salesError)
-    throw new Error(`Falha ao resolver vendas sincronizadas: ${salesError.message}`)
-  const sales = new Map((localSales ?? []).map(row => [String(row.core_venda_id), row.id as string]))
+  const sales = await idMap(finance, 'sales', 'core_venda_id')
 
   const commissions = rows.map(row => ({
     company_id: PORTAL_MEMUDE_COMPANY_ID,
@@ -285,7 +295,7 @@ async function syncSales(core: CoreSource, finance: SupabaseClient) {
     sale_id: sales.get(row.id) ?? null,
     total_amount: row.valor_comissao_bruta ?? (Number(row.valor_imovel) * Number(row.comissao_percentual) / 100),
     receipt_type: 'launch_passthrough',
-    status: row.data_pagamento ? 'received' : 'pending',
+    status: coreCommissionStatus(row.status),
     notes: 'Comissão sincronizada automaticamente do MeMude Core.',
     source: 'memude_core',
     source_updated_at: row.updated_at,
@@ -301,7 +311,7 @@ async function syncSales(core: CoreSource, finance: SupabaseClient) {
 }
 
 export async function syncCore(event: H3Event) {
-  const core = coreClient(event)
+  const core = await coreClient(event)
   const finance = serviceRoleClient(event) as unknown as SupabaseClient
   const started = new Date().toISOString()
   const resources: Resource[] = ['corretores', 'empreendimentos', 'leads', 'vendas']
