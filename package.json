@@ -106,7 +106,11 @@
       "stylelint-order": "6.0.3",
       "@types/video.js": "^7",
       "brace-expansion@1.1.16": "2.1.3",
-      "brace-expansion@2.1.2": "2.1.3"
+      "brace-expansion@2.1.2": "2.1.3",
+      "@simple-git/argv-parser": "^2.0.1",
+      "simple-git": "^4.0.1",
+      "seroval": "^1.6.2",
+      "shell-quote": "^1.11.0"
     },
     "auditConfig": {
       "ignoreCves": [
