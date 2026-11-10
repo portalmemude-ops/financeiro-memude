@@ -81,6 +81,7 @@ const reopenReason = ref('')
 const initialSituation = ref<'pending' | 'received'>('pending')
 const initialReceipt = ref<ReceiptInput>(newReceipt())
 const externalInvoice = ref<ExternalInvoiceInput>(newExternalInvoice())
+const invoiceFileRef = ref<{ upload: (entityId?: string) => Promise<string | undefined>; hasPendingFile: () => boolean } | null>(null)
 const saving = ref(false)
 const actionLoading = ref(false)
 const snackbar = ref(false)
@@ -178,14 +179,27 @@ async function save() {
       initialReceipt.value.receivedAt = new Date(initialReceipt.value.receivedAt).toISOString()
     }
 
-    const saved = await finance.saveReceivable(editing.value, {
+    const isManualInvoice = editing.value.invoiceRule === 'manual'
+    const pendingInvoiceFile = isManualInvoice && Boolean(invoiceFileRef.value?.hasPendingFile())
+
+    // Conta já existente: envia o arquivo da NFS-e antes e grava o link junto.
+    if (pendingInvoiceFile && editing.value.id)
+      externalInvoice.value.documentUrl = await invoiceFileRef.value!.upload(editing.value.id)
+
+    let saved = await finance.saveReceivable(editing.value, {
       initialReceipt: !editing.value.id && initialSituation.value === 'received' ? initialReceipt.value : undefined,
-      externalInvoice: editing.value.invoiceRule === 'manual' ? externalInvoice.value : undefined,
+      externalInvoice: isManualInvoice ? externalInvoice.value : undefined,
     })
 
     if (!saved)
       throw new Error('Não foi possível salvar a conta.')
     accountWasSaved = true
+
+    // Conta nova: o anexo precisa do id, então envia depois de criar e grava o link.
+    if (pendingInvoiceFile && !wasEditing) {
+      externalInvoice.value.documentUrl = await invoiceFileRef.value!.upload(saved.id)
+      saved = await finance.saveReceivable(structuredClone(toRaw(saved)), { externalInvoice: externalInvoice.value }) ?? saved
+    }
     editing.value = structuredClone(toRaw(saved))
     if (shouldReopen) {
       const reopened = await finance.reopenReceivable(saved.id, reopenReason.value.trim())
@@ -515,8 +529,24 @@ async function doReverse() {
           >
             {{ invoiceRuleLabels[item.invoiceRule] }}
           </VChip>
+          <a
+            v-if="invoiceOf(item.id)?.pdfUrl"
+            :href="invoiceOf(item.id)?.pdfUrl"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="ms-1"
+          >
+            <VIcon
+              icon="ri-file-text-line"
+              size="18"
+              color="success"
+            />
+            <VTooltip activator="parent">
+              Ver NFS-e anexada
+            </VTooltip>
+          </a>
           <VIcon
-            v-if="invoiceOf(item.id)"
+            v-else-if="invoiceOf(item.id)"
             icon="ri-file-text-line"
             size="18"
             class="ms-1"
@@ -835,9 +865,21 @@ async function doReverse() {
                   />
                 </VCol>
                 <VCol cols="12">
+                  <FileUpload
+                    ref="invoiceFileRef"
+                    v-model="externalInvoice.documentUrl"
+                    entity-type="receivable"
+                    :entity-id="editing.id ?? ''"
+                    :auto-upload="false"
+                    label="Arquivo da NFS-e emitida (PDF, PNG ou JPEG)"
+                    hint="O arquivo é enviado ao salvar a conta."
+                    persistent-hint
+                  />
+                </VCol>
+                <VCol cols="12">
                   <VTextField
                     v-model="externalInvoice.documentUrl"
-                    label="URL do documento fiscal (opcional)"
+                    label="Ou cole o link do documento fiscal (opcional)"
                   />
                 </VCol>
               </template>
