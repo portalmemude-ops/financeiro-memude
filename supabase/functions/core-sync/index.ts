@@ -55,7 +55,199 @@ async function referenceRows(client: ReturnType<typeof createClient>, table: str
   }
 }
 
+// ---------------------------------------------------------------------------
+// Financeiro automático das vendas do Core
+// Para vendas novas (e vendas com data a partir de AUTO_FINANCE_FROM) cria:
+//  - parcela da comissão (valor bruto + data prevista de pagamento)
+//  - título em Contas a Receber ligado à venda
+//  - divisão corretor / MeMude (% sobre a comissão líquida)
+//  - conta a pagar da comissão do corretor
+// Em execuções seguintes, só atualiza valores e datas enquanto os títulos estiverem em aberto.
+// ---------------------------------------------------------------------------
+const AUTO_FINANCE_FROM = '2026-10-31'
+const FINANCE_ACCOUNT = 'Conta MeMude'
+
+const num = (value: unknown) => Number(value ?? 0) || 0
+const round2 = (value: number) => Math.round(value * 100) / 100
+const brl = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+const pct = (value: unknown) => `${num(value).toLocaleString('pt-BR', { maximumFractionDigits: 2 })}%`
+const fmtDate = (value: string | null | undefined) => value ? value.slice(0, 10).split('-').reverse().join('/') : '—'
+
+async function lookupId(client: any, table: string, name: string): Promise<string | null> {
+  const { data } = await client.from(table).select('id').eq('company_id', COMPANY_ID).eq('name', name).limit(1).maybeSingle()
+  return data?.id ?? null
+}
+
+async function must<T>(label: string, promise: PromiseLike<{ data: T; error: any }>): Promise<T> {
+  const { data, error } = await promise
+  if (error) throw new Error(`${label}: ${error.message}`)
+  return data
+}
+
+async function updateIfOpen(client: any, table: 'receivables' | 'payables', id: string | null, values: Record<string, unknown>) {
+  if (!id) return
+  await must(`${table} update`, client.from(table).update({ ...values, updated_at: new Date().toISOString() }).eq('id', id).eq('status', 'open'))
+}
+
+async function syncSaleFinance(client: any, vendas: any[], ctx: {
+  saleIds: Map<string, string>
+  employeeIds: Map<string, string>
+  buyers: Map<string, any>
+  developmentNames: Map<string, string>
+  brokerNames: Map<string, string>
+  newVendaIds: Set<string>
+}) {
+  const commissionRows = await must<any[]>('commissions', client.from('commissions')
+    .select('id, core_venda_id, commission_installments(id, status, receivable_id), commission_splits(id, beneficiary_type, payable_id)')
+    .eq('company_id', COMPANY_ID).eq('source', 'memude_core'))
+  const commissions = new Map((commissionRows ?? []).map(row => [row.core_venda_id, row]))
+  const [receivableCategory, payableCategory, costCenter] = await Promise.all([
+    lookupId(client, 'chart_accounts', 'Comissões de vendas'),
+    lookupId(client, 'chart_accounts', 'Repasse de comissões'),
+    lookupId(client, 'cost_centers', 'Comercial'),
+  ])
+
+  for (const row of vendas) {
+    const commission = commissions.get(row.id)
+    if (!commission) continue
+    const eligible = ctx.newVendaIds.has(row.id) || String(row.data_venda ?? '') >= AUTO_FINANCE_FROM
+    if (!eligible) continue
+
+    const cancelled = ['cancelada', 'cancelado', 'canceled', 'cancelled'].includes(String(row.status).toLowerCase())
+    const saleValue = num(row.valor_imovel)
+    const gross = round2(num(row.valor_comissao_bruta) || saleValue * num(row.comissao_percentual) / 100)
+    const tax = round2(num(row.valor_imposto))
+    const net = round2(num(row.valor_comissao_liquida) || gross - tax)
+    const brokerValue = round2(num(row.valor_corretor))
+    const memudeValue = round2(num(row.valor_memude))
+    const dueDate = row.data_pagamento || row.data_venda
+    if (!dueDate || gross <= 0) continue
+
+    const saleId = ctx.saleIds.get(row.id) ?? null
+    const brokerId = row.corretor_id ? ctx.employeeIds.get(row.corretor_id) ?? null : null
+    const brokerName = row.corretor_id ? ctx.brokerNames.get(row.corretor_id) ?? 'corretor' : 'corretor'
+    const development = ctx.developmentNames.get(row.empreendimento_id) ?? 'Empreendimento'
+    const buyer = ctx.buyers.get(row.lead_id)?.nome ?? 'não informado'
+    const summary = [
+      `VGV ${brl(saleValue)}`,
+      `Comissão ${pct(row.comissao_percentual)} = ${brl(gross)}`,
+      `Imposto ${pct(row.imposto_percentual)} = ${brl(tax)}`,
+      `Comissão líquida ${brl(net)}`,
+      `Corretor (${brokerName}) ${brl(brokerValue)}`,
+      `MeMude ${brl(memudeValue)}`,
+      `Data da venda ${fmtDate(row.data_venda)}`,
+      `Previsão de pagamento ${fmtDate(dueDate)}`,
+    ].join(' · ')
+
+    await must('commissions notes', client.from('commissions').update({ notes: summary }).eq('id', commission.id))
+
+    // Parcela + Contas a Receber
+    let installment = (commission.commission_installments ?? [])[0]
+    if (!installment && !cancelled) {
+      installment = await must<any>('commission_installments', client.from('commission_installments').insert({
+        commission_id: commission.id,
+        installment_number: 1,
+        amount: gross,
+        expected_date: dueDate,
+        status: 'pending',
+      }).select('id, status, receivable_id').single())
+      const receivable = await must<any>('receivables', client.from('receivables').insert({
+        company_id: COMPANY_ID,
+        sale_id: saleId,
+        commission_installment_id: installment.id,
+        description: `Comissão ${development} - Cliente ${buyer}`,
+        amount: gross,
+        due_date: dueDate,
+        competence_date: row.data_venda,
+        category_id: receivableCategory,
+        cost_center_id: costCenter,
+        invoice_rule: 'none',
+        recurrence: 'once',
+        status: 'open',
+        account: FINANCE_ACCOUNT,
+        notes: summary,
+      }).select('id').single())
+      await must('commission_installments link', client.from('commission_installments').update({ receivable_id: receivable.id }).eq('id', installment.id))
+    }
+    else if (installment) {
+      if (installment.status === 'pending')
+        await must('commission_installments update', client.from('commission_installments')
+          .update(cancelled ? { status: 'cancelled' } : { amount: gross, expected_date: dueDate }).eq('id', installment.id))
+      await updateIfOpen(client, 'receivables', installment.receivable_id,
+        cancelled ? { status: 'cancelled' } : { amount: gross, due_date: dueDate, competence_date: row.data_venda, notes: summary })
+    }
+
+    // Divisão corretor / MeMude + Contas a Pagar do corretor
+    const splits = commission.commission_splits ?? []
+    const share = (value: number) => net > 0 ? round2(value / net * 100) : null
+    const brokerSplit = splits.find((split: any) => split.beneficiary_type === 'broker')
+    if (brokerValue > 0) {
+      if (!brokerSplit && !cancelled) {
+        const payable = await must<any>('payables', client.from('payables').insert({
+          company_id: COMPANY_ID,
+          employee_id: brokerId,
+          description: `Comissão corretor ${brokerName} - ${development} - Cliente ${buyer}`,
+          amount: brokerValue,
+          due_date: dueDate,
+          competence_date: row.data_venda,
+          category_id: payableCategory,
+          cost_center_id: costCenter,
+          recurrence: 'once',
+          status: 'open',
+          account: FINANCE_ACCOUNT,
+          notes: summary,
+        }).select('id').single())
+        await must('commission_splits broker', client.from('commission_splits').insert({
+          commission_id: commission.id,
+          beneficiary_type: 'broker',
+          beneficiary_id: brokerId,
+          percentage: share(brokerValue),
+          amount: brokerValue,
+          payable_id: payable.id,
+          status: 'pending',
+        }))
+      }
+      else if (brokerSplit) {
+        await must('commission_splits broker update', client.from('commission_splits')
+          .update({ beneficiary_id: brokerId, percentage: share(brokerValue), amount: brokerValue }).eq('id', brokerSplit.id).eq('status', 'pending'))
+        await updateIfOpen(client, 'payables', brokerSplit.payable_id,
+          cancelled ? { status: 'cancelled' } : { amount: brokerValue, due_date: dueDate, competence_date: row.data_venda, employee_id: brokerId, notes: summary })
+      }
+    }
+
+    const memudeSplit = splits.find((split: any) => split.beneficiary_type === 'brokerage')
+    if (memudeValue > 0) {
+      if (!memudeSplit && !cancelled)
+        await must('commission_splits brokerage', client.from('commission_splits').insert({
+          commission_id: commission.id,
+          beneficiary_type: 'brokerage',
+          percentage: share(memudeValue),
+          amount: memudeValue,
+          status: 'pending',
+        }))
+      else if (memudeSplit)
+        await must('commission_splits brokerage update', client.from('commission_splits')
+          .update({ percentage: share(memudeValue), amount: memudeValue }).eq('id', memudeSplit.id).eq('status', 'pending'))
+    }
+  }
+}
+
+const corsHeaders: Record<string, string> = {
+  'Access-Control-Allow-Origin': 'https://financas.memudecore.com.br',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-integration-secret, x-memude-timestamp, x-memude-signature',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Vary': 'Origin',
+}
+
 Deno.serve(async request => {
+  if (request.method === 'OPTIONS')
+    return new Response('ok', { headers: corsHeaders })
+  const response = await handleRequest(request)
+  for (const [key, value] of Object.entries(corsHeaders)) response.headers.set(key, value)
+  return response
+})
+
+async function handleRequest(request: Request): Promise<Response> {
   if (request.method !== 'POST')
     return Response.json({ error: 'Método não permitido.' }, { status: 405 })
 
@@ -140,6 +332,9 @@ Deno.serve(async request => {
     ])
     const developmentIds = new Map((localDevelopments ?? []).map(row => [row.core_empreendimento_id, row.id]))
     const employeeIds = new Map((localEmployees ?? []).map(row => [row.core_corretor_id, row.id]))
+
+    // Vendas que já existiam no financeiro antes desta execução (para identificar vendas novas)
+    const knownVendaIds = new Set((await referenceRows(finance, 'sales', 'core_venda_id')).map(row => row.core_venda_id))
     const vendas = await coreRows<any>('vendas', config.secret)
     const buyers = new Map(leads.map(row => [row.id, row]))
     await upsert(finance, 'sales', vendas.map(row => ({
@@ -173,6 +368,11 @@ Deno.serve(async request => {
       source_updated_at: row.updated_at,
     })), 'company_id,core_venda_id')
 
+    const developmentNames = new Map(empreendimentos.map((row: any) => [row.id, row.nome]))
+    const brokerNames = new Map(corretores.map((row: any) => [row.id, `${row.profiles?.first_name ?? ''} ${row.profiles?.last_name ?? ''}`.trim() || `Corretor ${row.creci}`]))
+    const newVendaIds = new Set<string>(vendas.map((row: any) => row.id).filter((id: string) => !knownVendaIds.has(id)))
+    await syncSaleFinance(finance, vendas, { saleIds, employeeIds, buyers, developmentNames, brokerNames, newVendaIds })
+
     const counts = { corretores: corretores.length, empreendimentos: empreendimentos.length, leads: leads.length, vendas: vendas.length }
     const completedAt = new Date().toISOString()
     for (const resource of resources) {
@@ -193,4 +393,4 @@ Deno.serve(async request => {
       .eq('company_id', COMPANY_ID).eq('source', 'memude_core')
     return Response.json({ error: message }, { status: 502 })
   }
-})
+}
